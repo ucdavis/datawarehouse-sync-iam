@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IamAssociation {
+	private Long id;
 	private String iamId;
 	private String deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
 	private boolean isUCDHS;
@@ -14,6 +15,13 @@ public class IamAssociation {
 	private String titleCode, titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
 	private Date createDate, modifyDate;
+	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	
 	public String getIamId() {
 		return iamId;

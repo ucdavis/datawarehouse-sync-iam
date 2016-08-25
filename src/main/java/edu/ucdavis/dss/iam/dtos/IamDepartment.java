@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IamDepartment {
+	private Long id;
 	private String orgOId;
 	private String deptCode;
 	private String deptOfficialName;
@@ -14,6 +15,13 @@ public class IamDepartment {
 	private boolean ucdhs;
 	private String bouOrgOId;
 	private Date createDate, modifyDate;
+	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	
 	public String getOrgOId() {
 		return orgOId;
