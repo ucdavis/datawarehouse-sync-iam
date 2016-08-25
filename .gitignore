@@ -1,0 +1,8 @@
+# Ignore IDE files
+.classpath
+.project
+.settings
+
+# Ignore compiled output
+target
+
