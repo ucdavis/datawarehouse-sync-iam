@@ -30,6 +30,8 @@
 		<property name="hbm2ddl.auto">validate</property>
 
 		<mapping resource="edu/ucdavis/dss/iam/dtos/IamDepartment.hbm.xml" />
+		<mapping resource="edu/ucdavis/dss/iam/dtos/IamAssociation.hbm.xml" />
+		<mapping resource="edu/ucdavis/dss/iam/dtos/IamPerson.hbm.xml" />
 
 	</session-factory>
 

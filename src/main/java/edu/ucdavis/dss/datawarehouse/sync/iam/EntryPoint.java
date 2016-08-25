@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamDepartment;
+import edu.ucdavis.dss.iam.dtos.IamPerson;
 
 public class EntryPoint {
 	public static String iamApiKey, localDBUrl, localDBUser, localDBPass;
@@ -113,10 +114,19 @@ public class EntryPoint {
 		}
 		session.close();
 		
-		
-		
-		
-		
+		/**
+		 * Extract and load all people by department from IAM
+		 */
+		session = sessionFactory.openSession();
+		for(IamDepartment department : departments) {
+			List<IamPerson> people = iamClient.getAllPeopleByDepartmentCode(department.getDeptCode());
+			for(IamPerson person : people) {
+				session.beginTransaction();
+				session.save( person );
+				session.getTransaction().commit();
+			}
+		}
+		session.close();
 
 		/**
 		 * Close Hibernate

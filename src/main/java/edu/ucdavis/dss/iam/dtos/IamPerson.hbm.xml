@@ -1,175 +1,84 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+                                   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Aug 25, 2016 3:00:39 PM by Hibernate Tools 3.5.0.Final -->
 <hibernate-mapping>
-    <class name="edu.ucdavis.dss.iam.dtos.IamPerson" table="IAMPERSON">
-        <id name="iamId" type="java.lang.String">
-            <column name="IAMID" />
-            <generator class="assigned" />
-        </id>
-        <property name="deptCode" type="java.lang.String">
-            <column name="DEPTCODE" />
-        </property>
-        <property name="deptOfficialName" type="java.lang.String">
-            <column name="DEPTOFFICIALNAME" />
-        </property>
-        <property name="deptDisplayName" type="java.lang.String">
-            <column name="DEPTDISPLAYNAME" />
-        </property>
-        <property name="deptAbbrev" type="java.lang.String">
-            <column name="DEPTABBREV" />
-        </property>
-        <property name="loginId" type="java.lang.String">
-            <column name="LOGINID" />
-        </property>
-        <property name="ucdhs" type="boolean">
-            <column name="UCDHS" />
-        </property>
-        <property name="bouOrgOId" type="java.lang.String">
-            <column name="BOUORGOID" />
-        </property>
-        <property name="assocRank" type="java.lang.String">
-            <column name="ASSOCRANK" />
-        </property>
-        <property name="assocStartDate" type="java.util.Date">
-            <column name="ASSOCSTARTDATE" />
-        </property>
-        <property name="assocEndDate" type="java.util.Date">
-            <column name="ASSOCENDDATE" />
-        </property>
-        <property name="titleCode" type="java.lang.String">
-            <column name="TITLECODE" />
-        </property>
-        <property name="titleOfficialName" type="java.lang.String">
-            <column name="TITLEOFFICIALNAME" />
-        </property>
-        <property name="titleDisplayName" type="java.lang.String">
-            <column name="TITLEDISPLAYNAME" />
-        </property>
-        <property name="positionTypeCode" type="java.lang.String">
-            <column name="POSITIONTYPECODE" />
-        </property>
-        <property name="positionType" type="java.lang.String">
-            <column name="POSITIONTYPE" />
-        </property>
-        <property name="percentFullTime" type="java.lang.String">
-            <column name="PERCENTFULLTIME" />
-        </property>
-        <property name="createDate" type="java.util.Date">
-            <column name="CREATEDATE" />
-        </property>
-        <property name="modifyDate" type="java.util.Date">
-            <column name="MODIFYDATE" />
-        </property>
-        <property name="mothraId" type="java.lang.String">
-            <column name="MOTHRAID" />
-        </property>
-        <property name="ppsId" type="java.lang.String">
-            <column name="PPSID" />
-        </property>
-        <property name="studentId" type="java.lang.String">
-            <column name="STUDENTID" />
-        </property>
-        <property name="bannerPIdM" type="java.lang.String">
-            <column name="BANNERPIDM" />
-        </property>
-        <property name="externalId" type="java.lang.String">
-            <column name="EXTERNALID" />
-        </property>
-        <property name="oFirstName" type="java.lang.String" access="field">
-            <column name="OFIRSTNAME" />
-        </property>
-        <property name="oMiddleName" type="java.lang.String" access="field">
-            <column name="OMIDDLENAME" />
-        </property>
-        <property name="oLastName" type="java.lang.String" access="field">
-            <column name="OLASTNAME" />
-        </property>
-        <property name="oSuffix" type="java.lang.String" access="field">
-            <column name="OSUFFIX" />
-        </property>
-        <property name="dFirstName" type="java.lang.String" access="field">
-            <column name="DFIRSTNAME" />
-        </property>
-        <property name="dMiddleName" type="java.lang.String" access="field">
-            <column name="DMIDDLENAME" />
-        </property>
-        <property name="dLastName" type="java.lang.String" access="field">
-            <column name="DLASTNAME" />
-        </property>
-        <property name="dSuffix" type="java.lang.String" access="field">
-            <column name="DSUFFIX" />
-        </property>
-        <property name="oFullName" type="java.lang.String" access="field">
-            <column name="OFULLNAME" />
-        </property>
-        <property name="dFullName" type="java.lang.String" access="field">
-            <column name="DFULLNAME" />
-        </property>
-        <property name="isEmployee" type="boolean" access="field">
-            <column name="ISEMPLOYEE" />
-        </property>
-        <property name="isHSEmployee" type="boolean" access="field">
-            <column name="ISHSEMPLOYEE" />
-        </property>
-        <property name="isFaculty" type="boolean" access="field">
-            <column name="ISFACULTY" />
-        </property>
-        <property name="isStudent" type="boolean" access="field">
-            <column name="ISSTUDENT" />
-        </property>
-        <property name="isStaff" type="boolean" access="field">
-            <column name="ISSTAFF" />
-        </property>
-        <property name="isExternal" type="boolean" access="field">
-            <column name="ISEXTERNAL" />
-        </property>
-        <property name="privacyCode" type="java.lang.String">
-            <column name="PRIVACYCODE" />
-        </property>
-        <property name="email" type="java.lang.String">
-            <column name="EMAIL" />
-        </property>
-        <property name="hsEmail" type="java.lang.String">
-            <column name="HSEMAIL" />
-        </property>
-        <property name="campusEmail" type="java.lang.String">
-            <column name="CAMPUSEMAIL" />
-        </property>
-        <property name="addrStreet" type="java.lang.String">
-            <column name="ADDRSTREET" />
-        </property>
-        <property name="addrCity" type="java.lang.String">
-            <column name="ADDRCITY" />
-        </property>
-        <property name="addrState" type="java.lang.String">
-            <column name="ADDRSTATE" />
-        </property>
-        <property name="addrZip" type="java.lang.String">
-            <column name="ADDRZIP" />
-        </property>
-        <property name="postalAddress" type="java.lang.String">
-            <column name="POSTALADDRESS" />
-        </property>
-        <property name="workPhone" type="java.lang.String">
-            <column name="WORKPHONE" />
-        </property>
-        <property name="workCell" type="java.lang.String">
-            <column name="WORKCELL" />
-        </property>
-        <property name="workPager" type="java.lang.String">
-            <column name="WORKPAGER" />
-        </property>
-        <property name="workFax" type="java.lang.String">
-            <column name="WORKFAX" />
-        </property>
-        <list name="associations" inverse="false" table="IAMASSOCIATION" lazy="true">
-            <key>
-                <column name="IAMID" />
-            </key>
-            <list-index></list-index>
-            <one-to-many class="edu.ucdavis.dss.iam.dtos.IamAssociation" />
-        </list>
-    </class>
+ <class name="edu.ucdavis.dss.iam.dtos.IamPerson" table="iam_people">
+  <id name="iamId" type="java.lang.String">
+   <column name="IAMID"/>
+   <generator class="assigned"/>
+  </id>
+  <property generated="never" lazy="false" name="deptCode" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="deptOfficialName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="deptDisplayName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="deptAbbrev" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="loginId" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="ucdhs" type="boolean"/>
+  <property generated="never" lazy="false" name="bouOrgOId" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="assocRank" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="assocStartDate" type="java.util.Date"/>
+  <property generated="never" lazy="false" name="assocEndDate" type="java.util.Date"/>
+  <property generated="never" lazy="false" name="titleCode" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="titleOfficialName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="titleDisplayName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="positionTypeCode" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="positionType" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="percentFullTime" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="createDate" type="java.util.Date"/>
+  <property generated="never" lazy="false" name="modifyDate" type="java.util.Date"/>
+  <property generated="never" lazy="false" name="mothraId" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="ppsId" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="studentId" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="bannerPIdM" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="externalId" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="oFirstName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="oMiddleName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="oLastName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false" name="oSuffix" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="dFirstName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="dMiddleName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="dLastName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false" name="dSuffix" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="oFullName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="dFullName" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false"
+   name="isEmployee" type="boolean"/>
+  <property access="field" generated="never" lazy="false"
+   name="isHSEmployee" type="boolean"/>
+  <property access="field" generated="never" lazy="false"
+   name="isFaculty" type="boolean"/>
+  <property access="field" generated="never" lazy="false"
+   name="isStudent" type="boolean"/>
+  <property access="field" generated="never" lazy="false" name="isStaff" type="boolean"/>
+  <property access="field" generated="never" lazy="false"
+   name="isExternal" type="boolean"/>
+  <property generated="never" lazy="false" name="privacyCode" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="email" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="hsEmail" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="campusEmail" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="addrStreet" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="addrCity" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="addrState" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="addrZip" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="postalAddress" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="workPhone" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="workCell" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="workPager" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="workFax" type="java.lang.String"/>
+  <list lazy="true" name="associations" table="IAMASSOCIATION">
+   <key>
+    <column name="IAMID"/>
+   </key>
+   <list-index base="0"/>
+   <one-to-many class="edu.ucdavis.dss.iam.dtos.IamAssociation"/>
+  </list>
+ </class>
 </hibernate-mapping>

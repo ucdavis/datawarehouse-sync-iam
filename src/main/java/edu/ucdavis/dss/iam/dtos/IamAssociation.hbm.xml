@@ -1,21 +1,29 @@
 <?xml version="1.0"?>
-
-<!-- ~ Hibernate, Relational Persistence for Idiomatic Java ~ ~ License: 
-	GNU Lesser General Public License (LGPL), version 2.1 or later. ~ See the 
-	lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>. -->
-<!DOCTYPE hibernate-mapping PUBLIC
-        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-
-<hibernate-mapping package="org.hibernate.tutorial.hbm">
-
-	<class name="edu.ucdavis.dss.iam.dtos.IamAssociation" table="iam_pps_depts">
-<!-- 		<id name="id" column="EVENT_ID">
-			<generator class="increment" />
-		</id>
- -->	
- 		<property name="deptCode" type="varchar" column="deptCode" />
-		
-	</class>
-
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+                                   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Aug 25, 2016 3:00:39 PM by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+ <class name="edu.ucdavis.dss.iam.dtos.IamAssociation" table="iam_associations">
+  <id name="iamId" type="java.lang.String">
+   <column name="IAMID"/>
+   <generator class="assigned"/>
+  </id>
+  <property generated="never" lazy="false" name="deptCode" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="deptOfficialName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="deptDisplayName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="deptAbbrev" type="java.lang.String"/>
+  <property access="field" generated="never" lazy="false" name="isUCDHS" type="boolean"/>
+  <property generated="never" lazy="false" name="bouOrgOId" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="assocRank" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="assocStartDate" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="assocEndDate" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="titleCode" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="titleOfficialName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="titleDisplayName" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="positionTypeCode" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="positionType" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="percentFullTime" type="java.lang.String"/>
+  <property generated="never" lazy="false" name="createDate" type="java.util.Date"/>
+  <property generated="never" lazy="false" name="modifyDate" type="java.util.Date"/>
+ </class>
 </hibernate-mapping>

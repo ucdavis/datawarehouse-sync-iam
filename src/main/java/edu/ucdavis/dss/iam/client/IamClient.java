@@ -255,10 +255,6 @@ public class IamClient {
 					
 				} else {
 					log.warn("getAllPeopleByDepartmentCode /api/iam/people/prikerbacct/" + person.getIamId() + " response from IAM not understood or was empty/null");
-
-					// This produces 1135 e-mails as of 2/12/16. Disabled for now but e-mailed IAM team for clarification.
-					// Appears to be related to individuals with undefined 'uid' in LDAP.
-					//AdminMailer.sendMail("dssit-devs-exceptions@ucdavis.edu", "DW: IAM error", "getAllPeopleByDepartmentCode /api/iam/people/prikerbacct/" + person.getIamId() + " response from IAM not understood or was empty/null");
 					
 					continue;
 				}
