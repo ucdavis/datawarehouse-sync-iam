@@ -3,9 +3,10 @@ package edu.ucdavis.dss.iam.client;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -151,18 +152,18 @@ public class IamClient {
 				arrNode = arrNode.get(0);
 				
 				if ((arrNode != null) && (arrNode.isNull() == false)) {
-					if(arrNode.get("email") != null) { person.setEmail(arrNode.get("email").textValue()); }
-					if(arrNode.get("hsEmail") != null) { person.setHsEmail(arrNode.get("hsEmail").textValue()); }
-					if(arrNode.get("campusEmail") != null) { person.setCampusEmail(arrNode.get("campusEmail").textValue()); }
-					if(arrNode.get("addrStreet") != null) { person.setAddrStreet(arrNode.get("addrStreet").textValue()); }
-					if(arrNode.get("addrCity") != null) { person.setAddrCity(arrNode.get("addrCity").textValue()); }
-					if(arrNode.get("addrState") != null) { person.setAddrState(arrNode.get("addrState").textValue()); }
-					if(arrNode.get("addrZip") != null) { person.setAddrZip(arrNode.get("addrZip").textValue()); }
-					if(arrNode.get("postalAddress") != null) { person.setPostalAddress(arrNode.get("postalAddress").textValue()); }
-					if(arrNode.get("workPhone") != null) { person.setWorkPhone(arrNode.get("workPhone").textValue()); }
-					if(arrNode.get("workCell") != null) { person.setWorkCell(arrNode.get("workCell").textValue()); }
-					if(arrNode.get("workPager") != null) { person.setWorkPager(arrNode.get("workPager").textValue()); }
-					if(arrNode.get("workFax") != null) { person.setWorkFax(arrNode.get("workFax").textValue()); }
+//					if(arrNode.get("email") != null) { person.setEmail(arrNode.get("email").textValue()); }
+//					if(arrNode.get("hsEmail") != null) { person.setHsEmail(arrNode.get("hsEmail").textValue()); }
+//					if(arrNode.get("campusEmail") != null) { person.setCampusEmail(arrNode.get("campusEmail").textValue()); }
+//					if(arrNode.get("addrStreet") != null) { person.setAddrStreet(arrNode.get("addrStreet").textValue()); }
+//					if(arrNode.get("addrCity") != null) { person.setAddrCity(arrNode.get("addrCity").textValue()); }
+//					if(arrNode.get("addrState") != null) { person.setAddrState(arrNode.get("addrState").textValue()); }
+//					if(arrNode.get("addrZip") != null) { person.setAddrZip(arrNode.get("addrZip").textValue()); }
+//					if(arrNode.get("postalAddress") != null) { person.setPostalAddress(arrNode.get("postalAddress").textValue()); }
+//					if(arrNode.get("workPhone") != null) { person.setWorkPhone(arrNode.get("workPhone").textValue()); }
+//					if(arrNode.get("workCell") != null) { person.setWorkCell(arrNode.get("workCell").textValue()); }
+//					if(arrNode.get("workPager") != null) { person.setWorkPager(arrNode.get("workPager").textValue()); }
+//					if(arrNode.get("workFax") != null) { person.setWorkFax(arrNode.get("workFax").textValue()); }
 				} else {
 					log.warn("getAllPeopleByDepartmentCode /api/iam/people/contactinfo/" + person.getIamId() + " response from IAM not understood or was empty/null");
 					
@@ -251,7 +252,7 @@ public class IamClient {
 				arrNode = arrNode.get(0);
 				
 				if ((arrNode != null) && (arrNode.isNull() == false)) {
-					if(arrNode.get("userId") != null) { person.setLoginId(arrNode.get("userId").textValue()); }
+					//if(arrNode.get("userId") != null) { person.setLoginId(arrNode.get("userId").textValue()); }
 					
 				} else {
 					log.warn("getAllPeopleByDepartmentCode /api/iam/people/prikerbacct/" + person.getIamId() + " response from IAM not understood or was empty/null");
@@ -285,7 +286,7 @@ public class IamClient {
 				arrNode = rootNode.findPath("results");
 				
 				if ((arrNode != null) && (arrNode.isNull() == false)) {
-					List<IamAssociation> associations = null;
+					Set<IamAssociation> associations = null;
 					
 					associations = mapper.readValue(
 							arrNode.toString(),
@@ -293,7 +294,7 @@ public class IamClient {
 									List.class, IamAssociation.class));
 					
 					// We'll set up a blank list just in case the client wants to call .size(), etc.
-					if(associations == null) associations = new ArrayList<IamAssociation>();
+					if(associations == null) associations = new HashSet<IamAssociation>();
 					
 					person.setAssociations(associations);
 					

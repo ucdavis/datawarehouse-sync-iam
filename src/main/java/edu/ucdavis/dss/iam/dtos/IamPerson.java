@@ -1,181 +1,42 @@
 package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IamPerson {
-	private String iamId;
-	private String deptCode;
-	private String deptOfficialName;
-	private String deptDisplayName;
-	private String deptAbbrev;
-	private String loginId;
-	private boolean ucdhs;
-	private String bouOrgOId;
-	private String assocRank;
-	private Date assocStartDate, assocEndDate;
-	private String titleCode;
-	private String titleOfficialName;
-	private String titleDisplayName;
-	private String positionTypeCode, positionType;
-	private String percentFullTime;
-	private Date createDate, modifyDate;
+	private Long id;
+	private Long iamId;
 	private String mothraId;
 	private String ppsId;
 	private String studentId;
 	private String bannerPIdM;
 	private String externalId;
-	private String oFirstName, oMiddleName, oLastName, oSuffix;
-	private String dFirstName, dMiddleName, dLastName, dSuffix;
-	private String oFullName, dFullName;
-	private boolean isEmployee, isHSEmployee, isFaculty, isStudent, isStaff, isExternal;
+	private String oFirstName, oMiddleName, oLastName, oFullName, oSuffix;
+	private String dFirstName, dMiddleName, dLastName, dSuffix, dFullName;
+	private Boolean isEmployee, isHSEmployee ,isFaculty ,isStudent, isStaff, isExternal;
 	private String privacyCode;
-	private String email, hsEmail, campusEmail;
-	private String addrStreet, addrCity, addrState, addrZip, postalAddress;
-	private String workPhone, workCell, workPager, workFax;
-	private List<IamAssociation> associations;
+	private Date modifyDate;
 	
-	public String getIamId() {
+	private Set<IamAssociation> associations;
+	private Set<IamContactInfo> contactInfos;
+	private Set<IamPrikerbacct> prikerbaccts;
+	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	public Long getIamId() {
 		return iamId;
 	}
 	
-	public void setIamId(String iamId) {
+	public void setIamId(Long iamId) {
 		this.iamId = iamId;
-	}
-	
-	public String getDeptCode() {
-		return deptCode;
-	}
-	
-	public void setDeptCode(String deptCode) {
-		this.deptCode = deptCode;
-	}
-	
-	public String getDeptOfficialName() {
-		return deptOfficialName;
-	}
-	
-	public void setDeptOfficialName(String deptOfficialName) {
-		this.deptOfficialName = deptOfficialName;
-	}
-	
-	public String getDeptDisplayName() {
-		return deptDisplayName;
-	}
-	
-	public void setDeptDisplayName(String deptDisplayName) {
-		this.deptDisplayName = deptDisplayName;
-	}
-	
-	public String getDeptAbbrev() {
-		return deptAbbrev;
-	}
-	
-	public void setDeptAbbrev(String deptAbbrev) {
-		this.deptAbbrev = deptAbbrev;
-	}
-	
-	@JsonProperty("isUCDHS")
-	public boolean isUcdhs() {
-		return ucdhs;
-	}
-	
-	public void setUcdhs(boolean ucdhs) {
-		this.ucdhs = ucdhs;
-	}
-	
-	public String getBouOrgOId() {
-		return bouOrgOId;
-	}
-	
-	public void setBouOrgOId(String bouOrgOId) {
-		this.bouOrgOId = bouOrgOId;
-	}
-	
-	public String getAssocRank() {
-		return assocRank;
-	}
-	
-	public void setAssocRank(String assocRank) {
-		this.assocRank = assocRank;
-	}
-	
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	public Date getAssocStartDate() {
-		return assocStartDate;
-	}
-	
-	public void setAssocStartDate(Date assocStartDate) {
-		this.assocStartDate = assocStartDate;
-	}
-	
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	public Date getAssocEndDate() {
-		return assocEndDate;
-	}
-	
-	public void setAssocEndDate(Date assocEndDate) {
-		this.assocEndDate = assocEndDate;
-	}
-	
-	public String getTitleCode() {
-		return titleCode;
-	}
-	
-	public void setTitleCode(String titleCode) {
-		this.titleCode = titleCode;
-	}
-	
-	public String getTitleOfficialName() {
-		return titleOfficialName;
-	}
-	
-	public void setTitleOfficialName(String titleOfficialName) {
-		this.titleOfficialName = titleOfficialName;
-	}
-	
-	public String getTitleDisplayName() {
-		return titleDisplayName;
-	}
-	
-	public void setTitleDisplayName(String titleDisplayName) {
-		this.titleDisplayName = titleDisplayName;
-	}
-	
-	public String getPositionTypeCode() {
-		return positionTypeCode;
-	}
-	
-	public void setPositionTypeCode(String positionTypeCode) {
-		this.positionTypeCode = positionTypeCode;
-	}
-	
-	public String getPositionType() {
-		return positionType;
-	}
-	
-	public void setPositionType(String positionType) {
-		this.positionType = positionType;
-	}
-	
-	public String getPercentFullTime() {
-		return percentFullTime;
-	}
-	
-	public void setPercentFullTime(String percentFullTime) {
-		this.percentFullTime = percentFullTime;
-	}
-	
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	public Date getCreateDate() {
-		return createDate;
-	}
-	
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
 	}
 	
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -369,122 +230,31 @@ public class IamPerson {
 		this.privacyCode = privacyCode;
 	}
 	
-	public String getEmail() {
-		return email;
-	}
-	
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	
-	public String getHsEmail() {
-		return hsEmail;
-	}
-	
-	public void setHsEmail(String hsEmail) {
-		this.hsEmail = hsEmail;
-	}
-	
-	public String getCampusEmail() {
-		return campusEmail;
-	}
-	
-	public void setCampusEmail(String campusEmail) {
-		this.campusEmail = campusEmail;
-	}
-	
-	public String getAddrStreet() {
-		return addrStreet;
-	}
-	
-	public void setAddrStreet(String addrStreet) {
-		this.addrStreet = addrStreet;
-	}
-	
-	public String getAddrCity() {
-		return addrCity;
-	}
-	
-	public void setAddrCity(String addrCity) {
-		this.addrCity = addrCity;
-	}
-	
-	public String getAddrState() {
-		return addrState;
-	}
-	
-	public void setAddrState(String addrState) {
-		this.addrState = addrState;
-	}
-	
-	public String getAddrZip() {
-		return addrZip;
-	}
-	
-	public void setAddrZip(String addrZip) {
-		this.addrZip = addrZip;
-	}
-	
-	public String getPostalAddress() {
-		return postalAddress;
-	}
-	
-	public void setPostalAddress(String postalAddress) {
-		this.postalAddress = postalAddress;
-	}
-	
-	public String getWorkPhone() {
-		return workPhone;
-	}
-	
-	public void setWorkPhone(String workPhone) {
-		this.workPhone = workPhone;
-	}
-	
-	public String getWorkCell() {
-		return workCell;
-	}
-	
-	public void setWorkCell(String workCell) {
-		this.workCell = workCell;
-	}
-	
-	public String getWorkPager() {
-		return workPager;
-	}
-	
-	public void setWorkPager(String workPager) {
-		this.workPager = workPager;
-	}
-	
-	public String getWorkFax() {
-		return workFax;
-	}
-	
-	public void setWorkFax(String workFax) {
-		this.workFax = workFax;
-	}
-	
-	public String getLoginId() {
-		return loginId;
-	}
-	
-	public void setLoginId(String loginId) {
-		this.loginId = loginId;
-	}
-	
-	public List<IamAssociation> getAssociations() {
+	public Set<IamAssociation> getAssociations() {
 		return associations;
 	}
 
-	public void setAssociations(List<IamAssociation> associations) {
+	public void setAssociations(Set<IamAssociation> associations) {
 		this.associations = associations;
+	}
+
+	public Set<IamContactInfo> getContactInfos() {
+		return contactInfos;
+	}
+	public void setContactInfos(Set<IamContactInfo> contactInfos) {
+		this.contactInfos = contactInfos;
+	}
+	public Set<IamPrikerbacct> getPrikerbaccts() {
+		return prikerbaccts;
+	}
+	public void setPrikerbaccts(Set<IamPrikerbacct> prikerbaccts) {
+		this.prikerbaccts = prikerbaccts;
 	}
 
 	@Override
 	public String toString() {
 		return String.format(
-				"IamPerson[iamId='%s', deptCode='%s', titleCode='%s', ppsId='%s', loginId='%s']",
-				iamId, deptCode, titleCode, ppsId, loginId);
+				"IamPerson[iamId='%s', ppsId='%s', dFullName='%s']",
+				iamId, ppsId, dFullName);
 	}
 }

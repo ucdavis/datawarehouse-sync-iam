@@ -2,9 +2,18 @@ package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@Entity
+@Table( name = "iam_pps_depts" )
 public class IamDepartment {
 	private Long id;
 	private String orgOId;
@@ -16,6 +25,8 @@ public class IamDepartment {
 	private String bouOrgOId;
 	private Date createDate, modifyDate;
 	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}
@@ -23,6 +34,7 @@ public class IamDepartment {
 		this.id = id;
 	}
 	
+	@Column
 	public String getOrgOId() {
 		return orgOId;
 	}
@@ -31,6 +43,7 @@ public class IamDepartment {
 		this.orgOId = orgOId;
 	}
 	
+	@Column
 	public String getDeptCode() {
 		return deptCode;
 	}
@@ -39,6 +52,7 @@ public class IamDepartment {
 		this.deptCode = deptCode;
 	}
 	
+	@Column
 	public String getDeptOfficialName() {
 		return deptOfficialName;
 	}
@@ -47,6 +61,7 @@ public class IamDepartment {
 		this.deptOfficialName = deptOfficialName;
 	}
 	
+	@Column
 	public String getDeptDisplayName() {
 		return deptDisplayName;
 	}
@@ -55,6 +70,7 @@ public class IamDepartment {
 		this.deptDisplayName = deptDisplayName;
 	}
 	
+	@Column
 	public String getDeptAbbrev() {
 		return deptAbbrev;
 	}
@@ -63,6 +79,7 @@ public class IamDepartment {
 		this.deptAbbrev = deptAbbrev;
 	}
 	
+	@Column(name="isUCDHS")
 	@JsonProperty("isUCDHS")
 	public boolean getUCDHS() {
 		return ucdhs;
@@ -72,6 +89,7 @@ public class IamDepartment {
 		this.ucdhs = ucdhs;
 	}
 	
+	@Column
 	public String getBouOrgOId() {
 		return bouOrgOId;
 	}
@@ -80,6 +98,7 @@ public class IamDepartment {
 		this.bouOrgOId = bouOrgOId;
 	}
 	
+	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateDate() {
 		return createDate;
@@ -89,6 +108,7 @@ public class IamDepartment {
 		this.createDate = createDate;
 	}
 	
+	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getModifyDate() {
 		return modifyDate;

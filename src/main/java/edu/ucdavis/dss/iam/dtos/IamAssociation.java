@@ -7,11 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IamAssociation {
 	private Long id;
-	private String iamId;
+	private Long iamId;
 	private String deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
 	private boolean isUCDHS;
 	private String bouOrgOId;
-	private String assocRank, assocStartDate, assocEndDate;
+	private String assocRank;
+	private Date assocStartDate, assocEndDate;
 	private String titleCode, titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
 	private Date createDate, modifyDate;
@@ -23,10 +24,10 @@ public class IamAssociation {
 		this.id = id;
 	}
 	
-	public String getIamId() {
+	public Long getIamId() {
 		return iamId;
 	}
-	public void setIamId(String iamId) {
+	public void setIamId(Long iamId) {
 		this.iamId = iamId;
 	}
 	
@@ -80,17 +81,17 @@ public class IamAssociation {
 		this.assocRank = assocRank;
 	}
 	
-	public String getAssocStartDate() {
+	public Date getAssocStartDate() {
 		return assocStartDate;
 	}
-	public void setAssocStartDate(String assocStartDate) {
+	public void setAssocStartDate(Date assocStartDate) {
 		this.assocStartDate = assocStartDate;
 	}
 	
-	public String getAssocEndDate() {
+	public Date getAssocEndDate() {
 		return assocEndDate;
 	}
-	public void setAssocEndDate(String assocEndDate) {
+	public void setAssocEndDate(Date assocEndDate) {
 		this.assocEndDate = assocEndDate;
 	}
 	

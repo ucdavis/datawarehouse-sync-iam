@@ -29,10 +29,12 @@
 		<!-- Drop and re-create the database schema on startup -->
 		<property name="hbm2ddl.auto">validate</property>
 
-		<mapping resource="edu/ucdavis/dss/iam/dtos/IamDepartment.hbm.xml" />
-		<mapping resource="edu/ucdavis/dss/iam/dtos/IamAssociation.hbm.xml" />
-		<mapping resource="edu/ucdavis/dss/iam/dtos/IamPerson.hbm.xml" />
-
+<!-- 		<mapping class="edu.ucdavis.dss.iam.dtos.IamAssociation" />
+		<mapping class="edu.ucdavis.dss.iam.dtos.IamContactInfo" />
+ -->		<mapping class="edu.ucdavis.dss.iam.dtos.IamDepartment" />
+<!-- 		<mapping class="edu.ucdavis.dss.iam.dtos.IamPerson" />
+		<mapping class="edu.ucdavis.dss.iam.dtos.IamPrikerbacct" />
+ -->
 	</session-factory>
 
 </hibernate-configuration>

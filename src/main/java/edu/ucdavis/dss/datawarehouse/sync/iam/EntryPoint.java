@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Properties;
 
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamDepartment;
-import edu.ucdavis.dss.iam.dtos.IamPerson;
 
 public class EntryPoint {
 	public static String iamApiKey, localDBUrl, localDBUser, localDBPass;
@@ -32,7 +30,6 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Connection mysqlConnection = null;
 		SessionFactory sessionFactory = null;
 		
 		/**
@@ -64,22 +61,6 @@ public class EntryPoint {
 			return;
 		}
 
-		/**
-		 * Connect to local MySQL database
-		 */
-//		logger.debug("Attempting to connect to local MySQL ...");
-//
-//		try {
-//			mysqlConnection =
-//					DriverManager.getConnection(EntryPoint.localDBUrl, EntryPoint.localDBUser, EntryPoint.localDBPass);
-//			
-//			logger.debug("Connected to local MySQL.");
-//		} catch (SQLException e) {
-//			logger.error("A SQLException occurred while connecting to the local MySQL database.");
-//			e.printStackTrace();
-//			return;
-//		}
-		
 		/**
 		 * Set up Hibernate
 		 */
@@ -117,16 +98,16 @@ public class EntryPoint {
 		/**
 		 * Extract and load all people by department from IAM
 		 */
-		session = sessionFactory.openSession();
-		for(IamDepartment department : departments) {
-			List<IamPerson> people = iamClient.getAllPeopleByDepartmentCode(department.getDeptCode());
-			for(IamPerson person : people) {
-				session.beginTransaction();
-				session.save( person );
-				session.getTransaction().commit();
-			}
-		}
-		session.close();
+//		session = sessionFactory.openSession();
+//		for(IamDepartment department : departments) {
+//			List<IamPerson> people = iamClient.getAllPeopleByDepartmentCode(department.getDeptCode());
+//			for(IamPerson person : people) {
+//				session.beginTransaction();
+//				session.save( person );
+//				session.getTransaction().commit();
+//			}
+//		}
+//		session.close();
 
 		/**
 		 * Close Hibernate
@@ -134,15 +115,6 @@ public class EntryPoint {
 		if ( sessionFactory != null ) {
 			sessionFactory.close();
 		}
-
-		/**
-		 * Close connection to local database.
-		 */
-//		try {
-//			mysqlConnection.close();
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
 	}
 
 	/**
