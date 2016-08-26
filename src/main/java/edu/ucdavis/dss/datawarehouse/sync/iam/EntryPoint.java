@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.ucdavis.dss.iam.client.IamClient;
+import edu.ucdavis.dss.iam.dtos.IamAssociation;
 import edu.ucdavis.dss.iam.dtos.IamDepartment;
 
 public class EntryPoint {
@@ -98,16 +99,16 @@ public class EntryPoint {
 		/**
 		 * Extract and load all people by department from IAM
 		 */
-//		session = sessionFactory.openSession();
-//		for(IamDepartment department : departments) {
-//			List<IamPerson> people = iamClient.getAllPeopleByDepartmentCode(department.getDeptCode());
-//			for(IamPerson person : people) {
-//				session.beginTransaction();
-//				session.save( person );
-//				session.getTransaction().commit();
-//			}
-//		}
-//		session.close();
+		session = sessionFactory.openSession();
+		for(IamDepartment department : departments) {
+			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
+			for(IamAssociation association : associations) {
+				session.beginTransaction();
+				session.save( association );
+				session.getTransaction().commit();
+			}
+		}
+		session.close();
 
 		/**
 		 * Close Hibernate
@@ -116,14 +117,4 @@ public class EntryPoint {
 			sessionFactory.close();
 		}
 	}
-
-	/**
-	 * Saves a single IAM department to the local database.
-	 * 
-	 * @param department a filled-in IamDepartment DTO
-	 * @param department an already open database connection
-	 */
-//	private static void saveIamDepartment(IamDepartment department, Connection conn) {
-//		
-//	}
 }

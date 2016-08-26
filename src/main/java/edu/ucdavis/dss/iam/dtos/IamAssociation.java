@@ -2,9 +2,18 @@ package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@Entity
+@Table( name = "iam_associations" )
 public class IamAssociation {
 	private Long id;
 	private Long iamId;
@@ -17,6 +26,8 @@ public class IamAssociation {
 	private String positionTypeCode, positionType, percentFullTime;
 	private Date createDate, modifyDate;
 	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}
@@ -24,6 +35,7 @@ public class IamAssociation {
 		this.id = id;
 	}
 	
+	@Column
 	public Long getIamId() {
 		return iamId;
 	}
@@ -31,6 +43,7 @@ public class IamAssociation {
 		this.iamId = iamId;
 	}
 	
+	@Column
 	public String getDeptCode() {
 		return deptCode;
 	}
@@ -38,6 +51,7 @@ public class IamAssociation {
 		this.deptCode = deptCode;
 	}
 	
+	@Column
 	public String getDeptOfficialName() {
 		return deptOfficialName;
 	}
@@ -45,6 +59,7 @@ public class IamAssociation {
 		this.deptOfficialName = deptOfficialName;
 	}
 	
+	@Column
 	public String getDeptDisplayName() {
 		return deptDisplayName;
 	}
@@ -52,6 +67,7 @@ public class IamAssociation {
 		this.deptDisplayName = deptDisplayName;
 	}
 	
+	@Column
 	public String getDeptAbbrev() {
 		return deptAbbrev;
 	}
@@ -59,6 +75,7 @@ public class IamAssociation {
 		this.deptAbbrev = deptAbbrev;
 	}
 	
+	@Column(name="isUCDHS")
 	@JsonProperty("isUCDHS")
 	public boolean isUCDHS() {
 		return isUCDHS;
@@ -67,6 +84,7 @@ public class IamAssociation {
 		this.isUCDHS = isUCDHS;
 	}
 	
+	@Column
 	public String getBouOrgOId() {
 		return bouOrgOId;
 	}
@@ -74,6 +92,7 @@ public class IamAssociation {
 		this.bouOrgOId = bouOrgOId;
 	}
 	
+	@Column
 	public String getAssocRank() {
 		return assocRank;
 	}
@@ -81,6 +100,8 @@ public class IamAssociation {
 		this.assocRank = assocRank;
 	}
 	
+	@Column
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	public Date getAssocStartDate() {
 		return assocStartDate;
 	}
@@ -88,6 +109,8 @@ public class IamAssociation {
 		this.assocStartDate = assocStartDate;
 	}
 	
+	@Column
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	public Date getAssocEndDate() {
 		return assocEndDate;
 	}
@@ -95,6 +118,7 @@ public class IamAssociation {
 		this.assocEndDate = assocEndDate;
 	}
 	
+	@Column
 	public String getTitleCode() {
 		return titleCode;
 	}
@@ -102,6 +126,7 @@ public class IamAssociation {
 		this.titleCode = titleCode;
 	}
 	
+	@Column
 	public String getTitleOfficialName() {
 		return titleOfficialName;
 	}
@@ -109,6 +134,7 @@ public class IamAssociation {
 		this.titleOfficialName = titleOfficialName;
 	}
 	
+	@Column
 	public String getTitleDisplayName() {
 		return titleDisplayName;
 	}
@@ -116,6 +142,7 @@ public class IamAssociation {
 		this.titleDisplayName = titleDisplayName;
 	}
 	
+	@Column
 	public String getPositionTypeCode() {
 		return positionTypeCode;
 	}
@@ -123,6 +150,7 @@ public class IamAssociation {
 		this.positionTypeCode = positionTypeCode;
 	}
 	
+	@Column
 	public String getPositionType() {
 		return positionType;
 	}
@@ -130,6 +158,7 @@ public class IamAssociation {
 		this.positionType = positionType;
 	}
 	
+	@Column
 	public String getPercentFullTime() {
 		return percentFullTime;
 	}
@@ -137,6 +166,7 @@ public class IamAssociation {
 		this.percentFullTime = percentFullTime;
 	}
 	
+	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateDate() {
 		return createDate;
@@ -145,6 +175,7 @@ public class IamAssociation {
 		this.createDate = createDate;
 	}
 	
+	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getModifyDate() {
 		return modifyDate;
