@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.ucdavis.dss.iam.dtos.IamAssociation;
+import edu.ucdavis.dss.iam.dtos.IamContactInfo;
 import edu.ucdavis.dss.iam.dtos.IamDepartment;
 
 public class IamClient {
@@ -320,6 +321,54 @@ public class IamClient {
 		//}
 		
 		//return people;
+	}
+	
+	/**
+	 * Returns the contact info entry for a given IamID
+	 * 
+	 * @return IamContactInfo or null
+	 */
+	public List<IamContactInfo> getContactInfo(Long iamId) {
+		long startTime;
+		
+		// First, get all people in the department
+		String url = "/api/iam/people/contactinfo/" + iamId;
+		HttpGet httpget = new HttpGet(url + "?v=1.0&key=" + apiKey);
+		List<IamContactInfo> contactInfos = null;
+
+		try {
+			log.debug("HTTP GET: " + url);
+			startTime = new Date().getTime();
+			CloseableHttpResponse response = httpclient.execute(
+					targetHost, httpget, context);
+			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "s.");
+
+			HttpEntity entity = response.getEntity();
+
+			ObjectMapper mapper = new ObjectMapper();
+			
+			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
+			JsonNode arrNode = rootNode.findParent("responseData");
+			arrNode = rootNode.findPath("results");
+			
+			if ((arrNode != null) && (arrNode.isNull() == false)) {
+				contactInfos = mapper.readValue(
+						arrNode.toString(),
+						mapper.getTypeFactory().constructCollectionType(
+								List.class, IamContactInfo.class));
+			} else {
+				log.warn("/api/iam/people/contactinfo/" + iamId + " response from IAM not understood or was empty/null");
+				
+				return null;
+			}
+
+			response.close();
+		} catch (IOException e) {
+			log.error(exceptionStacktraceToString(e));
+			return null;
+		}
+		
+		return contactInfos;
 	}
 	
 	// Credit: http://stackoverflow.com/questions/10120709/difference-between-printstacktrace-and-tostring

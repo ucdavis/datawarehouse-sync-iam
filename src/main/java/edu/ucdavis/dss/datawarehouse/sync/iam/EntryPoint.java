@@ -12,11 +12,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.hibernate.Session;
+import org.hibernate.exception.DataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.ucdavis.dss.iam.client.IamClient;
+import edu.ucdavis.dss.iam.dtos.IamAssociation;
+import edu.ucdavis.dss.iam.dtos.IamContactInfo;
 import edu.ucdavis.dss.iam.dtos.IamDepartment;
 
 public class EntryPoint {
@@ -30,9 +32,8 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//SessionFactory sessionFactory = null;
 		EntityManagerFactory entityManagerFactory = null;
-		
+
 		/**
 		 * Load the IAM API key from ~/.data-warehouse/settings.properties.
 		 * We expect a few keys to exist; see prop.getProperty() lines.
@@ -52,7 +53,7 @@ public class EntryPoint {
 			localDBUser = prop.getProperty("LOCAL_MYSQL_USER");
 			localDBPass = prop.getProperty("LOCAL_MYSQL_PASS");
 			iamApiKey = prop.getProperty("IAM_API_KEY");
-			
+
 			logger.info("Settings file '" + filename + "' found.");
 		} catch (FileNotFoundException e) {
 			logger.warn("Could not find " + filename + ".");
@@ -65,75 +66,65 @@ public class EntryPoint {
 		/**
 		 * Set up Hibernate
 		 */
-//		// A SessionFactory is set up once for an application!
-//		final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-//				.configure() // configures settings from hibernate.cfg.xml
-//				.build();
-//		try {
-//			sessionFactory = new MetadataSources( registry ).buildMetadata().buildSessionFactory();
-//		} catch (Exception e) {
-//			// The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
-//			// so destroy it manually.
-//			StandardServiceRegistryBuilder.destroy( registry );
-//			e.printStackTrace();
-//			return;
-//		}
 		entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
-		
+
 		/**
 		 * Initialize IAM client
 		 */
 		IamClient iamClient = new IamClient(iamApiKey);
-		
-		Session session = null;
+
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
 		/**
 		 * Extract and load all departments from IAM
 		 */
 		List<IamDepartment> departments = iamClient.getAllDepartments();
-//		Session session = sessionFactory.openSession();
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		departments.clear(); // REMOVEME
 		entityManager.getTransaction().begin();
 		for(IamDepartment department : departments) {
-//			session.beginTransaction();
 			entityManager.persist( department );
-//			session.save( department );
-//			session.getTransaction().commit();
 		}
 		entityManager.getTransaction().commit();
-		entityManager.close();
-//		session.close();
-		
+
 		/**
 		 * Extract and load all associations by department from IAM
 		 */
-//		session = sessionFactory.openSession();
-//		for(IamDepartment department : departments) {
-//			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
-//			for(IamAssociation association : associations) {
-//				session.beginTransaction();
-//				try {
-//					session.save( association );
-//				} catch (DataException e) {
-//					logger.debug("Exception while saving object: " + association);
-//					e.printStackTrace();
-//				}
-//				session.getTransaction().commit();
-//			}
-//		}
-//		session.close();
+		for(IamDepartment department : departments) {
+			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
+			entityManager.getTransaction().begin();
+			for(IamAssociation association : associations) {
+				entityManager.persist( association );
+			}
+			entityManager.getTransaction().commit();
+		}
+
+		List<IamContactInfo> contactInfos2 = iamClient.getContactInfo(1000008671L);
 		
 		/**
 		 * Use all known associations to fetch contact information, login IDs, etc.
 		 */
+		entityManager.getTransaction().begin();
+		List<Long> iamIds = entityManager.createQuery( "SELECT iamId from IamAssociation", Long.class ).getResultList();
+		entityManager.getTransaction().commit();
 		
+		entityManager.getTransaction().begin();
+		for(Long iamId : iamIds) {
+			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
+			for(IamContactInfo contactInfo : contactInfos) {
+				try {
+					entityManager.persist( contactInfo );
+				} catch (DataException e) {
+					logger.error("Unable to persist contactInfo: " + contactInfo);
+					e.printStackTrace();
+				}
+			}
+		}
+		entityManager.getTransaction().commit();
 
 		/**
 		 * Close Hibernate
 		 */
-//		if ( sessionFactory != null ) {
-//			sessionFactory.close();
-//		}
+		entityManager.close();
 		entityManagerFactory.close();
 	}
 }
