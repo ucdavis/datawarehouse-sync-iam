@@ -20,6 +20,8 @@ import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamAssociation;
 import edu.ucdavis.dss.iam.dtos.IamContactInfo;
 import edu.ucdavis.dss.iam.dtos.IamDepartment;
+import edu.ucdavis.dss.iam.dtos.IamPerson;
+import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 
 public class EntryPoint {
 	public static String iamApiKey, localDBUrl, localDBUser, localDBPass;
@@ -98,10 +100,8 @@ public class EntryPoint {
 			entityManager.getTransaction().commit();
 		}
 
-		List<IamContactInfo> contactInfos2 = iamClient.getContactInfo(1000008671L);
-		
 		/**
-		 * Use all known associations to fetch contact information, login IDs, etc.
+		 * Persist contact infos, people entries, and prikerbaccts
 		 */
 		entityManager.getTransaction().begin();
 		List<Long> iamIds = entityManager.createQuery( "SELECT iamId from IamAssociation", Long.class ).getResultList();
@@ -110,11 +110,32 @@ public class EntryPoint {
 		entityManager.getTransaction().begin();
 		for(Long iamId : iamIds) {
 			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
+			List<IamPerson> people = iamClient.getPersonInfo(iamId);
+			List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
+			
 			for(IamContactInfo contactInfo : contactInfos) {
 				try {
 					entityManager.persist( contactInfo );
 				} catch (DataException e) {
 					logger.error("Unable to persist contactInfo: " + contactInfo);
+					e.printStackTrace();
+				}
+			}
+			
+			for(IamPerson person : people) {
+				try {
+					entityManager.persist( person );
+				} catch (DataException e) {
+					logger.error("Unable to persist person: " + person);
+					e.printStackTrace();
+				}
+			}
+
+			for(IamPrikerbacct prikerbacct : prikerbaccts) {
+				try {
+					entityManager.persist( prikerbacct );
+				} catch (DataException e) {
+					logger.error("Unable to persist prikerbacct: " + prikerbacct);
 					e.printStackTrace();
 				}
 			}
