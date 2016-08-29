@@ -97,7 +97,7 @@ public class IamClient {
 			startTime = new Date().getTime();
 			CloseableHttpResponse response = httpclient.execute(
 					targetHost, httpget, context);
-			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "s.");
+			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 
 			HttpEntity entity = response.getEntity();
 
@@ -126,69 +126,15 @@ public class IamClient {
 		
 		return associations;
 		
-//		// No error but IAM did not return any people
-//		if(people == null) return null;
-//		
 //		// Perform four additional queries to obtain the rest of this person's information
 //		for(IamPerson person : people) {
-//			// Augment IamPerson with information from /people/contactinfo/ ...
-//			try {
-//				url = "/api/iam/people/contactinfo/" + person.getIamId();
-//				log.debug("HTTP GET: " + url);
-//				startTime = new Date().getTime();
-//				httpget = new HttpGet(url + "?v=1.0&key=" + apiKey);
-//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "s.");
-//				
-//				CloseableHttpResponse response = httpclient.execute(
-//						targetHost, httpget, context);
-//
-//				HttpEntity entity = response.getEntity();
-//
-//				ObjectMapper mapper = new ObjectMapper();
-//				
-//				JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-//				JsonNode arrNode = rootNode.findParent("responseData");
-//				arrNode = rootNode.findPath("results");
-//				arrNode = arrNode.get(0);
-//				
-//				if ((arrNode != null) && (arrNode.isNull() == false)) {
-//					Set<IamContactInfo> contactInfos = mapper.readValue(
-//							arrNode.toString(),
-//							mapper.getTypeFactory().constructCollectionType(
-//									Set.class, IamPerson.class));
-//					
-//					person.setContactInfos(contactInfos);
-////					if(arrNode.get("email") != null) { person.setEmail(arrNode.get("email").textValue()); }
-////					if(arrNode.get("hsEmail") != null) { person.setHsEmail(arrNode.get("hsEmail").textValue()); }
-////					if(arrNode.get("campusEmail") != null) { person.setCampusEmail(arrNode.get("campusEmail").textValue()); }
-////					if(arrNode.get("addrStreet") != null) { person.setAddrStreet(arrNode.get("addrStreet").textValue()); }
-////					if(arrNode.get("addrCity") != null) { person.setAddrCity(arrNode.get("addrCity").textValue()); }
-////					if(arrNode.get("addrState") != null) { person.setAddrState(arrNode.get("addrState").textValue()); }
-////					if(arrNode.get("addrZip") != null) { person.setAddrZip(arrNode.get("addrZip").textValue()); }
-////					if(arrNode.get("postalAddress") != null) { person.setPostalAddress(arrNode.get("postalAddress").textValue()); }
-////					if(arrNode.get("workPhone") != null) { person.setWorkPhone(arrNode.get("workPhone").textValue()); }
-////					if(arrNode.get("workCell") != null) { person.setWorkCell(arrNode.get("workCell").textValue()); }
-////					if(arrNode.get("workPager") != null) { person.setWorkPager(arrNode.get("workPager").textValue()); }
-////					if(arrNode.get("workFax") != null) { person.setWorkFax(arrNode.get("workFax").textValue()); }
-//				} else {
-//					log.warn("getAllPeopleByDepartmentCode /api/iam/people/contactinfo/" + person.getIamId() + " response from IAM not understood or was empty/null");
-//					
-//					continue;
-//				}
-//
-//				response.close();
-//			} catch (IOException e) {
-//				log.error(exceptionStacktraceToString(e));
-//				continue;
-//			}
-
 //			// Augment IamPerson with information from /people/search ...
 //			try {
 //				url = "/api/iam/people/search?iamId=" + person.getIamId();
 //				log.debug("HTTP GET: " + url);
 //				startTime = new Date().getTime();
 //				httpget = new HttpGet(url + "&v=1.0&key=" + apiKey);
-//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "s.");
+//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 //				
 //				CloseableHttpResponse response = httpclient.execute(
 //						targetHost, httpget, context);
@@ -243,7 +189,7 @@ public class IamClient {
 //				log.debug("HTTP GET: " + url);
 //				startTime = new Date().getTime();
 //				httpget = new HttpGet(url + "?key=" + apiKey + "&v=1.0");
-//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "s.");
+//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 //				
 //				CloseableHttpResponse response = httpclient.execute(
 //						targetHost, httpget, context);
@@ -278,7 +224,7 @@ public class IamClient {
 //				log.debug("HTTP GET: " + url);
 //				startTime = new Date().getTime();
 //				httpget = new HttpGet(url + "?key=" + apiKey + "&v=1.0");
-//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "s.");
+//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 //				
 //				CloseableHttpResponse response = httpclient.execute(
 //						targetHost, httpget, context);
@@ -341,7 +287,7 @@ public class IamClient {
 			startTime = new Date().getTime();
 			CloseableHttpResponse response = httpclient.execute(
 					targetHost, httpget, context);
-			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "s.");
+			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 
 			HttpEntity entity = response.getEntity();
 
