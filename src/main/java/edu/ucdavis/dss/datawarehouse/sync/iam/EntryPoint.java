@@ -107,11 +107,12 @@ public class EntryPoint {
 		List<Long> iamIds = entityManager.createQuery( "SELECT iamId from IamAssociation", Long.class ).getResultList();
 		entityManager.getTransaction().commit();
 		
-		entityManager.getTransaction().begin();
 		for(Long iamId : iamIds) {
 			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 			List<IamPerson> people = iamClient.getPersonInfo(iamId);
 			List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
+			
+			entityManager.getTransaction().begin();
 			
 			for(IamContactInfo contactInfo : contactInfos) {
 				try {
@@ -139,8 +140,9 @@ public class EntryPoint {
 					e.printStackTrace();
 				}
 			}
+			
+			entityManager.getTransaction().commit();
 		}
-		entityManager.getTransaction().commit();
 
 		/**
 		 * Close Hibernate
