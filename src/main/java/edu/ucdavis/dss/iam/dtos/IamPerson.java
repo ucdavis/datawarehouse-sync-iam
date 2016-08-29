@@ -1,11 +1,19 @@
 package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
-import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@Entity
+@Table( name = "iam_people" )
 public class IamPerson {
 	private Long id;
 	private Long iamId;
@@ -16,14 +24,12 @@ public class IamPerson {
 	private String externalId;
 	private String oFirstName, oMiddleName, oLastName, oFullName, oSuffix;
 	private String dFirstName, dMiddleName, dLastName, dSuffix, dFullName;
-	private Boolean isEmployee, isHSEmployee ,isFaculty ,isStudent, isStaff, isExternal;
+	private Boolean employeeInd, hsEmployeeInd, facultyInd, studentInd, staffInd, externalInd;
 	private String privacyCode;
 	private Date modifyDate;
 	
-	private Set<IamAssociation> associations;
-	private Set<IamContactInfo> contactInfos;
-	private Set<IamPrikerbacct> prikerbaccts;
-	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}
@@ -31,6 +37,7 @@ public class IamPerson {
 		this.id = id;
 	}
 	
+	@Column
 	public Long getIamId() {
 		return iamId;
 	}
@@ -39,6 +46,7 @@ public class IamPerson {
 		this.iamId = iamId;
 	}
 	
+	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getModifyDate() {
 		return modifyDate;
@@ -48,6 +56,7 @@ public class IamPerson {
 		this.modifyDate = modifyDate;
 	}
 	
+	@Column
 	public String getMothraId() {
 		return mothraId;
 	}
@@ -56,6 +65,7 @@ public class IamPerson {
 		this.mothraId = mothraId;
 	}
 	
+	@Column
 	public String getPpsId() {
 		return ppsId;
 	}
@@ -64,6 +74,7 @@ public class IamPerson {
 		this.ppsId = ppsId;
 	}
 	
+	@Column
 	public String getStudentId() {
 		return studentId;
 	}
@@ -72,6 +83,7 @@ public class IamPerson {
 		this.studentId = studentId;
 	}
 	
+	@Column
 	public String getBannerPIdM() {
 		return bannerPIdM;
 	}
@@ -80,6 +92,7 @@ public class IamPerson {
 		this.bannerPIdM = bannerPIdM;
 	}
 	
+	@Column
 	public String getExternalId() {
 		return externalId;
 	}
@@ -88,6 +101,7 @@ public class IamPerson {
 		this.externalId = externalId;
 	}
 	
+	@Column
 	public String getoFirstName() {
 		return oFirstName;
 	}
@@ -96,6 +110,7 @@ public class IamPerson {
 		this.oFirstName = oFirstName;
 	}
 	
+	@Column
 	public String getoMiddleName() {
 		return oMiddleName;
 	}
@@ -104,6 +119,7 @@ public class IamPerson {
 		this.oMiddleName = oMiddleName;
 	}
 
+	@Column
 	public String getoLastName() {
 		return oLastName;
 	}
@@ -112,6 +128,7 @@ public class IamPerson {
 		this.oLastName = oLastName;
 	}
 
+	@Column
 	public String getoFullName() {
 		return oFullName;
 	}
@@ -120,6 +137,7 @@ public class IamPerson {
 		this.oFullName = oFullName;
 	}
 	
+	@Column
 	public String getoSuffix() {
 		return oSuffix;
 	}
@@ -128,6 +146,7 @@ public class IamPerson {
 		this.oSuffix = oSuffix;
 	}
 	
+	@Column
 	public String getdFirstName() {
 		return dFirstName;
 	}
@@ -136,6 +155,7 @@ public class IamPerson {
 		this.dFirstName = dFirstName;
 	}
 	
+	@Column
 	public String getdMiddleName() {
 		return dMiddleName;
 	}
@@ -144,6 +164,7 @@ public class IamPerson {
 		this.dMiddleName = dMiddleName;
 	}
 	
+	@Column
 	public String getdLastName() {
 		return dLastName;
 	}
@@ -152,6 +173,7 @@ public class IamPerson {
 		this.dLastName = dLastName;
 	}
 	
+	@Column
 	public String getdSuffix() {
 		return dSuffix;
 	}
@@ -160,6 +182,7 @@ public class IamPerson {
 		this.dSuffix = dSuffix;
 	}
 	
+	@Column
 	public String getdFullName() {
 		return dFullName;
 	}
@@ -168,60 +191,67 @@ public class IamPerson {
 		this.dFullName = dFullName;
 	}
 	
+	@Column(name="isEmployee")
 	@JsonProperty("isEmployee")
-	public boolean isEmployee() {
-		return isEmployee;
+	public boolean getEmployeeInd() {
+		return employeeInd;
 	}
 	
-	public void setIsEmployee(boolean isEmployee) {
-		this.isEmployee = isEmployee;
+	public void setEmployeeInd(boolean employeeInd) {
+		this.employeeInd = employeeInd;
 	}
 	
+	@Column(name="isHSEmployee")
 	@JsonProperty("isHSEmployee")
-	public boolean isHSEmployee() {
-		return isHSEmployee;
+	public boolean getHsEmployeeInd() {
+		return hsEmployeeInd;
 	}
 	
-	public void setIsHSEmployee(boolean isHSEmployee) {
-		this.isHSEmployee = isHSEmployee;
+	public void sethsEmployeeInd(boolean hsEmployeeInd) {
+		this.hsEmployeeInd = hsEmployeeInd;
 	}
 	
+	@Column(name="isFaculty")
 	@JsonProperty("isFaculty")
-	public boolean isFaculty() {
-		return isFaculty;
+	public boolean getFacultyInd() {
+		return facultyInd;
 	}
 	
-	public void setIsFaculty(boolean isFaculty) {
-		this.isFaculty = isFaculty;
+	public void setFacultyInd(boolean facultyInd) {
+		this.facultyInd = facultyInd;
 	}
 	
+	@Column(name="isStudent")
 	@JsonProperty("isStudent")
-	public boolean isStudent() {
-		return isStudent;
+	public boolean getStudentInd() {
+		return studentInd;
 	}
 	
-	public void setIsStudent(boolean isStudent) {
-		this.isStudent = isStudent;
+	public void setStudentInd(boolean studentInd) {
+		this.studentInd = studentInd;
 	}
 	
+	@Column(name="isStaff")
 	@JsonProperty("isStaff")
-	public boolean isStaff() {
-		return isStaff;
+	public boolean getStaffInd() {
+		return staffInd;
 	}
 	
-	public void setIsStaff(boolean isStaff) {
-		this.isStaff = isStaff;
+	public void setStaffInd(boolean staffInd) {
+		this.staffInd = staffInd;
 	}
 	
+	@Column(name="isExternal")
 	@JsonProperty("isExternal")
-	public boolean isExternal() {
-		return isExternal;
+	public boolean getExternalInd() {
+		return externalInd;
 	}
 	
-	public void setIsExternal(boolean isExternal) {
-		this.isExternal = isExternal;
+	public void setExternalInd(boolean externalInd) {
+		this.externalInd = externalInd;
 	}
 	
+	@Column
 	public String getPrivacyCode() {
 		return privacyCode;
 	}
@@ -230,27 +260,6 @@ public class IamPerson {
 		this.privacyCode = privacyCode;
 	}
 	
-	public Set<IamAssociation> getAssociations() {
-		return associations;
-	}
-
-	public void setAssociations(Set<IamAssociation> associations) {
-		this.associations = associations;
-	}
-
-	public Set<IamContactInfo> getContactInfos() {
-		return contactInfos;
-	}
-	public void setContactInfos(Set<IamContactInfo> contactInfos) {
-		this.contactInfos = contactInfos;
-	}
-	public Set<IamPrikerbacct> getPrikerbaccts() {
-		return prikerbaccts;
-	}
-	public void setPrikerbaccts(Set<IamPrikerbacct> prikerbaccts) {
-		this.prikerbaccts = prikerbaccts;
-	}
-
 	@Override
 	public String toString() {
 		return String.format(
