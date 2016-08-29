@@ -8,16 +8,15 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.ucdavis.dss.iam.client.IamClient;
-import edu.ucdavis.dss.iam.dtos.IamAssociation;
 import edu.ucdavis.dss.iam.dtos.IamDepartment;
 
 public class EntryPoint {
@@ -31,7 +30,8 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SessionFactory sessionFactory = null;
+		//SessionFactory sessionFactory = null;
+		EntityManagerFactory entityManagerFactory = null;
 		
 		/**
 		 * Load the IAM API key from ~/.data-warehouse/settings.properties.
@@ -65,56 +65,75 @@ public class EntryPoint {
 		/**
 		 * Set up Hibernate
 		 */
-		// A SessionFactory is set up once for an application!
-		final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-				.configure() // configures settings from hibernate.cfg.xml
-				.build();
-		try {
-			sessionFactory = new MetadataSources( registry ).buildMetadata().buildSessionFactory();
-		} catch (Exception e) {
-			// The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
-			// so destroy it manually.
-			StandardServiceRegistryBuilder.destroy( registry );
-			e.printStackTrace();
-			return;
-		}
+//		// A SessionFactory is set up once for an application!
+//		final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+//				.configure() // configures settings from hibernate.cfg.xml
+//				.build();
+//		try {
+//			sessionFactory = new MetadataSources( registry ).buildMetadata().buildSessionFactory();
+//		} catch (Exception e) {
+//			// The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
+//			// so destroy it manually.
+//			StandardServiceRegistryBuilder.destroy( registry );
+//			e.printStackTrace();
+//			return;
+//		}
+		entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
 		
 		/**
 		 * Initialize IAM client
 		 */
 		IamClient iamClient = new IamClient(iamApiKey);
+		
+		Session session = null;
 
 		/**
 		 * Extract and load all departments from IAM
 		 */
 		List<IamDepartment> departments = iamClient.getAllDepartments();
-		Session session = sessionFactory.openSession();
+//		Session session = sessionFactory.openSession();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
 		for(IamDepartment department : departments) {
-			session.beginTransaction();
-			session.save( department );
-			session.getTransaction().commit();
+//			session.beginTransaction();
+			entityManager.persist( department );
+//			session.save( department );
+//			session.getTransaction().commit();
 		}
-		session.close();
+		entityManager.getTransaction().commit();
+		entityManager.close();
+//		session.close();
 		
 		/**
-		 * Extract and load all people by department from IAM
+		 * Extract and load all associations by department from IAM
 		 */
-		session = sessionFactory.openSession();
-		for(IamDepartment department : departments) {
-			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
-			for(IamAssociation association : associations) {
-				session.beginTransaction();
-				session.save( association );
-				session.getTransaction().commit();
-			}
-		}
-		session.close();
+//		session = sessionFactory.openSession();
+//		for(IamDepartment department : departments) {
+//			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
+//			for(IamAssociation association : associations) {
+//				session.beginTransaction();
+//				try {
+//					session.save( association );
+//				} catch (DataException e) {
+//					logger.debug("Exception while saving object: " + association);
+//					e.printStackTrace();
+//				}
+//				session.getTransaction().commit();
+//			}
+//		}
+//		session.close();
+		
+		/**
+		 * Use all known associations to fetch contact information, login IDs, etc.
+		 */
+		
 
 		/**
 		 * Close Hibernate
 		 */
-		if ( sessionFactory != null ) {
-			sessionFactory.close();
-		}
+//		if ( sessionFactory != null ) {
+//			sessionFactory.close();
+//		}
+		entityManagerFactory.close();
 	}
 }
