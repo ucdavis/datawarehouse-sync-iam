@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -30,6 +32,7 @@ public class EntryPoint {
 	public static String iamApiKey, localDBUrl, localDBUser, localDBPass;
 	static Logger logger = LoggerFactory.getLogger("EntryPoint");
 	static EntityManagerFactory entityManagerFactory = null;
+	static EntityManager entityManager = null;
 
 	/**
 	 * Main entry point for IAM sync. Run as a console application when
@@ -66,17 +69,20 @@ public class EntryPoint {
 			logger.error("An IOException occurred while loading " + filename);
 			return;
 		}
+		
+		long startTime = new Date().getTime();
 
 		/**
 		 * Set up Hibernate
 		 */
 		entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
-
+		entityManager = entityManagerFactory.createEntityManager();
+		
 		/**
 		 * Set up new 'vers' snapshot
 		 */
 		Version vers = new Version();
+		vers.setImportStarted(new Timestamp(new Date().getTime()));
 		entityManager.getTransaction().begin();
 		entityManager.persist( vers );
 		entityManager.getTransaction().commit();
@@ -86,7 +92,7 @@ public class EntryPoint {
 		/**
 		 * Remove any failed imports
 		 */
-		removeFailedImports(entityManager);
+		removeFailedImports();
 		
 		/**
 		 * Initialize IAM client
@@ -96,6 +102,7 @@ public class EntryPoint {
 		/**
 		 * Extract and load all departments from IAM
 		 */
+		logger.info("Persisting all departments ...");
 		List<IamDepartment> departments = iamClient.getAllDepartments();
 		entityManager.getTransaction().begin();
 		for(IamDepartment department : departments) {
@@ -107,6 +114,7 @@ public class EntryPoint {
 		/**
 		 * Extract and load all associations by department from IAM
 		 */
+		logger.info("Persisting all associations for " + departments.size() + " departments ...");
 		for(IamDepartment department : departments) {
 			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
 			entityManager.getTransaction().begin();
@@ -124,6 +132,8 @@ public class EntryPoint {
 		List<Long> iamIds = entityManager.createQuery( "SELECT iamId from IamAssociation", Long.class ).getResultList();
 		entityManager.getTransaction().commit();
 		
+		logger.info("Persisting additional data on " + iamIds.size() + " IAM IDs ...");
+		Long count = 0L;
 		for(Long iamId : iamIds) {
 			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 			List<IamPerson> people = iamClient.getPersonInfo(iamId);
@@ -162,13 +172,34 @@ public class EntryPoint {
 			}
 			
 			entityManager.getTransaction().commit();
+			
+			if(count % 500 == 0) {
+				logger.info("\tProgress: " + ((float)count / (float)iamIds.size()) * 100.0 + "%");
+			}
+			
+			count++;
 		}
+		
+		/**
+		 * Mark this snapshot as complete
+		 */
+		vers.setImportFinished(new Timestamp(new Date().getTime()));
+		entityManager.getTransaction().begin();
+		entityManager.persist( vers );
+		entityManager.getTransaction().commit();
+		
+		/**
+		 * Remove old data snapshots
+		 */
+		logger.info("Removing 5 old snapshots ...");
+		removeOldValidSnapshots(5);
 
 		/**
 		 * Close Hibernate
 		 */
 		entityManager.close();
 		entityManagerFactory.close();
+		logger.info("Program complete. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
 	}
 	
 	/**
@@ -180,7 +211,7 @@ public class EntryPoint {
 	 * be importing and generate a valid 'vers' with no import_finished
 	 * and this function would erroneously remove it.
 	 */
-	private static void removeFailedImports(EntityManager entityManager) {
+	private static void removeFailedImports() {
 		logger.info("Removing failed imports ...");
 
 		// Find failed imports
@@ -188,14 +219,14 @@ public class EntryPoint {
 		List<Version> failedVersions = entityManager.createQuery( "FROM Version WHERE importFinished IS NULL", Version.class ).getResultList();
 		entityManager.getTransaction().commit();
 
-		logger.info("Found " + failedVersions.size() + " failed imports.");
+		logger.info("Found " + failedVersions.size() + " failed import(s).");
 
 		// Remove data from any row utilizing a failed import
 		for(Version failedVersion : failedVersions) {
-			removeVersion(entityManager, failedVersion);
+			removeVersion(failedVersion);
 		}
 		
-		logger.info("Done removing " + failedVersions.size() + " failed imports.");
+		logger.info("Done removing " + failedVersions.size() + " failed import(s).");
 	}
 
 	/**
@@ -205,7 +236,7 @@ public class EntryPoint {
 	 * @param version Timestamp to remove from database.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void removeVersion(EntityManager entityManager, Version version) {
+	private static void removeVersion(Version version) {
 		logger.info("Removing version " + version + " ...");
 
 		entityManager.getTransaction().begin();
@@ -227,5 +258,34 @@ public class EntryPoint {
 		entityManager.getTransaction().commit();
 
 		logger.debug("Done removing version " + version + ".");
+	}
+	
+	/**
+	 * Removes all rows from any table where 'vers' is valid but too old,
+	 * defined by older than the last 'keepVersions' recent versions.
+	 * 
+	 * @param keepVersions Number of most recent versions of data to keep.
+	 */
+	private static void removeOldValidSnapshots(int keepVersions) {
+		logger.info("Removing old, valid imports ...");
+
+		// Find old, valid imports
+		entityManager.getTransaction().begin();
+		List<Version> validVersions = entityManager.createQuery( "FROM Version WHERE importFinished IS NOT NULL ORDER BY vers DESC", Version.class ).getResultList();
+		entityManager.getTransaction().commit();
+		List<Version> versionsToRemove = validVersions.subList(keepVersions, validVersions.size());
+
+		if(versionsToRemove.size() > 0) {
+			logger.info("Found " + versionsToRemove.size() + " snapshots to remove.");
+	
+			// Remove data from any row mentioning a failed 'vers'
+			for(Version versToRemove : versionsToRemove) {
+				removeVersion(versToRemove);
+			}
+			
+			logger.info("Done removing " + versionsToRemove.size() + " old, valid imports.");
+		} else {
+			logger.info("No old versions found (keeping " + validVersions.size() + ".");
+		}
 	}
 }
