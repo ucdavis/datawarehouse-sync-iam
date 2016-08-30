@@ -11,6 +11,9 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.Root;
 
 import org.hibernate.exception.DataException;
 import org.slf4j.Logger;
@@ -26,6 +29,7 @@ import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 public class EntryPoint {
 	public static String iamApiKey, localDBUrl, localDBUser, localDBPass;
 	static Logger logger = LoggerFactory.getLogger("EntryPoint");
+	static EntityManagerFactory entityManagerFactory = null;
 
 	/**
 	 * Main entry point for IAM sync. Run as a console application when
@@ -34,8 +38,6 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		EntityManagerFactory entityManagerFactory = null;
-
 		/**
 		 * Load the IAM API key from ~/.data-warehouse/settings.properties.
 		 * We expect a few keys to exist; see prop.getProperty() lines.
@@ -69,21 +71,35 @@ public class EntryPoint {
 		 * Set up Hibernate
 		 */
 		entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
+		/**
+		 * Set up new 'vers' snapshot
+		 */
+		Version vers = new Version();
+		entityManager.getTransaction().begin();
+		entityManager.persist( vers );
+		entityManager.getTransaction().commit();
+		
+		logger.info("Created new version snapshot: " + vers);
+		
+		/**
+		 * Remove any failed imports
+		 */
+		removeFailedImports(entityManager);
+		
 		/**
 		 * Initialize IAM client
 		 */
 		IamClient iamClient = new IamClient(iamApiKey);
 
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
-
 		/**
 		 * Extract and load all departments from IAM
 		 */
 		List<IamDepartment> departments = iamClient.getAllDepartments();
-		departments.clear(); // REMOVEME
 		entityManager.getTransaction().begin();
 		for(IamDepartment department : departments) {
+			department.markAsVersion(vers);
 			entityManager.persist( department );
 		}
 		entityManager.getTransaction().commit();
@@ -95,6 +111,7 @@ public class EntryPoint {
 			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
 			entityManager.getTransaction().begin();
 			for(IamAssociation association : associations) {
+				association.markAsVersion(vers);
 				entityManager.persist( association );
 			}
 			entityManager.getTransaction().commit();
@@ -116,6 +133,7 @@ public class EntryPoint {
 			
 			for(IamContactInfo contactInfo : contactInfos) {
 				try {
+					contactInfo.markAsVersion(vers);
 					entityManager.persist( contactInfo );
 				} catch (DataException e) {
 					logger.error("Unable to persist contactInfo: " + contactInfo);
@@ -125,6 +143,7 @@ public class EntryPoint {
 			
 			for(IamPerson person : people) {
 				try {
+					person.markAsVersion(vers);
 					entityManager.persist( person );
 				} catch (DataException e) {
 					logger.error("Unable to persist person: " + person);
@@ -134,6 +153,7 @@ public class EntryPoint {
 
 			for(IamPrikerbacct prikerbacct : prikerbaccts) {
 				try {
+					prikerbacct.markAsVersion(vers);
 					entityManager.persist( prikerbacct );
 				} catch (DataException e) {
 					logger.error("Unable to persist prikerbacct: " + prikerbacct);
@@ -149,5 +169,63 @@ public class EntryPoint {
 		 */
 		entityManager.close();
 		entityManagerFactory.close();
+	}
+	
+	/**
+	 * Removes any rows from _any_ table that matches a 'vers' from
+	 * the 'vers' table where import_finished is null (unfinished).
+	 * 
+	 * datwarehouse-sync-sis must not be running more than once
+	 * for this to work correctly, else another instance could
+	 * be importing and generate a valid 'vers' with no import_finished
+	 * and this function would erroneously remove it.
+	 */
+	private static void removeFailedImports(EntityManager entityManager) {
+		logger.info("Removing failed imports ...");
+
+		// Find failed imports
+		entityManager.getTransaction().begin();
+		List<Version> failedVersions = entityManager.createQuery( "FROM Version WHERE importFinished IS NULL", Version.class ).getResultList();
+		entityManager.getTransaction().commit();
+
+		logger.info("Found " + failedVersions.size() + " failed imports.");
+
+		// Remove data from any row utilizing a failed import
+		for(Version failedVersion : failedVersions) {
+			removeVersion(entityManager, failedVersion);
+		}
+		
+		logger.info("Done removing " + failedVersions.size() + " failed imports.");
+	}
+
+	/**
+	 * Removes all rows from any table where 'vers' equals 'version'.
+	 * Also removes the given version from the 'vers' table.
+	 * 
+	 * @param version Timestamp to remove from database.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void removeVersion(EntityManager entityManager, Version version) {
+		logger.info("Removing version " + version + " ...");
+
+		entityManager.getTransaction().begin();
+		
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+		Class<?>[] tables = {IamAssociation.class, IamContactInfo.class, IamPerson.class, IamDepartment.class, IamPrikerbacct.class, Version.class};
+		
+		// Remove data from any row mentioning a failed 'vers'
+		for(Class table : tables) {
+			logger.debug("Removing data from " + table.getName() + " for version " + version);
+			
+			CriteriaDelete<Class<?>> deleteAssociation = cb.createCriteriaDelete(table);
+			Root e = deleteAssociation.from(table);
+			deleteAssociation.where(cb.equal(e.get("vers"), version.getVers()));
+			entityManager.createQuery(deleteAssociation).executeUpdate();
+		}
+		
+		entityManager.getTransaction().commit();
+
+		logger.debug("Done removing version " + version + ".");
 	}
 }

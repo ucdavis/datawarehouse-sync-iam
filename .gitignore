@@ -6,3 +6,4 @@
 # Ignore compiled output
 target
 
+/bin/

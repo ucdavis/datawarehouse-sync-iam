@@ -1,11 +1,15 @@
 package edu.ucdavis.dss.iam.dtos;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import edu.ucdavis.dss.datawarehouse.sync.iam.Version;
 
 @Entity
 @Table( name = "iam_contactinfo" )
@@ -15,6 +19,7 @@ public class IamContactInfo {
 	private String email, hsEmail, campusEmail;
 	private String addrStreet, addrCity, addrState, addrZip, postalAddress;
 	private String workPhone, workCell, workPager, workFax;
+	private Date vers;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -127,5 +132,16 @@ public class IamContactInfo {
 	}
 	public void setWorkFax(String workFax) {
 		this.workFax = workFax;
+	}
+
+	@Column
+	public Date getVers() {
+		return vers;
+	}
+	public void setVers(Date vers) {
+		this.vers = vers;
+	}
+	public void markAsVersion(Version vers) {
+		this.vers = vers.getVers();
 	}
 }

@@ -12,6 +12,8 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.ucdavis.dss.datawarehouse.sync.iam.Version;
+
 @Entity
 @Table( name = "iam_people" )
 public class IamPerson {
@@ -27,6 +29,7 @@ public class IamPerson {
 	private Boolean employeeInd, hsEmployeeInd, facultyInd, studentInd, staffInd, externalInd;
 	private String privacyCode;
 	private Date modifyDate;
+	private Date vers;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -258,6 +261,17 @@ public class IamPerson {
 	
 	public void setPrivacyCode(String privacyCode) {
 		this.privacyCode = privacyCode;
+	}
+	
+	@Column
+	public Date getVers() {
+		return vers;
+	}
+	public void setVers(Date vers) {
+		this.vers = vers;
+	}
+	public void markAsVersion(Version vers) {
+		this.vers = vers.getVers();
 	}
 	
 	@Override
