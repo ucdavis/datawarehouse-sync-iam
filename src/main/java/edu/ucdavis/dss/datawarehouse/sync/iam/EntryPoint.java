@@ -134,6 +134,7 @@ public class EntryPoint {
 		
 		logger.info("Persisting additional data on " + iamIds.size() + " IAM IDs ...");
 		Long count = 0L;
+		long additionalStartTime = new Date().getTime();
 		for(Long iamId : iamIds) {
 			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 			List<IamPerson> people = iamClient.getPersonInfo(iamId);
@@ -173,11 +174,16 @@ public class EntryPoint {
 			
 			entityManager.getTransaction().commit();
 			
-			if(count % 500 == 0) {
-				logger.info("\tProgress: " + ((float)count / (float)iamIds.size()) * 100.0 + "%");
-			}
-			
 			count++;
+			
+			if(count % 500 == 0) {
+				float progress = (float)count / (float)iamIds.size();
+				long currentTime = new Date().getTime();
+				long timeSoFar = currentTime - additionalStartTime;
+				Date estCompleted = new Date(currentTime + (long)((float)timeSoFar / progress));
+				String logMsg = String.format("\tProgress: %.2f%% (est. completion at %s)", progress * (float)100, estCompleted.toString());
+				logger.info(logMsg);
+			}
 		}
 		
 		/**
