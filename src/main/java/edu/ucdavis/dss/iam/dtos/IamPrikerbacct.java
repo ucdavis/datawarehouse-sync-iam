@@ -62,6 +62,7 @@ public class IamPrikerbacct {
 	}
 	
 	@Column
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getClaimDate() {
 		return claimDate;
 	}
@@ -70,6 +71,7 @@ public class IamPrikerbacct {
 	}
 	
 	@Column
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getExpireDate() {
 		return expireDate;
 	}
