@@ -78,7 +78,12 @@ public class EntryPoint {
 		 */
 		entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
 		entityManager = entityManagerFactory.createEntityManager();
-		
+
+		/**
+		 * Remove any failed imports
+		 */
+		removeFailedImports();
+
 		/**
 		 * Set up new 'vers' snapshot
 		 */
@@ -89,11 +94,6 @@ public class EntryPoint {
 		entityManager.getTransaction().commit();
 		
 		logger.info("Created new version snapshot: " + vers);
-		
-		/**
-		 * Remove any failed imports
-		 */
-		removeFailedImports();
 		
 		/**
 		 * Initialize IAM client
@@ -132,6 +132,7 @@ public class EntryPoint {
 		entityManager.getTransaction().begin();
 		Query query = entityManager.createQuery("SELECT DISTINCT iamId FROM IamAssociation ia WHERE ia.vers=:vers");
 		query.setParameter("vers", vers.getVers());
+		@SuppressWarnings("unchecked")
 		List<Long> iamIds = query.getResultList();
 		entityManager.getTransaction().commit();
 		
@@ -183,9 +184,10 @@ public class EntryPoint {
 				float progress = (float)count / (float)iamIds.size();
 				long currentTime = new Date().getTime();
 				long timeSoFar = currentTime - additionalStartTime;
-				Date estCompleted = new Date(currentTime + (long)((float)timeSoFar / progress));
+				Date estCompleted = new Date(additionalStartTime + (long)((float)timeSoFar / progress));
 				String logMsg = String.format("\tProgress: %.2f%% (est. completion at %s)", progress * (float)100, estCompleted.toString());
 				logger.info(logMsg);
+				logger.info("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
 			}
 		}
 		
@@ -282,9 +284,10 @@ public class EntryPoint {
 		entityManager.getTransaction().begin();
 		List<Version> validVersions = entityManager.createQuery( "FROM Version WHERE importFinished IS NOT NULL ORDER BY vers DESC", Version.class ).getResultList();
 		entityManager.getTransaction().commit();
-		List<Version> versionsToRemove = validVersions.subList(keepVersions, validVersions.size());
-
-		if(versionsToRemove.size() > 0) {
+		
+		if(validVersions.size() > keepVersions) {
+			List<Version> versionsToRemove = validVersions.subList(keepVersions, validVersions.size());
+			
 			logger.info("Found " + versionsToRemove.size() + " snapshots to remove.");
 	
 			// Remove data from any row mentioning a failed 'vers'
