@@ -13,6 +13,7 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.Root;
@@ -129,7 +130,9 @@ public class EntryPoint {
 		 * Persist contact infos, people entries, and prikerbaccts
 		 */
 		entityManager.getTransaction().begin();
-		List<Long> iamIds = entityManager.createQuery( "SELECT iamId from IamAssociation", Long.class ).getResultList();
+		Query query = entityManager.createQuery("SELECT DISTINCT iamId FROM IamAssociation ia WHERE ia.vers=:vers");
+		query.setParameter("vers", vers.getVers());
+		List<Long> iamIds = query.getResultList();
 		entityManager.getTransaction().commit();
 		
 		logger.info("Persisting additional data on " + iamIds.size() + " IAM IDs ...");
@@ -176,7 +179,7 @@ public class EntryPoint {
 			
 			count++;
 			
-			if(count % 500 == 0) {
+			if(count % 1000 == 0) {
 				float progress = (float)count / (float)iamIds.size();
 				long currentTime = new Date().getTime();
 				long timeSoFar = currentTime - additionalStartTime;
