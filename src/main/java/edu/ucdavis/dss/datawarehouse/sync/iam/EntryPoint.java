@@ -58,10 +58,15 @@ public class EntryPoint {
 			is.close();
 
 			iamApiKey = prop.getProperty("IAM_API_KEY");
+			
+			if(iamApiKey == null || iamApiKey.length() == 0) {
+				logger.error("IAM_API_KEY in settings.properties is missing or empty.");
+				return;
+			}
 
 			logger.info("Settings file '" + filename + "' found.");
 		} catch (FileNotFoundException e) {
-			logger.warn("Could not find " + filename + ".");
+			logger.error("Could not find " + filename + ".");
 			return;
 		} catch (IOException e) {
 			logger.error("An IOException occurred while loading " + filename);
