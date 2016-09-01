@@ -30,7 +30,7 @@ import edu.ucdavis.dss.iam.dtos.IamPerson;
 import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 
 public class EntryPoint {
-	public static String iamApiKey, localDBUrl, localDBUser, localDBPass;
+	public static String iamApiKey;
 	static Logger logger = LoggerFactory.getLogger("EntryPoint");
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
@@ -57,9 +57,6 @@ public class EntryPoint {
 			prop.load(is);
 			is.close();
 
-			localDBUrl = prop.getProperty("LOCAL_MYSQL_URL");
-			localDBUser = prop.getProperty("LOCAL_MYSQL_USER");
-			localDBPass = prop.getProperty("LOCAL_MYSQL_PASS");
 			iamApiKey = prop.getProperty("IAM_API_KEY");
 
 			logger.info("Settings file '" + filename + "' found.");
