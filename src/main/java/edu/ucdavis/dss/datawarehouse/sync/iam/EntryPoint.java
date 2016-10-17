@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,6 +156,9 @@ public class EntryPoint {
 				} catch (DataException e) {
 					logger.error("Unable to persist contactInfo: " + contactInfo);
 					e.printStackTrace();
+				} catch (ConstraintViolationException e) {
+					logger.error("Unable to persist contactInfo: " + contactInfo);
+					e.printStackTrace();
 				}
 			}
 			
@@ -165,6 +169,9 @@ public class EntryPoint {
 				} catch (DataException e) {
 					logger.error("Unable to persist person: " + person);
 					e.printStackTrace();
+				} catch (ConstraintViolationException e) {
+					logger.error("Unable to persist person: " + person);
+					e.printStackTrace();
 				}
 			}
 
@@ -173,6 +180,9 @@ public class EntryPoint {
 					prikerbacct.markAsVersion(vers);
 					entityManager.persist( prikerbacct );
 				} catch (DataException e) {
+					logger.error("Unable to persist prikerbacct: " + prikerbacct);
+					e.printStackTrace();
+				} catch (ConstraintViolationException e) {
 					logger.error("Unable to persist prikerbacct: " + prikerbacct);
 					e.printStackTrace();
 				}
