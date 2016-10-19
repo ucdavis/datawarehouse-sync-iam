@@ -145,7 +145,9 @@ CREATE TABLE `iam_prikerbacct` (
   `iamId` bigint(20) NOT NULL,
   `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_iamid_vers` (`iamId`,`vers`)
+  KEY `idx_iamid_vers` (`iamId`,`vers`),
+  INDEX `iam_p_iam` (`iamId`),
+  INDEX `iam_p_vers` (`vers`)
 ) ENGINE=InnoDB AUTO_INCREMENT=245427 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
