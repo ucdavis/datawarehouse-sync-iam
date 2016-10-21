@@ -69,7 +69,7 @@ CREATE TABLE `iam_people` (
   `studentId` varchar(32) DEFAULT NULL,
   `bannerPIdM` varchar(32) DEFAULT NULL,
   `externalId` varchar(32) DEFAULT NULL,
-  `oFirstName` varchar(32) NOT NULL,
+  `oFirstName` varchar(32) NULL,
   `oLastName` varchar(32) NOT NULL,
   `oFullName` varchar(64) NOT NULL,
   `oSuffix` varchar(9) DEFAULT NULL,
