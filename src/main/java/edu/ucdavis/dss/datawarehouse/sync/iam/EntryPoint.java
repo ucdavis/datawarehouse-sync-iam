@@ -49,16 +49,17 @@ public class EntryPoint {
 		 */
 		String filename = System.getProperty("user.home") + File.separator + ".data-warehouse" + File.separator + "settings.properties";
 		File propsFile = new File(filename);
+		Properties configurationProperties = null;
 
 		try {
 			InputStream is = new FileInputStream(propsFile);
 
-			Properties prop = new Properties();
+			configurationProperties = new Properties();
 
-			prop.load(is);
+			configurationProperties.load(is);
 			is.close();
 
-			iamApiKey = prop.getProperty("IAM_API_KEY");
+			iamApiKey = configurationProperties.getProperty("IAM_API_KEY");
 			
 			if(iamApiKey == null || iamApiKey.length() == 0) {
 				logger.error("IAM_API_KEY in settings.properties is missing or empty.");
@@ -99,6 +100,16 @@ public class EntryPoint {
 		logger.info("Created new version snapshot: " + vers);
 		
 		/**
+		 * Get a list of all possible ucdPersonUUIDs using LDAP
+		 */
+//		LdapClient ldapClient = new LdapClient(configurationProperties.getProperty("LDAP_URL"),
+//				configurationProperties.getProperty("LDAP_BASE"),
+//				configurationProperties.getProperty("LDAP_USER"),
+//				configurationProperties.getProperty("LDAP_PASSWORD"));
+//		
+//		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
+		
+		/**
 		 * Initialize IAM client
 		 */
 		IamClient iamClient = new IamClient(iamApiKey);
@@ -108,12 +119,18 @@ public class EntryPoint {
 		 */
 		logger.info("Persisting all departments ...");
 		List<IamDepartment> departments = iamClient.getAllDepartments();
-		entityManager.getTransaction().begin();
-		for(IamDepartment department : departments) {
-			department.markAsVersion(vers);
-			entityManager.persist( department );
+		
+		if(departments != null) {
+			entityManager.getTransaction().begin();
+			for(IamDepartment department : departments) {
+				department.markAsVersion(vers);
+				entityManager.persist( department );
+			}
+			entityManager.getTransaction().commit();
+		} else {
+			logger.error("Unable to fetch departments. Exiting ...");
+			System.exit(-1);
 		}
-		entityManager.getTransaction().commit();
 
 		/**
 		 * Extract and load all associations by department from IAM
@@ -121,12 +138,17 @@ public class EntryPoint {
 		logger.info("Persisting all associations for " + departments.size() + " departments ...");
 		for(IamDepartment department : departments) {
 			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
-			entityManager.getTransaction().begin();
-			for(IamAssociation association : associations) {
-				association.markAsVersion(vers);
-				entityManager.persist( association );
+
+			if(associations != null) {
+				entityManager.getTransaction().begin();
+				for(IamAssociation association : associations) {
+					association.markAsVersion(vers);
+					entityManager.persist( association );
+				}
+				entityManager.getTransaction().commit();
+			} else {
+				logger.warn("Unable to fetch associations for department " + department.getDeptCode() + ".");
 			}
-			entityManager.getTransaction().commit();
 		}
 
 		/**
@@ -140,12 +162,26 @@ public class EntryPoint {
 		entityManager.getTransaction().commit();
 		
 		logger.info("Persisting additional data on " + iamIds.size() + " IAM IDs ...");
+		
 		Long count = 0L;
 		long additionalStartTime = new Date().getTime();
 		for(Long iamId : iamIds) {
 			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 			List<IamPerson> people = iamClient.getPersonInfo(iamId);
 			List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
+			
+			if(contactInfos == null) {
+				logger.warn("Unable to fetch contact info for IAM ID " + iamId + ". Skipping.");
+				continue;
+			}
+			if(people == null) {
+				logger.warn("Unable to fetch person info for IAM ID " + iamId + ". Skipping.");
+				continue;
+			}
+			if(prikerbaccts == null) {
+				logger.warn("Unable to fetch prikerbacct info for IAM ID " + iamId + ". Skipping.");
+				continue;
+			}
 			
 			entityManager.getTransaction().begin();
 			
