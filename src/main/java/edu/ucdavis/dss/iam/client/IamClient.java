@@ -17,6 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -60,6 +61,7 @@ public class IamClient {
 			HttpEntity entity = response.getEntity();
 
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			
 			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
 			JsonNode arrNode = rootNode.findPath("results");
@@ -104,6 +106,7 @@ public class IamClient {
 			HttpEntity entity = response.getEntity();
 
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			
 			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
 			JsonNode arrNode = rootNode.findParent("responseData");
@@ -144,6 +147,7 @@ public class IamClient {
 //				HttpEntity entity = response.getEntity();
 //
 //				ObjectMapper mapper = new ObjectMapper();
+//				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 //				
 //				JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
 //				JsonNode arrNode = rootNode.findParent("responseData");
@@ -204,6 +208,7 @@ public class IamClient {
 			HttpEntity entity = response.getEntity();
 
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			
 			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
 			JsonNode arrNode = rootNode.findParent("responseData");
@@ -252,6 +257,7 @@ public class IamClient {
 			HttpEntity entity = response.getEntity();
 
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			
 			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
 			JsonNode arrNode = rootNode.findParent("responseData");
@@ -300,6 +306,7 @@ public class IamClient {
 			HttpEntity entity = response.getEntity();
 
 			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			
 			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
 			JsonNode arrNode = rootNode.findParent("responseData");
