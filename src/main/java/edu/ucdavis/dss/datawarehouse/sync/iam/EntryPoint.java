@@ -1,10 +1,12 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +14,9 @@ import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -60,7 +64,7 @@ public class EntryPoint {
 			is.close();
 
 			iamApiKey = configurationProperties.getProperty("IAM_API_KEY");
-			
+
 			if(iamApiKey == null || iamApiKey.length() == 0) {
 				logger.error("IAM_API_KEY in settings.properties is missing or empty.");
 				return;
@@ -74,7 +78,7 @@ public class EntryPoint {
 			logger.error("An IOException occurred while loading " + filename);
 			return;
 		}
-		
+
 		long startTime = new Date().getTime();
 
 		/**
@@ -96,19 +100,19 @@ public class EntryPoint {
 		entityManager.getTransaction().begin();
 		entityManager.persist( vers );
 		entityManager.getTransaction().commit();
-		
+
 		logger.info("Created new version snapshot: " + vers);
-		
+
 		/**
 		 * Get a list of all possible ucdPersonUUIDs using LDAP
 		 */
-//		LdapClient ldapClient = new LdapClient(configurationProperties.getProperty("LDAP_URL"),
-//				configurationProperties.getProperty("LDAP_BASE"),
-//				configurationProperties.getProperty("LDAP_USER"),
-//				configurationProperties.getProperty("LDAP_PASSWORD"));
-//		
-//		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
-		
+		//		LdapClient ldapClient = new LdapClient(configurationProperties.getProperty("LDAP_URL"),
+		//				configurationProperties.getProperty("LDAP_BASE"),
+		//				configurationProperties.getProperty("LDAP_USER"),
+		//				configurationProperties.getProperty("LDAP_PASSWORD"));
+		//		
+		//		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
+
 		/**
 		 * Initialize IAM client
 		 */
@@ -119,7 +123,7 @@ public class EntryPoint {
 		 */
 		logger.info("Persisting all departments ...");
 		List<IamDepartment> departments = iamClient.getAllDepartments();
-		
+
 		if(departments != null) {
 			entityManager.getTransaction().begin();
 			for(IamDepartment department : departments) {
@@ -140,12 +144,25 @@ public class EntryPoint {
 			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
 
 			if(associations != null) {
-				entityManager.getTransaction().begin();
+				EntityTransaction tx = entityManager.getTransaction();
+
 				for(IamAssociation association : associations) {
+					tx.begin();
+
 					association.markAsVersion(vers);
-					entityManager.persist( association );
+					try {
+						entityManager.persist( association );
+					} catch (PersistenceException e) {
+						logger.warn("Exception while persisting association. Skipping. Exception was:");
+						logger.warn(exceptionStacktraceToString(e));
+						if(tx.isActive()) {
+							tx.rollback();
+						}
+						continue;
+					}
+
+					tx.commit();
 				}
-				entityManager.getTransaction().commit();
 			} else {
 				logger.warn("Unable to fetch associations for department " + department.getDeptCode() + ".");
 			}
@@ -160,16 +177,16 @@ public class EntryPoint {
 		@SuppressWarnings("unchecked")
 		List<Long> iamIds = query.getResultList();
 		entityManager.getTransaction().commit();
-		
+
 		logger.info("Persisting additional data on " + iamIds.size() + " IAM IDs ...");
-		
+
 		Long count = 0L;
 		long additionalStartTime = new Date().getTime();
 		for(Long iamId : iamIds) {
 			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 			List<IamPerson> people = iamClient.getPersonInfo(iamId);
 			List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
-			
+
 			if(contactInfos == null) {
 				logger.warn("Unable to fetch contact info for IAM ID " + iamId + ". Skipping.");
 				continue;
@@ -182,9 +199,9 @@ public class EntryPoint {
 				logger.warn("Unable to fetch prikerbacct info for IAM ID " + iamId + ". Skipping.");
 				continue;
 			}
-			
+
 			entityManager.getTransaction().begin();
-			
+
 			for(IamContactInfo contactInfo : contactInfos) {
 				try {
 					contactInfo.markAsVersion(vers);
@@ -197,7 +214,7 @@ public class EntryPoint {
 					e.printStackTrace();
 				}
 			}
-			
+
 			for(IamPerson person : people) {
 				try {
 					person.markAsVersion(vers);
@@ -223,11 +240,11 @@ public class EntryPoint {
 					e.printStackTrace();
 				}
 			}
-			
+
 			entityManager.getTransaction().commit();
-			
+
 			count++;
-			
+
 			if(count % 1000 == 0) {
 				float progress = (float)count / (float)iamIds.size();
 				long currentTime = new Date().getTime();
@@ -238,15 +255,15 @@ public class EntryPoint {
 				logger.info("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
 			}
 		}
-		
+
 		/**
 		 * Mark this snapshot as complete
 		 */
 		vers.setImportFinished(new Timestamp(new Date().getTime()));
 		entityManager.getTransaction().begin();
-		entityManager.persist( vers );
+		entityManager.merge( vers ); // 'vers' will be detached but we can override DB version safely
 		entityManager.getTransaction().commit();
-		
+
 		/**
 		 * Remove old data snapshots
 		 */
@@ -260,7 +277,7 @@ public class EntryPoint {
 		entityManagerFactory.close();
 		logger.info("Program complete. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
 	}
-	
+
 	/**
 	 * Removes any rows from _any_ table that matches a 'vers' from
 	 * the 'vers' table where import_finished is null (unfinished).
@@ -284,7 +301,7 @@ public class EntryPoint {
 		for(Version failedVersion : failedVersions) {
 			removeVersion(failedVersion);
 		}
-		
+
 		logger.info("Done removing " + failedVersions.size() + " failed import(s).");
 	}
 
@@ -299,26 +316,26 @@ public class EntryPoint {
 		logger.info("Removing version " + version + " ...");
 
 		entityManager.getTransaction().begin();
-		
+
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
 		Class<?>[] tables = {IamAssociation.class, IamContactInfo.class, IamPerson.class, IamDepartment.class, IamPrikerbacct.class, Version.class};
-		
+
 		// Remove data from any row mentioning a failed 'vers'
 		for(Class table : tables) {
 			logger.debug("Removing data from " + table.getName() + " for version " + version);
-			
+
 			CriteriaDelete<Class<?>> deleteAssociation = cb.createCriteriaDelete(table);
 			Root e = deleteAssociation.from(table);
 			deleteAssociation.where(cb.equal(e.get("vers"), version.getVers()));
 			entityManager.createQuery(deleteAssociation).executeUpdate();
 		}
-		
+
 		entityManager.getTransaction().commit();
 
 		logger.debug("Done removing version " + version + ".");
 	}
-	
+
 	/**
 	 * Removes all rows from any table where 'vers' is valid but too old,
 	 * defined by older than the last 'keepVersions' recent versions.
@@ -332,20 +349,31 @@ public class EntryPoint {
 		entityManager.getTransaction().begin();
 		List<Version> validVersions = entityManager.createQuery( "FROM Version WHERE importFinished IS NOT NULL ORDER BY vers DESC", Version.class ).getResultList();
 		entityManager.getTransaction().commit();
-		
+
 		if(validVersions.size() > keepVersions) {
 			List<Version> versionsToRemove = validVersions.subList(keepVersions, validVersions.size());
-			
+
 			logger.info("Found " + versionsToRemove.size() + " snapshots to remove.");
-	
+
 			// Remove data from any row mentioning a failed 'vers'
 			for(Version versToRemove : versionsToRemove) {
 				removeVersion(versToRemove);
 			}
-			
+
 			logger.info("Done removing " + versionsToRemove.size() + " old, valid imports.");
 		} else {
 			logger.info("No old versions found (keeping " + validVersions.size() + ".");
 		}
+	}
+
+	// Credit: http://stackoverflow.com/questions/10120709/difference-between-printstacktrace-and-tostring
+	private static String exceptionStacktraceToString(Exception e) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream ps = new PrintStream(baos);
+
+		e.printStackTrace(ps);
+		ps.close();
+		
+		return baos.toString();
 	}
 }
