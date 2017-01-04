@@ -22,7 +22,7 @@ CREATE TABLE `iam_associations` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
   `percentFullTime` varchar(3) NOT NULL,
-  `titleDisplayName` varchar(96) NOT NULL,
+  `titleDisplayName` varchar(128) NOT NULL,
   `positionType` varchar(32) NOT NULL,
   `titleOfficialName` varchar(160) NOT NULL,
   `vers` datetime DEFAULT NULL,
