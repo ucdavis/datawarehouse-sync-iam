@@ -14,19 +14,18 @@ import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
+import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.ucdavis.dss.datawarehouse.ldap.client.LdapClient;
 import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamAssociation;
 import edu.ucdavis.dss.iam.dtos.IamContactInfo;
@@ -84,7 +83,12 @@ public class EntryPoint {
 		/**
 		 * Set up Hibernate
 		 */
-		entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
+		try {
+			entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
+		} catch (ServiceException e) {
+			logger.error("Unable to create entity manager factory. Is the database running?");
+			System.exit(-1);
+		}
 		entityManager = entityManagerFactory.createEntityManager();
 
 		/**
@@ -106,12 +110,12 @@ public class EntryPoint {
 		/**
 		 * Get a list of all possible ucdPersonUUIDs using LDAP
 		 */
-		//		LdapClient ldapClient = new LdapClient(configurationProperties.getProperty("LDAP_URL"),
-		//				configurationProperties.getProperty("LDAP_BASE"),
-		//				configurationProperties.getProperty("LDAP_USER"),
-		//				configurationProperties.getProperty("LDAP_PASSWORD"));
-		//		
-		//		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
+		LdapClient ldapClient = new LdapClient(configurationProperties.getProperty("LDAP_URL"),
+				configurationProperties.getProperty("LDAP_BASE"),
+				configurationProperties.getProperty("LDAP_USER"),
+				configurationProperties.getProperty("LDAP_PASSWORD"));
+		
+		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
 
 		/**
 		 * Initialize IAM client
@@ -135,57 +139,19 @@ public class EntryPoint {
 			logger.error("Unable to fetch departments. Exiting ...");
 			System.exit(-1);
 		}
-
+		
 		/**
-		 * Extract and load all associations by department from IAM
+		 * Convert all ucdPersonUUIDs to IAM IDs and fetch associated information
 		 */
-		logger.info("Persisting all associations for " + departments.size() + " departments ...");
-		for(IamDepartment department : departments) {
-			List<IamAssociation> associations = iamClient.getAllAssociationsForDepartment(department.getDeptCode());
-
-			if(associations != null) {
-				EntityTransaction tx = entityManager.getTransaction();
-
-				for(IamAssociation association : associations) {
-					tx.begin();
-
-					association.markAsVersion(vers);
-					try {
-						entityManager.persist( association );
-					} catch (PersistenceException e) {
-						logger.warn("Exception while persisting association. Skipping. Exception was:");
-						logger.warn(exceptionStacktraceToString(e));
-						if(tx.isActive()) {
-							tx.rollback();
-						}
-						continue;
-					}
-
-					tx.commit();
-				}
-			} else {
-				logger.warn("Unable to fetch associations for department " + department.getDeptCode() + ".");
-			}
-		}
-
-		/**
-		 * Persist contact infos, people entries, and prikerbaccts
-		 */
-		entityManager.getTransaction().begin();
-		Query query = entityManager.createQuery("SELECT DISTINCT iamId FROM IamAssociation ia WHERE ia.vers=:vers");
-		query.setParameter("vers", vers.getVers());
-		@SuppressWarnings("unchecked")
-		List<Long> iamIds = query.getResultList();
-		entityManager.getTransaction().commit();
-
-		logger.info("Persisting additional data on " + iamIds.size() + " IAM IDs ...");
-
 		Long count = 0L;
 		long additionalStartTime = new Date().getTime();
-		for(Long iamId : iamIds) {
+		for(String ucdPersonUUID : allUcdPersonUUIDs) {
+			Long iamId = iamClient.getIamIdFromMothraId(ucdPersonUUID);
+			
 			List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 			List<IamPerson> people = iamClient.getPersonInfo(iamId);
 			List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
+			List<IamAssociation> associations = iamClient.getAllAssociationsForIamId(iamId);
 
 			if(contactInfos == null) {
 				logger.warn("Unable to fetch contact info for IAM ID " + iamId + ". Skipping.");
@@ -199,8 +165,25 @@ public class EntryPoint {
 				logger.warn("Unable to fetch prikerbacct info for IAM ID " + iamId + ". Skipping.");
 				continue;
 			}
+			if(associations == null) {
+				logger.warn("Unable to fetch associations info for IAM ID " + iamId + ". Skipping.");
+				continue;
+			}
 
 			entityManager.getTransaction().begin();
+
+			for(IamAssociation association : associations) {
+				try {
+					association.markAsVersion(vers);
+					entityManager.persist( association );
+				} catch (DataException e) {
+					logger.error("Unable to persist association: " + association);
+					e.printStackTrace();
+				} catch (ConstraintViolationException e) {
+					logger.error("Unable to persist association: " + association);
+					e.printStackTrace();
+				}
+			}
 
 			for(IamContactInfo contactInfo : contactInfos) {
 				try {
@@ -246,7 +229,7 @@ public class EntryPoint {
 			count++;
 
 			if(count % 1000 == 0) {
-				float progress = (float)count / (float)iamIds.size();
+				float progress = (float)count / (float)allUcdPersonUUIDs.size();
 				long currentTime = new Date().getTime();
 				long timeSoFar = currentTime - additionalStartTime;
 				Date estCompleted = new Date(additionalStartTime + (long)((float)timeSoFar / progress));

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -44,6 +45,51 @@ public class IamClient {
 		
 		this.apiKey = apiKey;
 	}
+	
+	/**
+	 * Returns the IAM ID for the given Mothra ID.
+	 *
+	 * Note: Mothra ID is called UcdPersonUUID in LDAP.
+	 * 
+	 * @param mothraId
+	 * @return
+	 */
+	public Long getIamIdFromMothraId(String mothraId) {
+		HttpGet httpget = new HttpGet("/api/iam/people/ids/search?mothraId=" + mothraId + "&v=1.0&key=" + apiKey);
+		Long iamId = null;
+
+		try {
+			HashMap<Object, Object> results = null;
+			
+			CloseableHttpResponse response = httpclient.execute(
+					targetHost, httpget, context);
+
+			HttpEntity entity = response.getEntity();
+
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			
+			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
+			JsonNode arrNode = rootNode.findPath("results").get(0);
+			
+			if ((arrNode != null) && (arrNode.isNull() == false)) {
+				results = mapper.readValue(
+						arrNode.toString(),
+						mapper.getTypeFactory().constructMapType(
+								HashMap.class, Object.class, Object.class));
+				
+				iamId = Long.parseLong((String) results.get("iamId"));
+			} else {
+				log.error("getIamIdFromMothraId response from IAM not understood or was empty/null");
+			}
+
+			response.close();
+		} catch (IOException e) {
+			log.error(exceptionStacktraceToString(e));
+		}
+		
+		return iamId;
+	}
 
 	/**
 	 * Returns a list of all departments
@@ -81,6 +127,54 @@ public class IamClient {
 		}
 		
 		return departments;
+	}
+	
+	/**
+	 * Returns a list of all associations for the given IAM ID
+	 * 
+	 * @return list of associations as IamAssociation DTOs
+	 */
+	public List<IamAssociation> getAllAssociationsForIamId(Long iamId) {
+		long startTime;
+		
+		String url = "/api/iam/associations/pps/" + iamId;
+		HttpGet httpget = new HttpGet(url + "?v=1.0&key=" + apiKey);
+		List<IamAssociation> associations = null;
+
+		try {
+			log.debug("HTTP GET: " + url);
+			startTime = new Date().getTime();
+			CloseableHttpResponse response = httpclient.execute(
+					targetHost, httpget, context);
+			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
+
+			HttpEntity entity = response.getEntity();
+
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			
+			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
+			JsonNode arrNode = rootNode.findParent("responseData");
+			arrNode = rootNode.findPath("results");
+			
+			if ((arrNode != null) && (arrNode.isNull() == false)) {
+				associations = mapper.readValue(
+						arrNode.toString(),
+						mapper.getTypeFactory().constructCollectionType(
+								List.class, IamAssociation.class));
+			} else {
+				log.warn("/api/iam/associations/pps/" + iamId + " response from IAM not understood or was empty/null");
+				
+				return null;
+			}
+
+			response.close();
+		} catch (IOException e) {
+			log.error(exceptionStacktraceToString(e));
+			return null;
+		}
+		
+		return associations;
 	}
 	
 	/**
@@ -130,59 +224,6 @@ public class IamClient {
 		}
 		
 		return associations;
-		
-//		// Perform four additional queries to obtain the rest of this person's information
-//		for(IamPerson person : people) {
-//			// Augment IamPerson with information from /people/associations/pps ...
-//			try {
-//				url = "/api/iam/associations/pps/" + person.getIamId();
-//				log.debug("HTTP GET: " + url);
-//				startTime = new Date().getTime();
-//				httpget = new HttpGet(url + "?key=" + apiKey + "&v=1.0");
-//				log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
-//				
-//				CloseableHttpResponse response = httpclient.execute(
-//						targetHost, httpget, context);
-//
-//				HttpEntity entity = response.getEntity();
-//
-//				ObjectMapper mapper = new ObjectMapper();
-//				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//				
-//				JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-//				JsonNode arrNode = rootNode.findParent("responseData");
-//				arrNode = rootNode.findPath("results");
-//				
-//				if ((arrNode != null) && (arrNode.isNull() == false)) {
-//					Set<IamAssociation> associations = null;
-//					
-//					associations = mapper.readValue(
-//							arrNode.toString(),
-//							mapper.getTypeFactory().constructCollectionType(
-//									List.class, IamAssociation.class));
-//					
-//					// We'll set up a blank list just in case the client wants to call .size(), etc.
-//					if(associations == null) associations = new HashSet<IamAssociation>();
-//					
-//					person.setAssociations(associations);
-//					
-//					for(IamAssociation association : associations) {
-//						log.debug("Position type: " + association.getPositionType() + "(code: " + association.getPositionTypeCode() + ")");
-//					}
-//				} else {
-//					log.warn("getAllPeopleByDepartmentCode /api/iam/associations/pps/" + person.getIamId() + " response from IAM not understood or was empty/null");
-//					
-//					continue;
-//				}
-//
-//				response.close();
-//			} catch (IOException e) {
-//				log.error(exceptionStacktraceToString(e));
-//				continue;
-//			}
-		//}
-		
-		//return people;
 	}
 	
 	/**

@@ -30,20 +30,23 @@ public class LdapClient {
 		bind();
 		
 		int i = 0;
-		int inc = 1000;
+		int inc = 2000; // limit set at ldap.ucdavis.edu
 		
 		List<String> allUcdPersonUUIDs = new ArrayList<String>();
-		
-		for(i = 0; i < 99999999; i += inc) {
+
+		// Max known ucdPersonUUID as of 1/5/2017 = 01364314
+		// Found using LDAP search ucdPersonUUID >= x
+		int maxUuid = 1500000;
+		for(i = 0; i < maxUuid; i += inc) {
 			allUcdPersonUUIDs.addAll(ldapTemplate.search("",
 					"(&(ucdPersonUUID<=" + (i + inc) + ")(ucdPersonUUID>=" + i + "))",
 					SearchControls.SUBTREE_SCOPE,
 					attrsToReturn,
 					new AttributeMapper()));
 			
-			if(i % 10000 == 0) {
-				System.out.println("i = " + i);
-			}
+//			if(i % 10000 == 0) {
+//				System.out.println("i = " + i + ", pct complete = " + String.format("%.5f", ((float)i / (float)maxUuid) * 100.0) + ", allUcdPersonUUIDs.size() = " + allUcdPersonUUIDs.size());
+//			}
 		}
 		
 		return allUcdPersonUUIDs;
