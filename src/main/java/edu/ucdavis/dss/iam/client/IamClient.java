@@ -80,7 +80,9 @@ public class IamClient {
 				
 				iamId = Long.parseLong((String) results.get("iamId"));
 			} else {
-				log.error("getIamIdFromMothraId response from IAM not understood or was empty/null");
+				// Mothra IDs may exist for individuals who are not active and don't show up in IAM.
+				// This is not an error, nor warning.
+				//log.error("getIamIdFromMothraId response from IAM not understood or was empty/null");
 			}
 
 			response.close();
