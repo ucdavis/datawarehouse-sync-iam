@@ -46,6 +46,8 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		logger.info("IAM/LDAP import started at " + new Date());
+		
 		/**
 		 * Load the IAM API key from ~/.data-warehouse/settings.properties.
 		 * We expect a few keys to exist; see prop.getProperty() lines.
@@ -258,7 +260,8 @@ public class EntryPoint {
 		 */
 		entityManager.close();
 		entityManagerFactory.close();
-		logger.info("Program complete. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
+		
+		logger.info("Import completed successfully. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
 	}
 
 	/**
