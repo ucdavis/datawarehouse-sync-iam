@@ -70,7 +70,7 @@ CREATE TABLE `iam_people` (
   `bannerPIdM` varchar(32) DEFAULT NULL,
   `externalId` varchar(32) DEFAULT NULL,
   `oFirstName` varchar(32) NULL,
-  `oLastName` varchar(32) NOT NULL,
+  `oLastName` varchar(64) NOT NULL,
   `oFullName` varchar(64) NOT NULL,
   `oSuffix` varchar(9) DEFAULT NULL,
   `isEmployee` tinyint(1) NOT NULL,
@@ -94,14 +94,7 @@ CREATE TABLE `iam_people` (
   `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_iamid_vers` (`iamId`,`vers`),
-  FULLTEXT KEY `oFullName` (`oFullName`,`oLastName`,`oFirstName`),
-  FULLTEXT KEY `oFullName_2` (`oFullName`,`oLastName`,`oFirstName`),
-  FULLTEXT KEY `oFullName_3` (`oFullName`),
-  FULLTEXT KEY `oFirstName` (`oFirstName`,`oLastName`),
-  FULLTEXT KEY `oFirstName_2` (`oFirstName`,`oLastName`),
-  FULLTEXT KEY `oFirstName_3` (`oFirstName`,`oLastName`),
-  FULLTEXT KEY `oFirstName_4` (`oFirstName`,`oLastName`),
-  FULLTEXT KEY `oFirstName_5` (`oFirstName`,`oMiddleName`,`oLastName`,`oFullName`,`dFirstName`,`dMiddleName`,`dLastName`,`dFullName`)
+  FULLTEXT KEY `oFullName` (`oFullName`,`oLastName`,`oFirstName`)
 ) ENGINE=InnoDB AUTO_INCREMENT=252770 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
