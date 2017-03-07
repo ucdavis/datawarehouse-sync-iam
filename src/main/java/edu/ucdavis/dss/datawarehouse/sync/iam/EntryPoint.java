@@ -15,6 +15,7 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.Root;
@@ -38,6 +39,7 @@ public class EntryPoint {
 	static Logger logger = LoggerFactory.getLogger("EntryPoint");
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
+	static int NUM_VALID_OLD_VERSIONS_TO_KEEP = 2;
 
 	/**
 	 * Main entry point for IAM sync. Run as a console application when
@@ -210,6 +212,9 @@ public class EntryPoint {
 				} catch (ConstraintViolationException e) {
 					logger.error("Unable to persist person: " + person);
 					e.printStackTrace();
+				} catch (PersistenceException e) {
+					logger.error("Unable to persist person: " + person);
+					e.printStackTrace();
 				}
 			}
 
@@ -252,8 +257,8 @@ public class EntryPoint {
 		/**
 		 * Remove old data snapshots
 		 */
-		logger.info("Removing 5 old snapshots ...");
-		removeOldValidSnapshots(5);
+		logger.info("Removing old snapshots ...");
+		removeOldValidSnapshots(NUM_VALID_OLD_VERSIONS_TO_KEEP);
 
 		/**
 		 * Close Hibernate
