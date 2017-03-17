@@ -277,7 +277,7 @@ public class IamPerson {
 	@Override
 	public String toString() {
 		return String.format(
-				"IamPerson[iamId='%s', ppsId='%s', dFullName='%s']",
-				iamId, ppsId, dFullName);
+				"IamPerson[iamId='%s', ppsId='%s', dFullName='%s', oFullName='%s']",
+				iamId, ppsId, dFullName, oFullName);
 	}
 }

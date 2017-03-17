@@ -201,7 +201,10 @@ public class EntryPoint {
 				}
 			}
 			
-			if(entityManager.isOpen() == false) continue;
+			if(entityManager.isOpen() == false) {
+				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				continue;
+			}
 
 			for(IamContactInfo contactInfo : contactInfos) {
 				if(entityManager.isOpen()) {
@@ -221,7 +224,10 @@ public class EntryPoint {
 				}
 			}
 			
-			if(entityManager.isOpen() == false) continue;
+			if(entityManager.isOpen() == false) {
+				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				continue;
+			}
 
 			for(IamPerson person : people) {
 				if(entityManager.isOpen()) {
@@ -244,7 +250,10 @@ public class EntryPoint {
 				}
 			}
 			
-			if(entityManager.isOpen() == false) continue;
+			if(entityManager.isOpen() == false) {
+				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				continue;
+			}
 
 			for(IamPrikerbacct prikerbacct : prikerbaccts) {
 				if(entityManager.isOpen()) {
@@ -264,7 +273,10 @@ public class EntryPoint {
 				}
 			}
 			
-			if(entityManager.isOpen() == false) continue;
+			if(entityManager.isOpen() == false) {
+				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				continue;
+			}
 
 			entityManager.getTransaction().commit();
 
