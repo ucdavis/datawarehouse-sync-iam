@@ -149,6 +149,7 @@ public class EntryPoint {
 		 */
 		Long count = 0L;
 		long additionalStartTime = new Date().getTime();
+		logger.info("Persisting all people ...");
 		for(String ucdPersonUUID : allUcdPersonUUIDs) {
 			Long iamId = iamClient.getIamIdFromMothraId(ucdPersonUUID);
 			
@@ -173,63 +174,97 @@ public class EntryPoint {
 				logger.warn("Unable to fetch associations info for IAM ID " + iamId + ". Skipping.");
 				continue;
 			}
+			
+			// If an exception happened during the last iteration of the loop,
+			// the entityManager is invalid and will need to be recreated.
+			if(entityManager.isOpen() == false) {
+				entityManager = entityManagerFactory.createEntityManager();
+			}
 
 			entityManager.getTransaction().begin();
 
 			for(IamAssociation association : associations) {
-				try {
-					association.markAsVersion(vers);
-					entityManager.persist( association );
-				} catch (DataException e) {
-					logger.error("Unable to persist association: " + association);
-					e.printStackTrace();
-				} catch (ConstraintViolationException e) {
-					logger.error("Unable to persist association: " + association);
-					e.printStackTrace();
+				if(entityManager.isOpen()) {
+					try {
+						association.markAsVersion(vers);
+						entityManager.persist( association );
+					} catch (DataException e) {
+						logger.error("Unable to persist association: " + association);
+						e.printStackTrace();
+					} catch (ConstraintViolationException e) {
+						logger.error("Unable to persist association: " + association);
+						e.printStackTrace();
+					} finally {
+						entityManager.getTransaction().rollback();
+						entityManager.close();
+					}
 				}
 			}
+			
+			if(entityManager.isOpen() == false) continue;
 
 			for(IamContactInfo contactInfo : contactInfos) {
-				try {
-					contactInfo.markAsVersion(vers);
-					entityManager.persist( contactInfo );
-				} catch (DataException e) {
-					logger.error("Unable to persist contactInfo: " + contactInfo);
-					e.printStackTrace();
-				} catch (ConstraintViolationException e) {
-					logger.error("Unable to persist contactInfo: " + contactInfo);
-					e.printStackTrace();
+				if(entityManager.isOpen()) {
+					try {
+						contactInfo.markAsVersion(vers);
+						entityManager.persist( contactInfo );
+					} catch (DataException e) {
+						logger.error("Unable to persist contactInfo: " + contactInfo);
+						e.printStackTrace();
+					} catch (ConstraintViolationException e) {
+						logger.error("Unable to persist contactInfo: " + contactInfo);
+						e.printStackTrace();
+					} finally {
+						entityManager.getTransaction().rollback();
+						if(entityManager.isOpen()) entityManager.close();
+					}
 				}
 			}
+			
+			if(entityManager.isOpen() == false) continue;
 
 			for(IamPerson person : people) {
-				try {
-					person.markAsVersion(vers);
-					entityManager.persist( person );
-				} catch (DataException e) {
-					logger.error("Unable to persist person: " + person);
-					e.printStackTrace();
-				} catch (ConstraintViolationException e) {
-					logger.error("Unable to persist person: " + person);
-					e.printStackTrace();
-				} catch (PersistenceException e) {
-					logger.error("Unable to persist person: " + person);
-					e.printStackTrace();
+				if(entityManager.isOpen()) {
+					try {
+						person.markAsVersion(vers);
+						entityManager.persist( person );
+					} catch (DataException e) {
+						logger.error("Unable to persist person: " + person);
+						e.printStackTrace();
+					} catch (ConstraintViolationException e) {
+						logger.error("Unable to persist person: " + person);
+						e.printStackTrace();
+					} catch (PersistenceException e) {
+						logger.error("Unable to persist person: " + person);
+						e.printStackTrace();
+					} finally {
+						entityManager.getTransaction().rollback();
+						if(entityManager.isOpen()) entityManager.close();
+					}
 				}
 			}
+			
+			if(entityManager.isOpen() == false) continue;
 
 			for(IamPrikerbacct prikerbacct : prikerbaccts) {
-				try {
-					prikerbacct.markAsVersion(vers);
-					entityManager.persist( prikerbacct );
-				} catch (DataException e) {
-					logger.error("Unable to persist prikerbacct: " + prikerbacct);
-					e.printStackTrace();
-				} catch (ConstraintViolationException e) {
-					logger.error("Unable to persist prikerbacct: " + prikerbacct);
-					e.printStackTrace();
+				if(entityManager.isOpen()) {
+					try {
+						prikerbacct.markAsVersion(vers);
+						entityManager.persist( prikerbacct );
+					} catch (DataException e) {
+						logger.error("Unable to persist prikerbacct: " + prikerbacct);
+						e.printStackTrace();
+					} catch (ConstraintViolationException e) {
+						logger.error("Unable to persist prikerbacct: " + prikerbacct);
+						e.printStackTrace();
+					} finally {
+						entityManager.getTransaction().rollback();
+						if(entityManager.isOpen()) entityManager.close();
+					}
 				}
 			}
+			
+			if(entityManager.isOpen() == false) continue;
 
 			entityManager.getTransaction().commit();
 
@@ -246,6 +281,10 @@ public class EntryPoint {
 			}
 		}
 
+		if(entityManager.isOpen() == false) {
+			entityManager = entityManagerFactory.createEntityManager();
+		}
+		
 		/**
 		 * Mark this snapshot as complete
 		 */
