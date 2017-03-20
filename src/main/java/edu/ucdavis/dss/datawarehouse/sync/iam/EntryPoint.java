@@ -15,13 +15,10 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.exception.DataException;
 import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,21 +185,17 @@ public class EntryPoint {
 					try {
 						association.markAsVersion(vers);
 						entityManager.persist( association );
-					} catch (DataException e) {
+					} catch (Exception e) {
 						logger.error("Unable to persist association: " + association);
 						e.printStackTrace();
-					} catch (ConstraintViolationException e) {
-						logger.error("Unable to persist association: " + association);
-						e.printStackTrace();
-					} finally {
 						entityManager.getTransaction().rollback();
-						entityManager.close();
+						if(entityManager.isOpen()) entityManager.close();
 					}
 				}
 			}
 			
 			if(entityManager.isOpen() == false) {
-				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				logger.error("IamAssociation: Skipping IAM ID " + iamId + " due to previous exceptions.");
 				continue;
 			}
 
@@ -211,13 +204,9 @@ public class EntryPoint {
 					try {
 						contactInfo.markAsVersion(vers);
 						entityManager.persist( contactInfo );
-					} catch (DataException e) {
+					} catch (Exception e) {
 						logger.error("Unable to persist contactInfo: " + contactInfo);
 						e.printStackTrace();
-					} catch (ConstraintViolationException e) {
-						logger.error("Unable to persist contactInfo: " + contactInfo);
-						e.printStackTrace();
-					} finally {
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
 					}
@@ -225,7 +214,7 @@ public class EntryPoint {
 			}
 			
 			if(entityManager.isOpen() == false) {
-				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				logger.error("IamContactInfo: Skipping IAM ID " + iamId + " due to previous exceptions.");
 				continue;
 			}
 
@@ -234,16 +223,9 @@ public class EntryPoint {
 					try {
 						person.markAsVersion(vers);
 						entityManager.persist( person );
-					} catch (DataException e) {
+					} catch (Exception e) {
 						logger.error("Unable to persist person: " + person);
 						e.printStackTrace();
-					} catch (ConstraintViolationException e) {
-						logger.error("Unable to persist person: " + person);
-						e.printStackTrace();
-					} catch (PersistenceException e) {
-						logger.error("Unable to persist person: " + person);
-						e.printStackTrace();
-					} finally {
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
 					}
@@ -251,7 +233,7 @@ public class EntryPoint {
 			}
 			
 			if(entityManager.isOpen() == false) {
-				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				logger.error("IamPerson: Skipping IAM ID " + iamId + " due to previous exceptions.");
 				continue;
 			}
 
@@ -260,13 +242,9 @@ public class EntryPoint {
 					try {
 						prikerbacct.markAsVersion(vers);
 						entityManager.persist( prikerbacct );
-					} catch (DataException e) {
+					} catch (Exception e) {
 						logger.error("Unable to persist prikerbacct: " + prikerbacct);
 						e.printStackTrace();
-					} catch (ConstraintViolationException e) {
-						logger.error("Unable to persist prikerbacct: " + prikerbacct);
-						e.printStackTrace();
-					} finally {
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
 					}
@@ -274,7 +252,7 @@ public class EntryPoint {
 			}
 			
 			if(entityManager.isOpen() == false) {
-				logger.error("Skipping IAM ID " + iamId + " due to previous exceptions.");
+				logger.error("IamPrikerbacct: Skipping IAM ID " + iamId + " due to previous exceptions.");
 				continue;
 			}
 
