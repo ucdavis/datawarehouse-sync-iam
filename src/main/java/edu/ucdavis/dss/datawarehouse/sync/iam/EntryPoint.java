@@ -45,6 +45,23 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		// Set up a default uncaught exception handler as Hibernate will not let the process
+		// exit if the main thread dies but Hibernate resources are not cleaned up.
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			public void uncaughtException(Thread t, Throwable ex) {
+				logger.error("Unhandled exception in thread: " + t.getName());
+				logger.error("Exception: " + ex.toString());
+				logger.error(exceptionStacktraceToString(ex));
+				
+				// Clean up Hibernate
+				if((entityManager != null) && (entityManager.isOpen())) { entityManager.close(); }
+				if((entityManagerFactory != null) && (entityManagerFactory.isOpen())) { entityManagerFactory.close(); }
+
+				// Exit with error
+				System.exit(-1);
+			}
+		});
+		
 		logger.debug("IAM/LDAP import started at " + new Date());
 		
 		/**
@@ -73,10 +90,10 @@ public class EntryPoint {
 			logger.debug("Settings file '" + filename + "' found.");
 		} catch (FileNotFoundException e) {
 			logger.error("Could not find " + filename + ".");
-			return;
+			System.exit(-1);
 		} catch (IOException e) {
 			logger.error("An IOException occurred while loading " + filename);
-			return;
+			System.exit(-1);
 		}
 
 		long startTime = new Date().getTime();
@@ -90,13 +107,9 @@ public class EntryPoint {
 			logger.error("Unable to create entity manager factory. Is the database running?");
 			System.exit(-1);
 		}
+		
 		entityManager = entityManagerFactory.createEntityManager();
-
-		/**
-		 * Remove any failed imports
-		 */
-		removeFailedImports();
-
+		
 		/**
 		 * Set up new 'vers' snapshot
 		 */
@@ -282,13 +295,18 @@ public class EntryPoint {
 		entityManager.getTransaction().begin();
 		entityManager.merge( vers ); // 'vers' will be detached but we can override DB version safely
 		entityManager.getTransaction().commit();
-
+		
 		/**
 		 * Remove old data snapshots
 		 */
 		logger.info("Removing old snapshots ...");
 		removeOldValidSnapshots(NUM_VALID_OLD_VERSIONS_TO_KEEP);
 
+		/**
+		 * Remove any failed imports
+		 */
+		removeFailedImports();
+		
 		/**
 		 * Close Hibernate
 		 */
@@ -387,11 +405,11 @@ public class EntryPoint {
 	}
 
 	// Credit: http://stackoverflow.com/questions/10120709/difference-between-printstacktrace-and-tostring
-	private static String exceptionStacktraceToString(Exception e) {
+	private static String exceptionStacktraceToString(Throwable ex) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream ps = new PrintStream(baos);
 
-		e.printStackTrace(ps);
+		ex.printStackTrace(ps);
 		ps.close();
 		
 		return baos.toString();
