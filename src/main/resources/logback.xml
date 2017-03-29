@@ -2,7 +2,7 @@
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+			<pattern>%date [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 		<target>System.out</target>
 		<filter class="edu.ucdavis.dss.logging.LogbackStdOutFilter" />
@@ -10,7 +10,7 @@
 
  	<appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+			<pattern>%date [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 		<target>System.err</target>
 		<filter class="edu.ucdavis.dss.logging.LogbackStdErrFilter" />
@@ -21,12 +21,10 @@
 	<logger name="org.jboss.logging" level="OFF" />
 	<logger name="EntryPoint" level="INFO" />
 	<logger name="IamLogger" level="INFO" />
+	<logger name="org.springframework.ldap" level="INFO" />
 
 	<root level="DEBUG">
 		<appender-ref ref="STDERR" />
 		<appender-ref ref="STDOUT" />
 	</root>
-<!--  	<root level="ERROR">
-		<appender-ref ref="STDERR" />
-	</root>
- --></configuration>
+</configuration>

@@ -29,7 +29,7 @@ import edu.ucdavis.dss.iam.dtos.IamPerson;
 import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 
 public class IamClient {
-	private final Logger log = LoggerFactory.getLogger("IamLogger");
+	private final Logger logger = LoggerFactory.getLogger("IamLogger");
 
 	private CloseableHttpClient httpclient;
 	private HttpHost targetHost;
@@ -87,7 +87,7 @@ public class IamClient {
 
 			response.close();
 		} catch (IOException e) {
-			log.error(exceptionStacktraceToString(e));
+			logger.error(exceptionStacktraceToString(e));
 		}
 		
 		return iamId;
@@ -120,12 +120,12 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamDepartment.class));
 			} else {
-				log.error("getAllDepartments response from IAM not understood or was empty/null");
+				logger.error("getAllDepartments response from IAM not understood or was empty/null");
 			}
 
 			response.close();
 		} catch (IOException e) {
-			log.error(exceptionStacktraceToString(e));
+			logger.error(exceptionStacktraceToString(e));
 		}
 		
 		return departments;
@@ -144,11 +144,11 @@ public class IamClient {
 		List<IamAssociation> associations = null;
 
 		try {
-			log.debug("HTTP GET: " + url);
+			logger.debug("HTTP GET: " + url);
 			startTime = new Date().getTime();
 			CloseableHttpResponse response = httpclient.execute(
 					targetHost, httpget, context);
-			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
+			logger.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 
 			HttpEntity entity = response.getEntity();
 
@@ -165,14 +165,14 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamAssociation.class));
 			} else {
-				log.warn("/api/iam/associations/pps/" + iamId + " response from IAM not understood or was empty/null");
+				logger.warn("/api/iam/associations/pps/" + iamId + " response from IAM not understood or was empty/null");
 				
 				return null;
 			}
 
 			response.close();
 		} catch (IOException e) {
-			log.error(exceptionStacktraceToString(e));
+			logger.error(exceptionStacktraceToString(e));
 			return null;
 		}
 		
@@ -193,11 +193,11 @@ public class IamClient {
 		List<IamAssociation> associations = null;
 
 		try {
-			log.debug("HTTP GET: " + url);
+			logger.debug("HTTP GET: " + url);
 			startTime = new Date().getTime();
 			CloseableHttpResponse response = httpclient.execute(
 					targetHost, httpget, context);
-			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
+			logger.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 
 			HttpEntity entity = response.getEntity();
 
@@ -214,14 +214,14 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamAssociation.class));
 			} else {
-				log.warn("/api/iam/associations/pps/search?deptCode=" + deptCode + " response from IAM not understood or was empty/null");
+				logger.warn("/api/iam/associations/pps/search?deptCode=" + deptCode + " response from IAM not understood or was empty/null");
 				
 				return null;
 			}
 
 			response.close();
 		} catch (IOException e) {
-			log.error(exceptionStacktraceToString(e));
+			logger.error(exceptionStacktraceToString(e));
 			return null;
 		}
 		
@@ -242,11 +242,11 @@ public class IamClient {
 		List<IamContactInfo> contactInfos = null;
 
 		try {
-			log.debug("HTTP GET: " + url);
+			logger.debug("HTTP GET: " + url);
 			startTime = new Date().getTime();
 			CloseableHttpResponse response = httpclient.execute(
 					targetHost, httpget, context);
-			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
+			logger.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 
 			HttpEntity entity = response.getEntity();
 
@@ -263,14 +263,14 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamContactInfo.class));
 			} else {
-				log.warn("/api/iam/people/contactinfo/" + iamId + " response from IAM not understood or was empty/null");
+				logger.warn("/api/iam/people/contactinfo/" + iamId + " response from IAM not understood or was empty/null");
 				
 				return null;
 			}
 
 			response.close();
 		} catch (IOException e) {
-			log.error(exceptionStacktraceToString(e));
+			logger.error(exceptionStacktraceToString(e));
 			return null;
 		}
 		
@@ -291,11 +291,11 @@ public class IamClient {
 		List<IamPerson> people = null;
 
 		try {
-			log.debug("HTTP GET: " + url);
+			logger.debug("HTTP GET: " + url);
 			startTime = new Date().getTime();
 			CloseableHttpResponse response = httpclient.execute(
 					targetHost, httpget, context);
-			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
+			logger.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 
 			HttpEntity entity = response.getEntity();
 
@@ -312,14 +312,14 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamPerson.class));
 			} else {
-				log.warn("/api/iam/people/search?iamId=" + iamId + " response from IAM not understood or was empty/null");
+				logger.warn("/api/iam/people/search?iamId=" + iamId + " response from IAM not understood or was empty/null");
 				
 				return null;
 			}
 
 			response.close();
 		} catch (IOException e) {
-			log.error(exceptionStacktraceToString(e));
+			logger.error(exceptionStacktraceToString(e));
 			return null;
 		}
 		
@@ -340,11 +340,11 @@ public class IamClient {
 		List<IamPrikerbacct> prikerbaccts = null;
 
 		try {
-			log.debug("HTTP GET: " + url);
+			logger.debug("HTTP GET: " + url);
 			startTime = new Date().getTime();
 			CloseableHttpResponse response = httpclient.execute(
 					targetHost, httpget, context);
-			log.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
+			logger.debug("HTTP GET took " + (new Date().getTime() - startTime) + "ms.");
 
 			HttpEntity entity = response.getEntity();
 
@@ -361,14 +361,14 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamPrikerbacct.class));
 			} else {
-				log.warn("/api/iam/people/prikerbacct/" + iamId + " response from IAM not understood or was empty/null");
+				logger.warn("/api/iam/people/prikerbacct/" + iamId + " response from IAM not understood or was empty/null");
 				
 				return null;
 			}
 
 			response.close();
 		} catch (IOException e) {
-			log.error(exceptionStacktraceToString(e));
+			logger.error(exceptionStacktraceToString(e));
 			return null;
 		}
 		

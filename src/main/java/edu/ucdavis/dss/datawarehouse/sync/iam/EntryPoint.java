@@ -45,7 +45,7 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		logger.info("IAM/LDAP import started at " + new Date());
+		logger.debug("IAM/LDAP import started at " + new Date());
 		
 		/**
 		 * Load the IAM API key from ~/.data-warehouse/settings.properties.
@@ -70,7 +70,7 @@ public class EntryPoint {
 				return;
 			}
 
-			logger.info("Settings file '" + filename + "' found.");
+			logger.debug("Settings file '" + filename + "' found.");
 		} catch (FileNotFoundException e) {
 			logger.error("Could not find " + filename + ".");
 			return;
@@ -266,8 +266,8 @@ public class EntryPoint {
 				long timeSoFar = currentTime - additionalStartTime;
 				Date estCompleted = new Date(additionalStartTime + (long)((float)timeSoFar / progress));
 				String logMsg = String.format("\tProgress: %.2f%% (est. completion at %s)", progress * (float)100, estCompleted.toString());
-				logger.info(logMsg);
-				logger.info("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
+				logger.debug(logMsg);
+				logger.debug("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
 			}
 		}
 
@@ -315,14 +315,14 @@ public class EntryPoint {
 		List<Version> failedVersions = entityManager.createQuery( "FROM Version WHERE importFinished IS NULL", Version.class ).getResultList();
 		entityManager.getTransaction().commit();
 
-		logger.info("Found " + failedVersions.size() + " failed import(s).");
+		logger.debug("Found " + failedVersions.size() + " failed import(s).");
 
 		// Remove data from any row utilizing a failed import
 		for(Version failedVersion : failedVersions) {
 			removeVersion(failedVersion);
 		}
 
-		logger.info("Done removing " + failedVersions.size() + " failed import(s).");
+		logger.info("Removed " + failedVersions.size() + " failed import(s).");
 	}
 
 	/**
@@ -333,7 +333,7 @@ public class EntryPoint {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void removeVersion(Version version) {
-		logger.info("Removing version " + version + " ...");
+		logger.debug("Removing version " + version + " ...");
 
 		entityManager.getTransaction().begin();
 
@@ -373,14 +373,14 @@ public class EntryPoint {
 		if(validVersions.size() > keepVersions) {
 			List<Version> versionsToRemove = validVersions.subList(keepVersions, validVersions.size());
 
-			logger.info("Found " + versionsToRemove.size() + " snapshots to remove.");
+			logger.debug("Found " + versionsToRemove.size() + " snapshots to remove.");
 
 			// Remove data from any row mentioning a failed 'vers'
 			for(Version versToRemove : versionsToRemove) {
 				removeVersion(versToRemove);
 			}
 
-			logger.info("Done removing " + versionsToRemove.size() + " old, valid imports.");
+			logger.info("Removed " + versionsToRemove.size() + " old, valid imports.");
 		} else {
 			logger.info("No old versions found (keeping " + validVersions.size() + ".");
 		}

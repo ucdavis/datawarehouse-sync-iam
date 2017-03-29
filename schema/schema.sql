@@ -94,7 +94,8 @@ CREATE TABLE `iam_people` (
   `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_iamid_vers` (`iamId`,`vers`),
-  FULLTEXT KEY `search_key` (`oFirstName`, `oMiddleName`, `oLastName`, `oFullName`, `dFirstName`, `dMiddleName`, `dLastName`, `dFullName`)
+  -- FULLTEXT KEY `search_key` (`oFirstName`, `oMiddleName`, `oLastName`, `oFullName`, `dFirstName`, `dMiddleName`, `dLastName`, `dFullName`)
+  FULLTEXT KEY `search_key` (`oFullName`)
 ) ENGINE=InnoDB AUTO_INCREMENT=252770 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
