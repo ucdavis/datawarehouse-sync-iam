@@ -21,9 +21,9 @@
 	<logger name="org.jboss.logging" level="OFF" />
 	<logger name="EntryPoint" level="INFO" />
 	<logger name="IamLogger" level="INFO" />
-	<logger name="org.springframework.ldap" level="INFO" />
+	<logger name="org.springframework.ldap" level="WARN" />
 
-	<root level="DEBUG">
+	<root level="WARN">
 		<appender-ref ref="STDERR" />
 		<appender-ref ref="STDOUT" />
 	</root>
