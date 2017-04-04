@@ -33,7 +33,7 @@ import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 
 public class EntryPoint {
 	public static String iamApiKey;
-	static Logger logger = LoggerFactory.getLogger("EntryPoint");
+	static private Logger logger = LoggerFactory.getLogger("EntryPoint");
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
 	static int NUM_VALID_OLD_VERSIONS_TO_KEEP = 2;
@@ -129,7 +129,9 @@ public class EntryPoint {
 				configurationProperties.getProperty("LDAP_USER"),
 				configurationProperties.getProperty("LDAP_PASSWORD"));
 		
+		logger.info("Fetching all UCD person UUIDs from LDAP ...");
 		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
+		logger.info("Finished fetching all UCD person UUIDs from LDAP.");
 
 		/**
 		 * Initialize IAM client

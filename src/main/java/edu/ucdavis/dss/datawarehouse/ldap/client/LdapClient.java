@@ -8,12 +8,15 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.DefaultTlsDirContextAuthenticationStrategy;
 import org.springframework.ldap.core.support.LdapContextSource;
 
 public class LdapClient {
+	static private Logger logger = LoggerFactory.getLogger("LdapClient");
 	private LdapTemplate ldapTemplate = null;
 	private String serverUrl, serverBase, serverUser, serverPassword;
 	
@@ -44,9 +47,9 @@ public class LdapClient {
 					attrsToReturn,
 					new AttributeMapper()));
 			
-//			if(i % 10000 == 0) {
-//				System.out.println("i = " + i + ", pct complete = " + String.format("%.5f", ((float)i / (float)maxUuid) * 100.0) + ", allUcdPersonUUIDs.size() = " + allUcdPersonUUIDs.size());
-//			}
+			if(i % 10000 == 0) {
+				logger.debug("i = " + i + ", pct complete = " + String.format("%.5f", ((float)i / (float)maxUuid) * 100.0) + ", allUcdPersonUUIDs.size() = " + allUcdPersonUUIDs.size());
+			}
 		}
 		
 		return allUcdPersonUUIDs;
