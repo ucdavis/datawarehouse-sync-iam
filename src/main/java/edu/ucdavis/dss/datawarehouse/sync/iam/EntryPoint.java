@@ -281,8 +281,8 @@ public class EntryPoint {
 				long timeSoFar = currentTime - additionalStartTime;
 				Date estCompleted = new Date(additionalStartTime + (long)((float)timeSoFar / progress));
 				String logMsg = String.format("\tProgress: %.2f%% (est. completion at %s)", progress * (float)100, estCompleted.toString());
-				logger.debug(logMsg);
-				logger.debug("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
+				logger.info(logMsg);
+				logger.info("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
 			}
 		}
 
