@@ -12,8 +12,6 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import edu.ucdavis.dss.datawarehouse.sync.iam.Version;
-
 @Entity
 @Table( name = "iam_associations" )
 public class IamAssociation {
@@ -27,7 +25,6 @@ public class IamAssociation {
 	private String titleCode, titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
 	private Date createDate, modifyDate;
-	private Date vers;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -187,17 +184,6 @@ public class IamAssociation {
 		this.modifyDate = modifyDate;
 	}
 	
-	@Column
-	public Date getVers() {
-		return vers;
-	}
-	public void setVers(Date vers) {
-		this.vers = vers;
-	}
-	public void markAsVersion(Version vers) {
-		this.vers = vers.getVers();
-	}
-
 	@Override
 	public String toString() {
 		return String.format(
