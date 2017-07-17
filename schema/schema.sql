@@ -45,7 +45,7 @@ CREATE TABLE `iam_contactinfo` (
   `workFax` varchar(16) DEFAULT NULL,
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
-  `workPhone` varchar(16) DEFAULT NULL,
+  `workPhone` varchar(32) DEFAULT NULL,
   `email` varchar(48) DEFAULT NULL,
   `addrCity` varchar(32) DEFAULT NULL,
   `addrState` varchar(2) DEFAULT NULL,
