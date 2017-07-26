@@ -41,7 +41,7 @@ public class IamPersonImportThread implements Runnable {
 			List<IamPerson> people = iamClient.getPersonInfo(iamId);
 			List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
 			List<IamAssociation> associations = iamClient.getAllAssociationsForIamId(iamId);
-
+			
 			if(contactInfos == null) {
 				logger.warn("Unable to fetch contact info for IAM ID " + iamId + ". Skipping.");
 				continue;
@@ -65,15 +65,17 @@ public class IamPersonImportThread implements Runnable {
 				logger.error("EntityManager is not open!");
 				return;
 			}
+			
+			// FIXME: This is duplicating records, not updating them!
 
 			entityManager.getTransaction().begin();
 
 			for(IamAssociation association : associations) {
 				if(entityManager.isOpen()) {
 					try {
-						entityManager.persist( association );
+						entityManager.merge( association );
 					} catch (Exception e) {
-						logger.error("Unable to persist association: " + association);
+						logger.error("Unable to merge association: " + association);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
@@ -89,9 +91,9 @@ public class IamPersonImportThread implements Runnable {
 			for(IamContactInfo contactInfo : contactInfos) {
 				if(entityManager.isOpen()) {
 					try {
-						entityManager.persist( contactInfo );
+						entityManager.merge( contactInfo );
 					} catch (Exception e) {
-						logger.error("Unable to persist contactInfo: " + contactInfo);
+						logger.error("Unable to merge contactInfo: " + contactInfo);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
@@ -107,9 +109,9 @@ public class IamPersonImportThread implements Runnable {
 			for(IamPerson person : people) {
 				if(entityManager.isOpen()) {
 					try {
-						entityManager.persist( person );
+						entityManager.merge( person );
 					} catch (Exception e) {
-						logger.error("Unable to persist person: " + person);
+						logger.error("Unable to merge person: " + person);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
@@ -125,9 +127,9 @@ public class IamPersonImportThread implements Runnable {
 			for(IamPrikerbacct prikerbacct : prikerbaccts) {
 				if(entityManager.isOpen()) {
 					try {
-						entityManager.persist( prikerbacct );
+						entityManager.merge( prikerbacct );
 					} catch (Exception e) {
-						logger.error("Unable to persist prikerbacct: " + prikerbacct);
+						logger.error("Unable to merge prikerbacct: " + prikerbacct);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();

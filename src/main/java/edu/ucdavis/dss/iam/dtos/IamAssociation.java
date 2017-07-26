@@ -3,10 +3,8 @@ package edu.ucdavis.dss.iam.dtos;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -15,34 +13,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity
 @Table( name = "iam_associations" )
 public class IamAssociation {
-	private Long id;
-	private Long iamId;
 	private String deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
 	private boolean isUCDHS;
 	private String bouOrgOId;
-	private String assocRank;
 	private Date assocStartDate, assocEndDate;
 	private String titleCode, titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
 	private Date createDate, modifyDate;
+
+	@EmbeddedId
+	private IamAssociationPK associationPK = new IamAssociationPK();
 	
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	public Long getId() {
-		return id;
+	public IamAssociationPK getId() {
+		return associationPK;
 	}
-	public void setId(Long id) {
-		this.id = id;
+ 
+	public void setId(IamAssociationPK associationPK) {
+		this.associationPK = associationPK;
 	}
-	
-	@Column
+
 	public Long getIamId() {
-		return iamId;
+		return associationPK.getIamId();
 	}
 	public void setIamId(Long iamId) {
-		this.iamId = iamId;
+		this.associationPK.setIamId(iamId);
 	}
-	
+
 	@Column
 	public String getDeptCode() {
 		return deptCode;
@@ -50,7 +46,7 @@ public class IamAssociation {
 	public void setDeptCode(String deptCode) {
 		this.deptCode = deptCode;
 	}
-	
+
 	@Column
 	public String getDeptOfficialName() {
 		return deptOfficialName;
@@ -58,7 +54,7 @@ public class IamAssociation {
 	public void setDeptOfficialName(String deptOfficialName) {
 		this.deptOfficialName = deptOfficialName;
 	}
-	
+
 	@Column
 	public String getDeptDisplayName() {
 		return deptDisplayName;
@@ -66,7 +62,7 @@ public class IamAssociation {
 	public void setDeptDisplayName(String deptDisplayName) {
 		this.deptDisplayName = deptDisplayName;
 	}
-	
+
 	@Column
 	public String getDeptAbbrev() {
 		return deptAbbrev;
@@ -74,7 +70,7 @@ public class IamAssociation {
 	public void setDeptAbbrev(String deptAbbrev) {
 		this.deptAbbrev = deptAbbrev;
 	}
-	
+
 	@Column(name="isUCDHS")
 	@JsonProperty("isUCDHS")
 	public boolean isUCDHS() {
@@ -83,7 +79,7 @@ public class IamAssociation {
 	public void setUCDHS(boolean isUCDHS) {
 		this.isUCDHS = isUCDHS;
 	}
-	
+
 	@Column
 	public String getBouOrgOId() {
 		return bouOrgOId;
@@ -91,15 +87,14 @@ public class IamAssociation {
 	public void setBouOrgOId(String bouOrgOId) {
 		this.bouOrgOId = bouOrgOId;
 	}
-	
-	@Column
+
 	public String getAssocRank() {
-		return assocRank;
+		return associationPK.getAssocRank();
 	}
 	public void setAssocRank(String assocRank) {
-		this.assocRank = assocRank;
+		this.associationPK.setAssocRank(assocRank);
 	}
-	
+
 	@Column
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	public Date getAssocStartDate() {
@@ -108,7 +103,7 @@ public class IamAssociation {
 	public void setAssocStartDate(Date assocStartDate) {
 		this.assocStartDate = assocStartDate;
 	}
-	
+
 	@Column
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	public Date getAssocEndDate() {
@@ -117,7 +112,7 @@ public class IamAssociation {
 	public void setAssocEndDate(Date assocEndDate) {
 		this.assocEndDate = assocEndDate;
 	}
-	
+
 	@Column
 	public String getTitleCode() {
 		return titleCode;
@@ -125,7 +120,7 @@ public class IamAssociation {
 	public void setTitleCode(String titleCode) {
 		this.titleCode = titleCode;
 	}
-	
+
 	@Column
 	public String getTitleOfficialName() {
 		return titleOfficialName;
@@ -133,7 +128,7 @@ public class IamAssociation {
 	public void setTitleOfficialName(String titleOfficialName) {
 		this.titleOfficialName = titleOfficialName;
 	}
-	
+
 	@Column
 	public String getTitleDisplayName() {
 		return titleDisplayName;
@@ -141,7 +136,7 @@ public class IamAssociation {
 	public void setTitleDisplayName(String titleDisplayName) {
 		this.titleDisplayName = titleDisplayName;
 	}
-	
+
 	@Column
 	public String getPositionTypeCode() {
 		return positionTypeCode;
@@ -149,7 +144,7 @@ public class IamAssociation {
 	public void setPositionTypeCode(String positionTypeCode) {
 		this.positionTypeCode = positionTypeCode;
 	}
-	
+
 	@Column
 	public String getPositionType() {
 		return positionType;
@@ -157,7 +152,7 @@ public class IamAssociation {
 	public void setPositionType(String positionType) {
 		this.positionType = positionType;
 	}
-	
+
 	@Column
 	public String getPercentFullTime() {
 		return percentFullTime;
@@ -165,7 +160,7 @@ public class IamAssociation {
 	public void setPercentFullTime(String percentFullTime) {
 		this.percentFullTime = percentFullTime;
 	}
-	
+
 	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateDate() {
@@ -174,7 +169,7 @@ public class IamAssociation {
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
-	
+
 	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getModifyDate() {
@@ -183,11 +178,11 @@ public class IamAssociation {
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format(
-				"IamAssociation[iamId='%s', deptCode='%s', titleCode='%s']",
-				iamId, deptCode, titleCode);
+				"IamAssociation[PK='%s', deptCode='%s', titleCode='%s']",
+				associationPK, deptCode, titleCode);
 	}
 }

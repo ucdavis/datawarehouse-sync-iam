@@ -2,29 +2,18 @@ package edu.ucdavis.dss.iam.dtos;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table( name = "iam_contactinfo" )
 public class IamContactInfo {
-	private Long id;
 	private Long iamId;
 	private String email, hsEmail, campusEmail;
 	private String addrStreet, addrCity, addrState, addrZip, postalAddress;
 	private String workPhone, workCell, workPager, workFax;
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	@Column
 	public Long getIamId() {
 		return iamId;

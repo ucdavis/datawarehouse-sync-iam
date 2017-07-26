@@ -96,7 +96,7 @@ public class EntryPoint {
 		if(departments != null) {
 			entityManager.getTransaction().begin();
 			for(IamDepartment department : departments) {
-				entityManager.persist( department );
+				entityManager.merge( department );
 			}
 			entityManager.getTransaction().commit();
 		} else {
@@ -173,7 +173,7 @@ public class EntryPoint {
 
 		logger.info("Import completed successfully. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
 	}
-
+	
 	// Credit: http://stackoverflow.com/questions/10120709/difference-between-printstacktrace-and-tostring
 	private static String exceptionStacktraceToString(Throwable ex) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

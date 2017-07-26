@@ -4,8 +4,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -15,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity
 @Table( name = "iam_people" )
 public class IamPerson {
-	private Long id;
 	private Long iamId;
 	private String mothraId;
 	private String ppsId;
@@ -29,14 +26,6 @@ public class IamPerson {
 	private Date modifyDate;
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
 	@Column
 	public Long getIamId() {
 		return iamId;
@@ -193,61 +182,61 @@ public class IamPerson {
 	
 	@Column(name="isEmployee")
 	@JsonProperty("isEmployee")
-	public boolean getEmployeeInd() {
+	public Boolean getEmployeeInd() {
 		return employeeInd;
 	}
 	
-	public void setEmployeeInd(boolean employeeInd) {
+	public void setEmployeeInd(Boolean employeeInd) {
 		this.employeeInd = employeeInd;
 	}
 	
 	@Column(name="isHSEmployee")
 	@JsonProperty("isHSEmployee")
-	public boolean getHsEmployeeInd() {
+	public Boolean getHsEmployeeInd() {
 		return hsEmployeeInd;
 	}
 	
-	public void sethsEmployeeInd(boolean hsEmployeeInd) {
+	public void sethsEmployeeInd(Boolean hsEmployeeInd) {
 		this.hsEmployeeInd = hsEmployeeInd;
 	}
 	
 	@Column(name="isFaculty")
 	@JsonProperty("isFaculty")
-	public boolean getFacultyInd() {
+	public Boolean getFacultyInd() {
 		return facultyInd;
 	}
 	
-	public void setFacultyInd(boolean facultyInd) {
+	public void setFacultyInd(Boolean facultyInd) {
 		this.facultyInd = facultyInd;
 	}
 	
 	@Column(name="isStudent")
 	@JsonProperty("isStudent")
-	public boolean getStudentInd() {
+	public Boolean getStudentInd() {
 		return studentInd;
 	}
 	
-	public void setStudentInd(boolean studentInd) {
+	public void setStudentInd(Boolean studentInd) {
 		this.studentInd = studentInd;
 	}
 	
 	@Column(name="isStaff")
 	@JsonProperty("isStaff")
-	public boolean getStaffInd() {
+	public Boolean getStaffInd() {
 		return staffInd;
 	}
 	
-	public void setStaffInd(boolean staffInd) {
+	public void setStaffInd(Boolean staffInd) {
 		this.staffInd = staffInd;
 	}
 	
 	@Column(name="isExternal")
 	@JsonProperty("isExternal")
-	public boolean getExternalInd() {
+	public Boolean getExternalInd() {
 		return externalInd;
 	}
 	
-	public void setExternalInd(boolean externalInd) {
+	public void setExternalInd(Boolean externalInd) {
 		this.externalInd = externalInd;
 	}
 	

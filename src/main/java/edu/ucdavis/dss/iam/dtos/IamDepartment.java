@@ -4,8 +4,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -15,34 +13,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity
 @Table( name = "iam_pps_depts" )
 public class IamDepartment {
-	private Long id;
 	private String orgOId;
 	private String deptCode;
 	private String deptOfficialName;
 	private String deptDisplayName;
 	private String deptAbbrev;
-	private boolean ucdhs;
+	private Boolean ucdhs;
 	private String bouOrgOId;
 	private Date createDate, modifyDate;
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
-	@Column
-	public String getOrgOId() {
-		return orgOId;
-	}
-	
-	public void setOrgOId(String orgOId) {
-		this.orgOId = orgOId;
-	}
-	
 	@Column
 	public String getDeptCode() {
 		return deptCode;
@@ -50,6 +30,15 @@ public class IamDepartment {
 	
 	public void setDeptCode(String deptCode) {
 		this.deptCode = deptCode;
+	}
+
+	@Column
+	public String getOrgOId() {
+		return orgOId;
+	}
+	
+	public void setOrgOId(String orgOId) {
+		this.orgOId = orgOId;
 	}
 	
 	@Column
@@ -81,11 +70,11 @@ public class IamDepartment {
 	
 	@Column(name="isUCDHS")
 	@JsonProperty("isUCDHS")
-	public boolean getUCDHS() {
+	public Boolean getUCDHS() {
 		return ucdhs;
 	}
 	
-	public void setUCDHS(boolean ucdhs) {
+	public void setUCDHS(Boolean ucdhs) {
 		this.ucdhs = ucdhs;
 	}
 	
