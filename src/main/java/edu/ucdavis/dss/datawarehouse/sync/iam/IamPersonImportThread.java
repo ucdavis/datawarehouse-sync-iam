@@ -1,13 +1,18 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.ucdavis.dss.elasticsearch.ESClient;
 import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamAssociation;
 import edu.ucdavis.dss.iam.dtos.IamContactInfo;
@@ -17,21 +22,25 @@ import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 public class IamPersonImportThread implements Runnable {
 	private List<String> uuids = null;
 	private Logger logger = LoggerFactory.getLogger("IamPersonImportThread");
-	private EntityManager entityManager = null;
+	private EntityManagerFactory entityManagerFactory = null;
+	private ESClient client = null;
 	
-	public IamPersonImportThread(List<String> uuids, EntityManager entityManager) {
+	public IamPersonImportThread(List<String> uuids, EntityManagerFactory entityManagerFactory) {
 		this.uuids = uuids;
-		this.entityManager = entityManager;
+		this.entityManagerFactory = entityManagerFactory;
 	}
 
 	@Override
 	public void run() {
 		IamClient iamClient = new IamClient(SettingsUtils.getIamApiKey());
+		EntityManager entityManager = null;
 		int count = 0;
 		Long additionalStartTime = new Date().getTime();
 		
 		logger.debug("Starting IamPersonImportThread ...");
 		
+		client = new edu.ucdavis.dss.elasticsearch.ESClient(SettingsUtils.getElasticSearchHost());
+
 		for(String ucdPersonUUID : uuids) {
 			logger.debug("Importing UUID " + ucdPersonUUID + " ...");
 			
@@ -58,16 +67,16 @@ public class IamPersonImportThread implements Runnable {
 				logger.warn("Unable to fetch associations info for IAM ID " + iamId + ". Skipping.");
 				continue;
 			}
+			
+			entityManager = this.entityManagerFactory.createEntityManager();
 
 			// If an exception happened during the last iteration of the loop,
 			// the entityManager is invalid and will need to be recreated.
 			if(entityManager.isOpen() == false) {
 				logger.error("EntityManager is not open!");
-				return;
+				continue;
 			}
 			
-			// FIXME: This is duplicating records, not updating them!
-
 			entityManager.getTransaction().begin();
 
 			for(IamAssociation association : associations) {
@@ -85,7 +94,7 @@ public class IamPersonImportThread implements Runnable {
 
 			if(entityManager.isOpen() == false) {
 				logger.error("EntityManager is not open!");
-				return;
+				continue;
 			}
 
 			for(IamContactInfo contactInfo : contactInfos) {
@@ -103,7 +112,7 @@ public class IamPersonImportThread implements Runnable {
 
 			if(entityManager.isOpen() == false) {
 				logger.error("EntityManager is not open!");
-				return;
+				continue;
 			}
 
 			for(IamPerson person : people) {
@@ -121,7 +130,7 @@ public class IamPersonImportThread implements Runnable {
 
 			if(entityManager.isOpen() == false) {
 				logger.error("EntityManager is not open!");
-				return;
+				continue;
 			}
 
 			for(IamPrikerbacct prikerbacct : prikerbaccts) {
@@ -139,23 +148,60 @@ public class IamPersonImportThread implements Runnable {
 
 			if(entityManager.isOpen() == false) {
 				logger.error("EntityManager is not open!");
-				return;
+				continue;
 			}
 
 			entityManager.getTransaction().commit();
+			entityManager.close();
+			
+			updateElasticSearchDocument(contactInfos, people, prikerbaccts, associations);
 
 			count++;
 
-			if(count % 100 == 0) {
+			if(count % 250 == 0) {
 				float progress = (float)count / (float)uuids.size();
 				long currentTime = new Date().getTime();
 				long timeSoFar = currentTime - additionalStartTime;
 				Date estCompleted = new Date(additionalStartTime + (long)((float)timeSoFar / progress));
 				String logMsg = String.format("\tProgress: %.2f%% (est. completion at %s)", progress * (float)100, estCompleted.toString());
-				logger.info(logMsg);
-				logger.info("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
+				logger.debug(logMsg);
+				logger.debug("Based on:\n\tprogress: " + progress + "\n\tcurrentTime: " + currentTime + "\n\ttimeSoFar: " + timeSoFar);
 			}
 		}
 	}
+	
+	private void updateElasticSearchDocument(final List<IamContactInfo> contactInfos, final List<IamPerson> people,
+			final List<IamPrikerbacct> prikerbaccts, final List<IamAssociation> associations) {
 
+		if(people.size() == 0) return;
+		if(contactInfos.size() == 0) return;
+		if(prikerbaccts.size() == 0) return;
+		
+		final IamPerson person = people.get(0);
+		final IamContactInfo contactInfo = contactInfos.get(0);
+		final IamPrikerbacct prikerbacct = prikerbaccts.get(0);
+		
+		if(people.size() > 1) { logger.warn("More than one IamPerson found."); }
+		if(contactInfos.size() > 1) { logger.warn("More than one IamContactInfo found."); }
+		if(prikerbaccts.size() > 1) { logger.warn("More than one IamPrikerbacct found."); }
+		
+		try {
+			client.putDocument("dw", "people", person.getIamId().toString(), String.format(
+					"{ \"iamId\": \"%s\", \"dFirstName\": \"%s\", \"dLastName\": \"%s\", \"userId\": \"%s\", \"email\": \"%s\", \"dMiddleName\": \"%s\", \"oFirstName\": \"%s\", \"oMiddleName\": \"%s\", \"oLastName\": \"%s\", \"dFullName\": \"%s\", \"oFullName\": \"%s\" }",
+					person.getIamId(), person.getdFirstName(), person.getdLastName(), prikerbacct.getUserId(), contactInfo.getEmail(), person.getdMiddleName(), person.getoFirstName(), person.getoMiddleName(), person.getoLastName(), person.getdFullName(), person.getoFullName()));
+		} catch (IOException e) {
+			logger.error("Exception occurred while updating ElasticSearch:");
+			logger.error(exceptionStacktraceToString(e));
+		}
+
+	}
+	
+	// Credit: http://stackoverflow.com/questions/10120709/difference-between-printstacktrace-and-tostring
+	private static String exceptionStacktraceToString(Exception e) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream ps = new PrintStream(baos);
+		e.printStackTrace(ps);
+		ps.close();
+		return baos.toString();
+	}
 }

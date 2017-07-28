@@ -24,6 +24,7 @@ public class EntryPoint {
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
 	static final int maxThreads = 30;
+	static final int recordsPerThread = 100;
 
 	// Set up a default uncaught exception handler as Hibernate will not let the process
 	// exit if the main thread dies but Hibernate resources are not cleaned up.
@@ -77,7 +78,7 @@ public class EntryPoint {
 				SettingsUtils.getLdapBase(),
 				SettingsUtils.getLdapUser(),
 				SettingsUtils.getLdapPassword());
-
+ 
 		logger.info("Fetching all UCD person UUIDs from LDAP ...");
 		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
 		logger.info("Finished fetching all UCD person UUIDs from LDAP.");
@@ -110,9 +111,9 @@ public class EntryPoint {
 
 		List<Thread> threads = new ArrayList<Thread>();
 		
-		List<List<String>> chunkedUuids = chunkList(allUcdPersonUUIDs, maxThreads);
+		List<List<String>> chunkedUuids = chunkList(allUcdPersonUUIDs, recordsPerThread);
 		for(List<String> uuids : chunkedUuids) {
-			Thread t = new Thread(new IamPersonImportThread(uuids, entityManagerFactory.createEntityManager()));
+			Thread t = new Thread(new IamPersonImportThread(uuids, entityManagerFactory));
 			t.setUncaughtExceptionHandler(uncaughtException);
 			threads.add(t);
 		}
@@ -185,7 +186,15 @@ public class EntryPoint {
 		return baos.toString();
 	}
 
-	// Credit: http://stackoverflow.com/questions/2895342/java-how-can-i-split-an-arraylist-in-multiple-small-arraylists
+	/**
+	 * Return L lists of equal size composed with the contents of list
+	 * 
+	 * Credit: http://stackoverflow.com/questions/2895342/java-how-can-i-split-an-arraylist-in-multiple-small-arraylists
+	 * 
+	 * @param list - list to be chunked
+	 * @param L    - desired size of each list
+	 * @return
+	 */
 	static <T> List<List<T>> chunkList(List<T> list, final int L) {
 		List<List<T>> parts = new ArrayList<List<T>>();
 		final int N = list.size();

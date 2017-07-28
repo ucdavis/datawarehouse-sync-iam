@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 public class SettingsUtils {
 	private static Logger logger = LoggerFactory.getLogger("SettingsUtils");
 	private static String iamApiKey, ldapUrl, ldapBase, ldapUser, ldapPassword;
+	private static String elasticSearchHost;
 
 	public static boolean initialize() {
 		/**
@@ -35,6 +36,7 @@ public class SettingsUtils {
 			ldapBase = prop.getProperty("LDAP_BASE");
 			ldapUser = prop.getProperty("LDAP_USER");
 			ldapPassword = prop.getProperty("LDAP_PASSWORD");
+			elasticSearchHost = prop.getProperty("ELASTICSEARCH_HOST");
 			
 			logger.debug("Settings file '" + filename + "' found.");
 
@@ -66,5 +68,9 @@ public class SettingsUtils {
 
 	public static String getIamApiKey() {
 		return iamApiKey;
+	}
+
+	public static String getElasticSearchHost() {
+		return elasticSearchHost;
 	}
 }
