@@ -24,6 +24,7 @@ public class IamPersonImportThread implements Runnable {
 	private Logger logger = LoggerFactory.getLogger("IamPersonImportThread");
 	private EntityManagerFactory entityManagerFactory = null;
 	private ESClient client = null;
+	private boolean skipElasticUpdate = false;
 	
 	public IamPersonImportThread(List<String> uuids, EntityManagerFactory entityManagerFactory) {
 		this.uuids = uuids;
@@ -84,75 +85,87 @@ public class IamPersonImportThread implements Runnable {
 					try {
 						entityManager.merge( association );
 					} catch (Exception e) {
-						logger.error("Unable to merge association: " + association);
+						logger.error("Skipping IAM ID: " + iamId + ". Unable to merge association: " + association);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
+						continue;
 					}
 				}
 			}
 
-			if(entityManager.isOpen() == false) {
-				logger.error("EntityManager is not open!");
-				continue;
-			}
+//			if(entityManager.isOpen() == false) {
+//				logger.error("EntityManager is not open!");
+//				continue;
+//			}
 
 			for(IamContactInfo contactInfo : contactInfos) {
 				if(entityManager.isOpen()) {
 					try {
 						entityManager.merge( contactInfo );
 					} catch (Exception e) {
-						logger.error("Unable to merge contactInfo: " + contactInfo);
+						logger.error("Skipping IAM ID: " + iamId + ". Unable to merge contactInfo: " + contactInfo);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
+						continue;
 					}
 				}
 			}
 
-			if(entityManager.isOpen() == false) {
-				logger.error("EntityManager is not open!");
-				continue;
-			}
+//			if(entityManager.isOpen() == false) {
+//				logger.error("EntityManager is not open!");
+//				continue;
+//			}
 
 			for(IamPerson person : people) {
 				if(entityManager.isOpen()) {
 					try {
 						entityManager.merge( person );
 					} catch (Exception e) {
-						logger.error("Unable to merge person: " + person);
+						logger.error("Skipping IAM ID: " + iamId + ". Unable to merge person: " + person);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
+						continue;
 					}
 				}
 			}
 
-			if(entityManager.isOpen() == false) {
-				logger.error("EntityManager is not open!");
-				continue;
-			}
+//			if(entityManager.isOpen() == false) {
+//				logger.error("EntityManager is not open!");
+//				continue;
+//			}
 
 			for(IamPrikerbacct prikerbacct : prikerbaccts) {
 				if(entityManager.isOpen()) {
 					try {
 						entityManager.merge( prikerbacct );
 					} catch (Exception e) {
-						logger.error("Unable to merge prikerbacct: " + prikerbacct);
+						logger.error("Skipping IAM ID: " + iamId + ". Unable to merge prikerbacct: " + prikerbacct);
 						e.printStackTrace();
 						entityManager.getTransaction().rollback();
 						if(entityManager.isOpen()) entityManager.close();
+						continue;
 					}
 				}
 			}
 
-			if(entityManager.isOpen() == false) {
-				logger.error("EntityManager is not open!");
+//			if(entityManager.isOpen() == false) {
+//				logger.error("EntityManager is not open!");
+//				continue;
+//			}
+
+			try {
+				entityManager.getTransaction().commit();
+				entityManager.close();
+			} catch (Exception e) {
+				logger.error("Skipping IAM ID: " + iamId + ". Unable to commit transaction.");
+				e.printStackTrace();
+				entityManager.getTransaction().rollback();
+				if(entityManager.isOpen()) entityManager.close();
 				continue;
 			}
-
-			entityManager.getTransaction().commit();
-			entityManager.close();
 			
 			updateElasticSearchDocument(contactInfos, people, prikerbaccts, associations);
 
@@ -173,6 +186,9 @@ public class IamPersonImportThread implements Runnable {
 	private void updateElasticSearchDocument(final List<IamContactInfo> contactInfos, final List<IamPerson> people,
 			final List<IamPrikerbacct> prikerbaccts, final List<IamAssociation> associations) {
 
+		// Flag will be true if AWS SDK has had trouble this run already, else false.
+		if(skipElasticUpdate) return;
+
 		if(people.size() == 0) return;
 		if(contactInfos.size() == 0) return;
 		if(prikerbaccts.size() == 0) return;
@@ -189,11 +205,16 @@ public class IamPersonImportThread implements Runnable {
 			client.putDocument("dw", "people", person.getIamId().toString(), String.format(
 					"{ \"iamId\": \"%s\", \"dFirstName\": \"%s\", \"dLastName\": \"%s\", \"userId\": \"%s\", \"email\": \"%s\", \"dMiddleName\": \"%s\", \"oFirstName\": \"%s\", \"oMiddleName\": \"%s\", \"oLastName\": \"%s\", \"dFullName\": \"%s\", \"oFullName\": \"%s\" }",
 					person.getIamId(), person.getdFirstName(), person.getdLastName(), prikerbacct.getUserId(), contactInfo.getEmail(), person.getdMiddleName(), person.getoFirstName(), person.getoMiddleName(), person.getoLastName(), person.getdFullName(), person.getoFullName()));
-		} catch (IOException e) {
-			logger.error("Exception occurred while updating ElasticSearch:");
+		} catch (com.amazonaws.SdkClientException e) {
+			logger.error("SdkClientException occurred while updating ElasticSearch:");
 			logger.error(exceptionStacktraceToString(e));
+			skipElasticUpdate = true;
+			return;
+		} catch (IOException e) {
+			logger.error("IOException occurred while updating ElasticSearch:");
+			logger.error(exceptionStacktraceToString(e));
+			return;
 		}
-
 	}
 	
 	// Credit: http://stackoverflow.com/questions/10120709/difference-between-printstacktrace-and-tostring
