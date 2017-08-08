@@ -48,6 +48,7 @@ public class ESClient {
 		System.out.println(document);
 
 		try {
+			@SuppressWarnings("deprecation")
 			Response<Void> response =
 					client.execute(request, responseHandler, errorHandler, context);
 			
@@ -78,6 +79,7 @@ public class ESClient {
 		MyErrorHandler errorHandler = new MyErrorHandler();
 
 		try {
+			@SuppressWarnings("deprecation")
 			Response<Void> response =
 					client.execute(request, responseHandler, errorHandler, context);
 			
@@ -133,7 +135,13 @@ public class ESClient {
 	}
 
 	static String convertStreamToString(java.io.InputStream is) {
-		java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-		return s.hasNext() ? s.next() : "";
+		java.util.Scanner s = new java.util.Scanner(is);
+		s.useDelimiter("\\A");
+		
+		String ret = s.hasNext() ? s.next() : "";
+
+		s.close();
+		
+		return ret;
 	}
 }
