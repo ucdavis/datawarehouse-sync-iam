@@ -101,7 +101,7 @@ public class ESClient {
 
 			InputStream responseStream = response.getContent();
 			String responseString = convertStreamToString(responseStream);
-			System.out.println(responseString);
+			//System.out.println(responseString);
 
 			AmazonWebServiceResponse<T> awsResponse = new AmazonWebServiceResponse<T>();
 			return awsResponse;
