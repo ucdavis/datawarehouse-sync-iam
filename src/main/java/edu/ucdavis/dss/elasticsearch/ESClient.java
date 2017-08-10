@@ -44,8 +44,8 @@ public class ESClient {
 		MyHttpResponseHandler<Void> responseHandler = new MyHttpResponseHandler<Void>();
 		MyErrorHandler errorHandler = new MyErrorHandler();
 
-		System.out.println("document:");
-		System.out.println(document);
+//		System.out.println("document:");
+//		System.out.println(document);
 
 		try {
 			@SuppressWarnings("deprecation")
