@@ -197,9 +197,9 @@ public class IamPersonImportThread implements Runnable {
 		final IamContactInfo contactInfo = contactInfos.get(0);
 		final IamPrikerbacct prikerbacct = prikerbaccts.get(0);
 		
-		if(people.size() > 1) { logger.warn("More than one IamPerson found."); }
-		if(contactInfos.size() > 1) { logger.warn("More than one IamContactInfo found."); }
-		if(prikerbaccts.size() > 1) { logger.warn("More than one IamPrikerbacct found."); }
+		if(people.size() > 1) { logger.warn("More than one IamPerson found for IAM ID: " + person.getIamId()); }
+		if(contactInfos.size() > 1) { logger.warn("More than one IamContactInfo found for IAM ID: " + person.getIamId()); }
+		if(prikerbaccts.size() > 1) { logger.warn("More than one IamPrikerbacct found for IAM ID: " + person.getIamId()); }
 		
 		try {
 			client.putDocument("dw", "people", person.getIamId().toString(), String.format(
