@@ -9,6 +9,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +85,12 @@ public class IamPersonImportThread implements Runnable {
 				if(entityManager.isOpen()) {
 					try {
 						entityManager.merge( association );
+					} catch (HibernateException e) {
+						logger.error("Skipping IAM ID: " + iamId + " due to Hibernate error. Unable to merge association: " + association);
+						e.printStackTrace();
+						entityManager.getTransaction().rollback();
+						if(entityManager.isOpen()) entityManager.close();
+						continue;
 					} catch (Exception e) {
 						logger.error("Skipping IAM ID: " + iamId + ". Unable to merge association: " + association);
 						e.printStackTrace();
