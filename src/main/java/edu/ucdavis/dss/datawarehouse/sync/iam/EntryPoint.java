@@ -79,9 +79,9 @@ public class EntryPoint {
 				SettingsUtils.getLdapUser(),
 				SettingsUtils.getLdapPassword());
  
-		logger.info("Fetching all UCD person UUIDs from LDAP ...");
+		logger.debug("Fetching all UCD person UUIDs from LDAP ...");
 		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
-		logger.info("Finished fetching all UCD person UUIDs from LDAP.");
+		logger.debug("Finished fetching all UCD person UUIDs from LDAP.");
 
 		/**
 		 * Initialize IAM client
@@ -91,7 +91,7 @@ public class EntryPoint {
 		/**
 		 * Extract and load all departments from IAM
 		 */
-		logger.info("Persisting all departments ...");
+		logger.debug("Persisting all departments ...");
 		List<IamDepartment> departments = iamClient.getAllDepartments();
 
 		if(departments != null) {
@@ -107,7 +107,7 @@ public class EntryPoint {
 		
 		entityManager.close();
 		
-		logger.info("Persisting all people ...");
+		logger.debug("Persisting all people ...");
 
 		List<Thread> threads = new ArrayList<Thread>();
 		

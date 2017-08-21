@@ -18,13 +18,14 @@
 		<filter class="edu.ucdavis.dss.logging.LogbackStdErrFilter" />
 	</appender>
 
-	<logger name="org.hibernate" level="INFO" />
+	<logger name="com.zaxxer.hikari.HikariDataSource" level="WARN" />
+	<logger name="org.hibernate" level="WARN" />
 	<logger name="org.jboss.logging" level="OFF" />
 	<logger name="EntryPoint" level="INFO" />
 	<logger name="IamLogger" level="INFO" />
 	<logger name="LdapClient" level="INFO" />
-	<logger name="org.springframework.ldap" level="INFO" />
-	<logger name="IamPersonImportThread" level="INFO" />
+	<logger name="org.springframework.ldap" level="WARN" />
+	<logger name="IamPersonImportThread" level="WARN" />
 
 	<root level="INFO">
 		<appender-ref ref="STDERR" />
