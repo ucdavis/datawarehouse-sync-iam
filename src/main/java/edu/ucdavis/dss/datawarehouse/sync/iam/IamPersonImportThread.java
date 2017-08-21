@@ -13,6 +13,8 @@ import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 import edu.ucdavis.dss.elasticsearch.ESClient;
 import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamAssociation;
@@ -209,9 +211,22 @@ public class IamPersonImportThread implements Runnable {
 		if(prikerbaccts.size() > 1) { logger.warn("More than one IamPrikerbacct found for IAM ID: " + person.getIamId()); }
 		
 		try {
-			client.putDocument("dw", "people", person.getIamId().toString(), String.format(
-					"{ \"iamId\": \"%s\", \"dFirstName\": \"%s\", \"dLastName\": \"%s\", \"userId\": \"%s\", \"email\": \"%s\", \"dMiddleName\": \"%s\", \"oFirstName\": \"%s\", \"oMiddleName\": \"%s\", \"oLastName\": \"%s\", \"dFullName\": \"%s\", \"oFullName\": \"%s\" }",
-					person.getIamId(), person.getdFirstName(), person.getdLastName(), prikerbacct.getUserId(), contactInfo.getEmail(), person.getdMiddleName(), person.getoFirstName(), person.getoMiddleName(), person.getoLastName(), person.getdFullName(), person.getoFullName()));
+			Gson gson = new Gson();
+			ESPersonDTO esPerson = new ESPersonDTO();
+			
+			esPerson.setIamId(person.getIamId().toString());
+			esPerson.setdFirstName(person.getdFirstName());
+			esPerson.setdLastName(person.getdLastName());
+			esPerson.setUserId(prikerbacct.getUserId());
+			esPerson.setEmail(contactInfo.getEmail());
+			esPerson.setdMiddleName(person.getdMiddleName());
+			esPerson.setoFirstName(person.getoFirstName());
+			esPerson.setoMiddleName(person.getoMiddleName());
+			esPerson.setoLastName(person.getoLastName());
+			esPerson.setdFullName(person.getdFullName());
+			esPerson.setoFullName(person.getoFullName());
+			
+			client.putDocument("dw", "people", person.getIamId().toString(), gson.toJson(esPerson));
 		} catch (com.amazonaws.SdkClientException e) {
 			logger.error("SdkClientException occurred while updating ElasticSearch:");
 			logger.error(exceptionStacktraceToString(e));
