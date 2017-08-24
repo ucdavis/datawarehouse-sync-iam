@@ -41,8 +41,8 @@ import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 
 public class IamClient {
 	private final Logger logger = LoggerFactory.getLogger("IamLogger");
-	private final int TIMEOUT = 25000; // milliseconds
-	private final int MAX_RETRIES = 5;
+	private final int TIMEOUT = 30000; // milliseconds
+	private final int MAX_RETRIES = 3;
 
 	private CloseableHttpClient httpclient;
 	private HttpHost targetHost;
