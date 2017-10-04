@@ -2,8 +2,11 @@
 .classpath
 .project
 .settings
+.idea
 
 # Ignore compiled output
 target
 
 /bin/
+
+datawarehouse-sync-iam.iml
