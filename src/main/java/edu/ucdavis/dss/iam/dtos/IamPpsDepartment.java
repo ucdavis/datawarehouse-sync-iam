@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table( name = "iam_pps_depts" )
-public class IamDepartment {
+public class IamPpsDepartment {
 	private String orgOId;
 	private String deptCode;
 	private String deptOfficialName;

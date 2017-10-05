@@ -6,13 +6,13 @@ import javax.persistence.Embeddable;
 
 @SuppressWarnings("serial")
 @Embeddable
-public class IamAssociationPK implements Serializable {
+public class IamPpsAssociationPK implements Serializable {
 	protected Long iamId;
 	protected String assocRank;
 
-	public IamAssociationPK() {}
+	public IamPpsAssociationPK() {}
 
-	public IamAssociationPK(Long iamId, String assocRank) {
+	public IamPpsAssociationPK(Long iamId, String assocRank) {
 		this.iamId = iamId;
 		this.assocRank = assocRank;
 	}
@@ -34,7 +34,7 @@ public class IamAssociationPK implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		IamAssociationPK other = (IamAssociationPK) obj;
+		IamPpsAssociationPK other = (IamPpsAssociationPK) obj;
 		if (assocRank == null) {
 			if (other.assocRank != null)
 				return false;

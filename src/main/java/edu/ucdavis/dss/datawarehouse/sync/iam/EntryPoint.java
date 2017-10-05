@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.ucdavis.dss.datawarehouse.ldap.client.LdapClient;
 import edu.ucdavis.dss.iam.client.IamClient;
-import edu.ucdavis.dss.iam.dtos.IamDepartment;
+import edu.ucdavis.dss.iam.dtos.IamPpsDepartment;
 
 public class EntryPoint {
 	static private Logger logger = LoggerFactory.getLogger("EntryPoint");
@@ -32,7 +32,7 @@ public class EntryPoint {
 		public void uncaughtException(Thread t, Throwable e) {
 			logger.error("Unhandled exception in thread: " + t.getName());
 			logger.error("Exception: " + e.toString());
-			logger.error(exceptionStacktraceToString(e));
+			logger.error(ExceptionUtils.stacktraceToString(e));
 
 			// Clean up Hibernate
 			if((entityManager != null) && (entityManager.isOpen())) { entityManager.close(); }
@@ -92,11 +92,11 @@ public class EntryPoint {
 		 * Extract and load all departments from IAM
 		 */
 		logger.debug("Persisting all departments ...");
-		List<IamDepartment> departments = iamClient.getAllDepartments();
+		List<IamPpsDepartment> departments = iamClient.getAllDepartments();
 
 		if(departments != null) {
 			entityManager.getTransaction().begin();
-			for(IamDepartment department : departments) {
+			for(IamPpsDepartment department : departments) {
 				entityManager.merge( department );
 			}
 			entityManager.getTransaction().commit();
@@ -175,17 +175,6 @@ public class EntryPoint {
 		logger.info("Import completed successfully. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
 	}
 	
-	// Credit: http://stackoverflow.com/questions/10120709/difference-between-printstacktrace-and-tostring
-	private static String exceptionStacktraceToString(Throwable ex) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintStream ps = new PrintStream(baos);
-
-		ex.printStackTrace(ps);
-		ps.close();
-
-		return baos.toString();
-	}
-
 	/**
 	 * Return L lists of equal size composed with the contents of list
 	 * 

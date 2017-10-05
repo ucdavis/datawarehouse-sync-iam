@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table( name = "iam_associations" )
-public class IamAssociation {
+public class IamPpsAssociation {
 	private String deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
 	private boolean isUCDHS;
 	private String bouOrgOId;
@@ -22,13 +22,13 @@ public class IamAssociation {
 	private Date createDate, modifyDate;
 
 	@EmbeddedId
-	private IamAssociationPK associationPK = new IamAssociationPK();
+	private IamPpsAssociationPK associationPK = new IamPpsAssociationPK();
 	
-	public IamAssociationPK getId() {
+	public IamPpsAssociationPK getId() {
 		return associationPK;
 	}
  
-	public void setId(IamAssociationPK associationPK) {
+	public void setId(IamPpsAssociationPK associationPK) {
 		this.associationPK = associationPK;
 	}
 
