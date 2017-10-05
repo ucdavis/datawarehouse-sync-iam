@@ -1,11 +1,11 @@
 --
--- Table structure for table `iam_associations`
+-- Table structure for table `iam_pps_associations`
 --
 
-DROP TABLE IF EXISTS `iam_associations`;
+DROP TABLE IF EXISTS `iam_pps_associations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `iam_associations` (
+CREATE TABLE `iam_pps_associations` (
   `deptCode` varchar(6) NOT NULL,
   `deptOfficialName` varchar(64) NOT NULL,
   `deptDisplayName` varchar(64) NOT NULL,
@@ -28,6 +28,34 @@ CREATE TABLE `iam_associations` (
   `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=905891 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `iam_sis_associations`
+--
+
+DROP TABLE IF EXISTS `iam_sis_associations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `iam_sis_associations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `iamId` bigint(20) NOT NULL,
+  `levelCode` varchar(2) NOT NULL,
+  `levelName` varchar(32) NOT NULL,
+  `classCode` varchar(2) NULL,
+  `className` varchar(32) NULL,
+  `collegeCode` varchar(2) NULL,
+  `collegeName` varchar(32) NOT NULL,
+  `assocRank` varchar(1) NOT NULL,
+  `assocStartDate` datetime NULL,
+  `assocEndDate` datetime NULL,
+  `majorCode` varchar(4) NOT NULL,
+  `majorName` varchar(32) NOT NULL,
+  `fepraCode` varchar(1) NULL,
+  `createDate` datetime NOT NULL,
+  `modifyDate` datetime NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -131,7 +159,7 @@ DROP TABLE IF EXISTS `iam_prikerbacct`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `iam_prikerbacct` (
   `userId` varchar(32) NOT NULL,
-  `uuId` varchar(16) NOT NULL,
+  `uuId` varchar(32) NOT NULL,
   `createDate` datetime NOT NULL,
   `claimDate` datetime DEFAULT NULL,
   `expireDate` datetime DEFAULT NULL,

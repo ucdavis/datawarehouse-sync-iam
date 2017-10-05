@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@Table( name = "iam_associations" )
+@Table( name = "iam_pps_associations" )
 public class IamPpsAssociation {
 	private String deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
 	private boolean isUCDHS;
@@ -27,7 +27,6 @@ public class IamPpsAssociation {
 	public IamPpsAssociationPK getId() {
 		return associationPK;
 	}
- 
 	public void setId(IamPpsAssociationPK associationPK) {
 		this.associationPK = associationPK;
 	}
@@ -182,7 +181,7 @@ public class IamPpsAssociation {
 	@Override
 	public String toString() {
 		return String.format(
-				"IamAssociation[PK='%s', deptCode='%s', titleCode='%s']",
+				"IamPpsAssociation[PK='%s', deptCode='%s', titleCode='%s']",
 				associationPK, deptCode, titleCode);
 	}
 }

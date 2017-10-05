@@ -1,9 +1,6 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
-import edu.ucdavis.dss.iam.dtos.IamContactInfo;
-import edu.ucdavis.dss.iam.dtos.IamPerson;
-import edu.ucdavis.dss.iam.dtos.IamPpsAssociation;
-import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
+import edu.ucdavis.dss.iam.dtos.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +20,6 @@ public class ESPersonDTO {
 	@Getter @Setter private List<IamContactInfo> contactInfos;
 	@Getter @Setter private List<IamPerson> people;
 	@Getter @Setter private List<IamPrikerbacct> prikerbaccts;
-	@Getter @Setter private List<IamPpsAssociation> associations;
+	@Getter @Setter private List<IamPpsAssociation> ppsAssociations;
+	@Getter @Setter private List<IamSisAssociation> sisAssociations;
 }

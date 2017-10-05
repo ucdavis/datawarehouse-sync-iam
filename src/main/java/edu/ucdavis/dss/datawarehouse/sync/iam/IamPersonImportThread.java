@@ -1,14 +1,13 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import edu.ucdavis.dss.iam.dtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +15,6 @@ import com.google.gson.Gson;
 
 import edu.ucdavis.dss.elasticsearch.ESClient;
 import edu.ucdavis.dss.iam.client.IamClient;
-import edu.ucdavis.dss.iam.dtos.IamPpsAssociation;
-import edu.ucdavis.dss.iam.dtos.IamContactInfo;
-import edu.ucdavis.dss.iam.dtos.IamPerson;
-import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 
 public class IamPersonImportThread implements Runnable {
 	private List<String> uuids = null;
@@ -58,9 +53,10 @@ public class IamPersonImportThread implements Runnable {
 				List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 				List<IamPerson> people = iamClient.getPersonInfo(iamId);
 				List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
-				List<IamPpsAssociation> associations = iamClient.getAllAssociationsForIamId(iamId);
+				List<IamPpsAssociation> ppsAssociations = iamClient.getAllPpsAssociationsForIamId(iamId);
+				List<IamSisAssociation> sisAssociations = iamClient.getAllSisAssociationsForIamId(iamId);
 
-				if ((contactInfos == null) || (people == null) || (prikerbaccts == null) || (associations == null)) {
+				if ((contactInfos == null) || (people == null) || (prikerbaccts == null) || (ppsAssociations == null)) {
 					logger.warn("Unable to fetch from IAM for IAM ID " + iamId);
 					retryCount++;
 					continue;
@@ -71,20 +67,34 @@ public class IamPersonImportThread implements Runnable {
 					entityManager = this.entityManagerFactory.createEntityManager();
 					entityManager.getTransaction().begin();
 
-					for (IamPpsAssociation association : associations) {
-						entityManager.merge(association);
+					if(ppsAssociations != null) {
+						for (IamPpsAssociation association : ppsAssociations) {
+							entityManager.merge(association);
+						}
 					}
 
-					for (IamContactInfo contactInfo : contactInfos) {
-						entityManager.merge(contactInfo);
+					if(sisAssociations != null) {
+						for (IamSisAssociation association : sisAssociations) {
+							entityManager.merge(association);
+						}
 					}
 
-					for (IamPerson person : people) {
-						entityManager.merge(person);
+					if(contactInfos != null) {
+						for (IamContactInfo contactInfo : contactInfos) {
+							entityManager.merge(contactInfo);
+						}
 					}
 
-					for (IamPrikerbacct prikerbacct : prikerbaccts) {
-						entityManager.merge(prikerbacct);
+					if(people != null) {
+						for (IamPerson person : people) {
+							entityManager.merge(person);
+						}
+					}
+
+					if(prikerbaccts != null) {
+						for (IamPrikerbacct prikerbacct : prikerbaccts) {
+							entityManager.merge(prikerbacct);
+						}
 					}
 
 					entityManager.getTransaction().commit();
@@ -106,12 +116,12 @@ public class IamPersonImportThread implements Runnable {
 					continue;
 				}
 
-				updateElasticSearchDocument(contactInfos, people, prikerbaccts, associations);
+				updateElasticSearchDocument(contactInfos, people, prikerbaccts, ppsAssociations, sisAssociations);
 			}
 
 			if(retryCount == IMPORT_RETRY_COUNT) {
 				logger.error("Skipping ucdPersonUUID: " + ucdPersonUUID + ". Unable to commit transaction.");
-				logger.error("Last exception was:");
+				logger.error("Last exception:");
 				logger.error(ExceptionUtils.stacktraceToString(lastException));
 			}
 
@@ -130,7 +140,8 @@ public class IamPersonImportThread implements Runnable {
 	}
 	
 	private void updateElasticSearchDocument(final List<IamContactInfo> contactInfos, final List<IamPerson> people,
-			final List<IamPrikerbacct> prikerbaccts, final List<IamPpsAssociation> associations) {
+			final List<IamPrikerbacct> prikerbaccts, final List<IamPpsAssociation> ppsAssociations,
+											 final List<IamSisAssociation> sisAssociations) {
 
 		// Flag will be true if AWS SDK has had trouble this run already, else false.
 		if(skipElasticUpdate) return;
@@ -162,7 +173,8 @@ public class IamPersonImportThread implements Runnable {
 			esPerson.setPeople(people);
 			esPerson.setContactInfos(contactInfos);
 			esPerson.setPrikerbaccts(prikerbaccts);
-			esPerson.setAssociations(associations);
+			esPerson.setPpsAssociations(ppsAssociations);
+			esPerson.setSisAssociations(sisAssociations);
 			
 			client.putDocument("dw", "people", person.getIamId().toString(), gson.toJson(esPerson));
 		} catch (com.amazonaws.SdkClientException e) {

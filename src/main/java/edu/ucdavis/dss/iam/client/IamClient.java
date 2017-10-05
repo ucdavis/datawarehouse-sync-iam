@@ -12,6 +12,7 @@ import java.util.List;
 import javax.net.ssl.SSLException;
 
 import edu.ucdavis.dss.datawarehouse.sync.iam.ExceptionUtils;
+import edu.ucdavis.dss.iam.dtos.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
@@ -33,12 +34,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import edu.ucdavis.dss.iam.dtos.IamPpsAssociation;
-import edu.ucdavis.dss.iam.dtos.IamContactInfo;
-import edu.ucdavis.dss.iam.dtos.IamPpsDepartment;
-import edu.ucdavis.dss.iam.dtos.IamPerson;
-import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
 
 public class IamClient {
 	private final Logger logger = LoggerFactory.getLogger("IamLogger");
@@ -153,11 +148,11 @@ public class IamClient {
 	}
 
 	/**
-	 * Returns a list of all associations for the given IAM ID
+	 * Returns a list of all PPS associations for the given IAM ID
 	 * 
-	 * @return list of associations as IamAssociation DTOs
+	 * @return list of PPS associations as IamPpsAssociation DTOs
 	 */
-	public List<IamPpsAssociation> getAllAssociationsForIamId(Long iamId) {
+	public List<IamPpsAssociation> getAllPpsAssociationsForIamId(Long iamId) {
 		String url = "/api/iam/associations/pps/" + iamId;
 		HttpGet request = new HttpGet(url + "?v=1.0&key=" + apiKey);
 		List<IamPpsAssociation> associations = null;
@@ -184,6 +179,51 @@ public class IamClient {
 								List.class, IamPpsAssociation.class));
 			} else {
 				logger.warn("/api/iam/associations/pps/" + iamId + " response from IAM not understood or was empty/null");
+
+				return null;
+			}
+
+			response.close();
+		} catch (IOException e) {
+			logger.error(ExceptionUtils.stacktraceToString(e));
+			return null;
+		}
+
+		return associations;
+	}
+
+	/**
+	 * Returns a list of all SIS associations for the given IAM ID
+	 *
+	 * @return list of SIS associations as IamSisAssociation DTOs
+	 */
+	public List<IamSisAssociation> getAllSisAssociationsForIamId(Long iamId) {
+		String url = "/api/iam/associations/sis/" + iamId;
+		HttpGet request = new HttpGet(url + "?v=1.0&key=" + apiKey);
+		List<IamSisAssociation> associations = null;
+
+		try {
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
+			request.setConfig(requestConfig);
+
+			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
+
+			HttpEntity entity = response.getEntity();
+
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
+			JsonNode arrNode = rootNode.findPath("results");
+
+			if ((arrNode != null) && !arrNode.isNull()) {
+				associations = mapper.readValue(
+						arrNode.toString(),
+						mapper.getTypeFactory().constructCollectionType(
+								List.class, IamSisAssociation.class));
+			} else {
+				logger.warn("/api/iam/associations/sis/" + iamId + " response from IAM not understood or was empty/null");
 
 				return null;
 			}
@@ -389,31 +429,24 @@ public class IamClient {
 				int executionCount,
 				HttpContext context) {
 
-			logger.error("retry handler called");
-
 			if (executionCount >= MAX_RETRIES) {
 				// Do not retry if over max retry count
-				logger.error("--over max count");
+				logger.error("A HTTP request exceeded its maximum retries.");
 				return false;
 			}
 			if (exception instanceof InterruptedIOException) {
-				// Timeout
-				logger.error("--timeout");
-				return false;
+				return true;
 			}
 			if (exception instanceof UnknownHostException) {
 				// Unknown host
-				logger.error("--unknown host");
 				return false;
 			}
 			if (exception instanceof ConnectTimeoutException) {
-				// Connection refused
-				logger.error("--connection refused");
-				return false;
+				// Connection timed out
+				return true;
 			}
 			if (exception instanceof SSLException) {
 				// SSL handshake exception
-				logger.error("--ssl handshake exception");
 				return false;
 			}
 
@@ -422,11 +455,9 @@ public class IamClient {
 			boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
 			if (idempotent) {
 				// Retry if the request is considered idempotent
-				logger.error("--will retry");
 				return true;
 			}
 
-			logger.error("--will not retry");
 			return false;
 		}
 	};
