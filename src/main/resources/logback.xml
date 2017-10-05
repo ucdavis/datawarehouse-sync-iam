@@ -19,7 +19,7 @@
 	</appender>
 
 	<logger name="com.zaxxer.hikari.HikariDataSource" level="WARN" />
-	<logger name="org.hibernate" level="WARN" />
+	<logger name="org.hibernate" level="OFF" />
 	<logger name="org.jboss.logging" level="OFF" />
 	<logger name="EntryPoint" level="INFO" />
 	<logger name="IamLogger" level="INFO" />
