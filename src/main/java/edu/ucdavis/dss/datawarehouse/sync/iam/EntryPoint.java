@@ -1,7 +1,5 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -69,7 +67,12 @@ public class EntryPoint {
 			System.exit(-1);
 		}
 
-		entityManager = entityManagerFactory.createEntityManager();
+		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
+			logger.error("Unable to import PPS departments! Will continue ...");
+		}
+		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
+			logger.error("Unable to import BOUs! Will continue ...");
+		}
 
 		/**
 		 * Get a list of all possible ucdPersonUUIDs using LDAP
@@ -83,30 +86,6 @@ public class EntryPoint {
 		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
 		logger.debug("Finished fetching all UCD person UUIDs from LDAP.");
 
-		/**
-		 * Initialize IAM client
-		 */
-		IamClient iamClient = new IamClient(SettingsUtils.getIamApiKey());
-
-		/**
-		 * Extract and load all departments from IAM
-		 */
-		logger.debug("Persisting all departments ...");
-		List<IamPpsDepartment> departments = iamClient.getAllDepartments();
-
-		if(departments != null) {
-			entityManager.getTransaction().begin();
-			for(IamPpsDepartment department : departments) {
-				entityManager.merge( department );
-			}
-			entityManager.getTransaction().commit();
-		} else {
-			logger.error("Unable to fetch departments. Exiting ...");
-			System.exit(-1);
-		}
-		
-		entityManager.close();
-		
 		logger.debug("Persisting all people ...");
 
 		List<Thread> threads = new ArrayList<Thread>();

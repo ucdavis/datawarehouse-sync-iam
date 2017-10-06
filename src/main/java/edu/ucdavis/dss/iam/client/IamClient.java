@@ -111,7 +111,7 @@ public class IamClient {
 	 * 
 	 * @return list of departments as IamDepartment DTOs
 	 */
-	public List<IamPpsDepartment> getAllDepartments() {
+	public List<IamPpsDepartment> getAllPpsDepartments() {
 		HttpGet request = new HttpGet("/api/iam/orginfo/pps/depts?v=1.0&key=" + apiKey);
 		List<IamPpsDepartment> departments = null;
 
@@ -136,7 +136,7 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamPpsDepartment.class));
 			} else {
-				logger.error("getAllDepartments response from IAM not understood or was empty/null");
+				logger.error("getAllPpsDepartments response from IAM not understood or was empty/null");
 			}
 
 			response.close();
@@ -419,6 +419,45 @@ public class IamClient {
 		}
 
 		return prikerbaccts;
+	}
+
+	public List<IamBou> getAllBous() {
+		HttpGet request = new HttpGet("/api/iam/orginfo/pps/divisions?v=1.0&key=" + apiKey);
+		List<IamBou> bous = null;
+
+		try {
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
+			request.setConfig(requestConfig);
+
+			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
+
+			HttpEntity entity = response.getEntity();
+
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
+			JsonNode arrNode = rootNode.findPath("results");
+
+			if ((arrNode != null) && !arrNode.isNull()) {
+				bous = mapper.readValue(
+						arrNode.toString(),
+						mapper.getTypeFactory().constructCollectionType(
+								List.class, IamBou.class));
+			} else {
+				logger.warn("/api/iam/orginfo/pps/divisions response from IAM not understood or was empty/null");
+
+				return null;
+			}
+
+			response.close();
+		} catch (IOException e) {
+			logger.error(ExceptionUtils.stacktraceToString(e));
+			return null;
+		}
+
+		return bous;
 	}
 
 	// Credit: http://hc.apache.org/httpcomponents-client-4.5.x/tutorial/html/fundamentals.html#d5e316

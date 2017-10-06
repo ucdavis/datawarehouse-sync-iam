@@ -25,9 +25,8 @@ CREATE TABLE `iam_pps_associations` (
   `titleDisplayName` varchar(128) NOT NULL,
   `positionType` varchar(32) NOT NULL,
   `titleOfficialName` varchar(160) NOT NULL,
-  `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=905891 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,17 +39,17 @@ DROP TABLE IF EXISTS `iam_sis_associations`;
 CREATE TABLE `iam_sis_associations` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
-  `levelCode` varchar(2) NOT NULL,
-  `levelName` varchar(32) NOT NULL,
+  `levelCode` varchar(2) NULL,
+  `levelName` varchar(32) NULL,
   `classCode` varchar(2) NULL,
   `className` varchar(32) NULL,
   `collegeCode` varchar(2) NULL,
-  `collegeName` varchar(32) NOT NULL,
-  `assocRank` varchar(1) NOT NULL,
+  `collegeName` varchar(32) NULL,
+  `assocRank` varchar(1) NULL,
   `assocStartDate` datetime NULL,
   `assocEndDate` datetime NULL,
-  `majorCode` varchar(4) NOT NULL,
-  `majorName` varchar(32) NOT NULL,
+  `majorCode` varchar(4) NULL,
+  `majorName` varchar(32) NULL,
   `fepraCode` varchar(1) NULL,
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NULL,
@@ -80,10 +79,9 @@ CREATE TABLE `iam_contactinfo` (
   `addrZip` varchar(10) DEFAULT NULL,
   `postalAddress` varchar(96) DEFAULT NULL,
   `addrStreet` varchar(128) DEFAULT NULL,
-  `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_iamid_vers` (`iamId`,`vers`)
-) ENGINE=InnoDB AUTO_INCREMENT=330207 DEFAULT CHARSET=utf8;
+  KEY `idx_iamid` (`iamId`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,12 +117,11 @@ CREATE TABLE `iam_people` (
   `dFullName` varchar(64) DEFAULT NULL,
   `ppsId` varchar(9) DEFAULT NULL,
   `mothraId` varchar(8) DEFAULT NULL,
-  `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_iamid_vers` (`iamId`,`vers`),
+  KEY `idx_iamid` (`iamId`),
   -- FULLTEXT KEY `search_key` (`oFirstName`, `oMiddleName`, `oLastName`, `oFullName`, `dFirstName`, `dMiddleName`, `dLastName`, `dFullName`)
   FULLTEXT KEY `search_key` (`oFullName`)
-) ENGINE=InnoDB AUTO_INCREMENT=252770 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -145,9 +142,8 @@ CREATE TABLE `iam_pps_depts` (
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NOT NULL,
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=69848 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -165,32 +161,33 @@ CREATE TABLE `iam_prikerbacct` (
   `expireDate` datetime DEFAULT NULL,
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
-  `vers` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_iamid_vers` (`iamId`,`vers`),
-  INDEX `iam_p_iam` (`iamId`),
-  INDEX `iam_p_vers` (`vers`)
-) ENGINE=InnoDB AUTO_INCREMENT=245427 DEFAULT CHARSET=utf8;
+  KEY `idx_iamid` (`iamId`),
+  INDEX `iam_p_iam` (`iamId`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `iam_vers`
+-- Table structure for table `iam_bous`
 --
 
-DROP TABLE IF EXISTS `iam_vers`;
+DROP TABLE IF EXISTS `iam_bous`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `iam_vers` (
-  `import_started` datetime DEFAULT NULL,
-  `import_finished` datetime DEFAULT NULL,
-  `vers` datetime DEFAULT NULL,
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`),
-  KEY `idx_vers_vers` (`vers`),
-  KEY `idx_vers_import_finished` (`import_finished`),
-  KEY `idx_wovmoth_vers_imported` (`vers`,`import_finished`)
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
+CREATE TABLE `iam_bous` (
+  `orgOId` varchar(32) NOT NULL,
+  `deptCode` varchar(2) NOT NULL,
+  `deptOfficialName` varchar(64) NOT NULL,
+  `deptDisplayName` varchar(32) NOT NULL,
+  `deptAbbrev` varchar(12) NOT NULL,
+  `isUCDHS` boolean NOT NULL,
+  `createDate` datetime NOT NULL,
+  `modifyDate` datetime NULL,
+  PRIMARY KEY (`orgOId`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
