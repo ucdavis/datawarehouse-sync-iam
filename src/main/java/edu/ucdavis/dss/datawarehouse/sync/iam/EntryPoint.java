@@ -83,7 +83,7 @@ public class EntryPoint {
 				SettingsUtils.getLdapPassword());
  
 		logger.debug("Fetching all UCD person UUIDs from LDAP ...");
-		List<String> allUcdPersonUUIDs = ldapClient.fetchAllUcdPersonUUIDs();
+		List<String> allUcdPersonUUIDs = new ArrayList(ldapClient.fetchAllUcdPersonUUIDs());
 		logger.debug("Finished fetching all UCD person UUIDs from LDAP.");
 
 		logger.debug("Persisting all people ...");

@@ -1,7 +1,9 @@
 package edu.ucdavis.dss.datawarehouse.ldap.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -27,7 +29,7 @@ public class LdapClient {
 		this.serverPassword = serverPassword;
 	}
 
-	public List<String> fetchAllUcdPersonUUIDs() {
+	public Set<String> fetchAllUcdPersonUUIDs() {
 		String[] attrsToReturn = {"ucdPersonUUID"};
 		
 		bind();
@@ -35,7 +37,7 @@ public class LdapClient {
 		int i = 0;
 		int inc = 2000; // limit set at ldap.ucdavis.edu
 		
-		List<String> allUcdPersonUUIDs = new ArrayList<String>();
+		Set<String> allUcdPersonUUIDs = new HashSet<String>();
 
 		// Max known ucdPersonUUID as of 1/5/2017 = 01364314
 		// Found using LDAP search ucdPersonUUID >= x
