@@ -29,6 +29,11 @@ public class LdapClient {
 		this.serverPassword = serverPassword;
 	}
 
+	/**
+	 * Returns a set containing all ucdPersonUUIDs.
+	 *
+	 * @return
+	 */
 	public Set<String> fetchAllUcdPersonUUIDs() {
 		String[] attrsToReturn = {"ucdPersonUUID"};
 		
@@ -36,7 +41,8 @@ public class LdapClient {
 		
 		int i = 0;
 		int inc = 2000; // limit set at ldap.ucdavis.edu
-		
+
+		// Use a Set, not a List, as LDAP has been known to return duplicates.
 		Set<String> allUcdPersonUUIDs = new HashSet<String>();
 
 		// Max known ucdPersonUUID as of 1/5/2017 = 01364314
