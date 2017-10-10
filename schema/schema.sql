@@ -70,7 +70,6 @@ CREATE TABLE `iam_contactinfo` (
   `workCell` varchar(16) DEFAULT NULL,
   `workPager` varchar(16) DEFAULT NULL,
   `workFax` varchar(16) DEFAULT NULL,
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
   `workPhone` varchar(32) DEFAULT NULL,
   `email` varchar(48) DEFAULT NULL,
@@ -79,9 +78,8 @@ CREATE TABLE `iam_contactinfo` (
   `addrZip` varchar(10) DEFAULT NULL,
   `postalAddress` varchar(96) DEFAULT NULL,
   `addrStreet` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_iamid` (`iamId`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`iamId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -107,7 +105,6 @@ CREATE TABLE `iam_people` (
   `isExternal` tinyint(1) NOT NULL,
   `privacyCode` varchar(16) DEFAULT NULL,
   `modifyDate` datetime NOT NULL,
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
   `oMiddleName` varchar(32) DEFAULT NULL,
   `dFirstName` varchar(32) DEFAULT NULL,
@@ -117,11 +114,10 @@ CREATE TABLE `iam_people` (
   `dFullName` varchar(64) DEFAULT NULL,
   `ppsId` varchar(9) DEFAULT NULL,
   `mothraId` varchar(8) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_iamid` (`iamId`),
+  PRIMARY KEY (`iamId`),
   -- FULLTEXT KEY `search_key` (`oFirstName`, `oMiddleName`, `oLastName`, `oFullName`, `dFirstName`, `dMiddleName`, `dLastName`, `dFullName`)
   FULLTEXT KEY `search_key` (`oFullName`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
