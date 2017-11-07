@@ -13,6 +13,8 @@ public class ExceptionUtils {
 	 * @return The exception's stacktrace, as a string
 	 */
 	public static String stacktraceToString(Throwable e) {
+		if(e == null) return null;
+
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		e.printStackTrace(pw);
