@@ -326,6 +326,10 @@ public class IamClient {
 			return null;
 		}
 
+		if(contactInfos.size() > 1) {
+			logger.warn("IAM returned " + contactInfos.size() + " contactInfos for IAM ID: " + iamId + " (email: " + contactInfos.get(0).getEmail() + ")");
+		}
+
 		return contactInfos;
 	}
 
@@ -372,6 +376,10 @@ public class IamClient {
 			return null;
 		}
 
+		if(people.size() > 1) {
+			logger.warn("IAM returned " + people.size() + " 'people' for IAM ID: " + iamId + " (mothra ID: " + people.get(0).getMothraId() + ")");
+		}
+
 		return people;
 	}
 
@@ -416,6 +424,10 @@ public class IamClient {
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
 			return null;
+		}
+
+		if(prikerbaccts.size() > 1) {
+			logger.warn("IAM returned " + prikerbaccts.size() + " prikerbaccts for IAM ID: " + iamId + " (user ID: " + prikerbaccts.get(0).getUserId() + ")");
 		}
 
 		return prikerbaccts;
