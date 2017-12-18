@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Date;
 
 /**
  * DTO for ElasticSearch person
@@ -22,4 +23,5 @@ public class ESPersonDTO {
 	@Getter @Setter private List<IamPrikerbacct> prikerbaccts;
 	@Getter @Setter private List<IamPpsAssociation> ppsAssociations;
 	@Getter @Setter private List<IamSisAssociation> sisAssociations;
+	@Getter @Setter private Date lastSeen;
 }

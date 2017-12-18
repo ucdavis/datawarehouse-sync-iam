@@ -175,6 +175,8 @@ public class IamPersonImportThread implements Runnable {
 			esPerson.setPrikerbaccts(prikerbaccts);
 			esPerson.setPpsAssociations(ppsAssociations);
 			esPerson.setSisAssociations(sisAssociations);
+
+			esPerson.setLastSeen(new Date());
 			
 			client.putDocument("dw", "people", person.getIamId().toString(), gson.toJson(esPerson));
 		} catch (com.amazonaws.SdkClientException e) {
