@@ -46,18 +46,25 @@ public class LdapClient {
 		Set<String> allUcdPersonUUIDs = new HashSet<String>();
 
 		// Max known ucdPersonUUID as of 1/5/2017 = 01364314
+		// Max known ucdPersonUUID as of 1/25/2018 = 01505589 (~141,000 / year)
+		// Max will be increased during import so long as records are still being found.
 		// Found using LDAP search ucdPersonUUID >= x
-		int maxUuid = 1500000;
-		for(i = 0; i < maxUuid; i += inc) {
-			allUcdPersonUUIDs.addAll(ldapTemplate.search("",
+		int maxUuid = 1505589;
+		for(i = 0; i <= maxUuid; i += inc) {
+			List<String> uuids = ldapTemplate.search("",
 					"(&(ucdPersonUUID<=" + (i + inc) + ")(ucdPersonUUID>=" + i + "))",
 					SearchControls.SUBTREE_SCOPE,
 					attrsToReturn,
-					new AttributeMapper()));
-			
-			if(i % 10000 == 0) {
-				logger.debug("i = " + i + ", pct complete = " + String.format("%.5f", ((float)i / (float)maxUuid) * 100.0) + ", allUcdPersonUUIDs.size() = " + allUcdPersonUUIDs.size());
-			}
+					new AttributeMapper());
+			allUcdPersonUUIDs.addAll(uuids);
+
+			// Increase maximum so long as records are being found
+			if((i >= maxUuid - inc) && (uuids.size() > 0)) maxUuid += (inc * 2);
+
+//			// Percent complete can't be calculated if we move the maxUuid as we go ...
+//			if(i % 10000 == 0) {
+//				logger.debug("i = " + i + ", pct complete = " + String.format("%.5f", ((float)i / (float)maxUuid) * 100.0) + ", allUcdPersonUUIDs.size() = " + allUcdPersonUUIDs.size());
+//			}
 		}
 		
 		return allUcdPersonUUIDs;
