@@ -2,10 +2,7 @@ package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -15,6 +12,7 @@ public class IamPrikerbacct {
 	private Long iamId;
 	private String userId, uuId;
 	private Date createDate, claimDate, expireDate;
+	private Date createdAt, updatedAt;
 	
 	@Id
 	@Column
@@ -66,5 +64,29 @@ public class IamPrikerbacct {
 	}
 	public void setExpireDate(Date expireDate) {
 		this.expireDate = expireDate;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	@PreUpdate
+	private void beforeUpdate() {
+		this.updatedAt = new Date();
+	}
+
+	@PrePersist
+	private void beforeCreation() {
+		this.createdAt = new Date();
+		this.updatedAt = new Date();
 	}
 }

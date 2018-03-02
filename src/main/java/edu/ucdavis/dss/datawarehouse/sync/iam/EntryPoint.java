@@ -13,10 +13,6 @@ import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.ucdavis.dss.datawarehouse.ldap.client.LdapClient;
-import edu.ucdavis.dss.iam.client.IamClient;
-import edu.ucdavis.dss.iam.dtos.IamPpsDepartment;
-
 public class EntryPoint {
 	static private Logger logger = LoggerFactory.getLogger("EntryPoint");
 	static EntityManagerFactory entityManagerFactory = null;
@@ -48,7 +44,7 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		logger.info("IAM/LDAP import started at " + new Date());
+		logger.info("IAM import started at " + new Date());
 
 		if(SettingsUtils.initialize() == false) {
 			logger.error("Unable to load settings. Cannot proceed.");
@@ -74,25 +70,17 @@ public class EntryPoint {
 			logger.error("Unable to import BOUs! Will continue ...");
 		}
 
-		/**
-		 * Get a list of all possible ucdPersonUUIDs using LDAP
-		 */
-		LdapClient ldapClient = new LdapClient(SettingsUtils.getLdapUrl(),
-				SettingsUtils.getLdapBase(),
-				SettingsUtils.getLdapUser(),
-				SettingsUtils.getLdapPassword());
- 
-		logger.debug("Fetching all UCD person UUIDs from LDAP ...");
-		List<String> allUcdPersonUUIDs = new ArrayList(ldapClient.fetchAllUcdPersonUUIDs());
-		logger.debug("Finished fetching all UCD person UUIDs from LDAP.");
+		logger.info("Fetching IDs from IAM started at " + new Date());
+		List<String> allIamIds = IamIdsImport.importIds();
+		logger.info("Fetching IDs from IAM finished at " + new Date());
 
 		logger.debug("Persisting all people ...");
 
 		List<Thread> threads = new ArrayList<Thread>();
 		
-		List<List<String>> chunkedUuids = chunkList(allUcdPersonUUIDs, recordsPerThread);
-		for(List<String> uuids : chunkedUuids) {
-			Thread t = new Thread(new IamPersonImportThread(uuids, entityManagerFactory));
+		List<List<String>> chunkedIamIds = chunkList(allIamIds, recordsPerThread);
+		for(List<String> iamIds : chunkedIamIds) {
+			Thread t = new Thread(new IamPersonImportThread(iamIds, entityManagerFactory));
 			t.setUncaughtExceptionHandler(uncaughtException);
 			threads.add(t);
 		}

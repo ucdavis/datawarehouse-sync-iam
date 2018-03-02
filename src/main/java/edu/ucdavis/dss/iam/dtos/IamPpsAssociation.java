@@ -2,10 +2,7 @@ package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,6 +17,7 @@ public class IamPpsAssociation {
 	private String titleCode, titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
 	private Date createDate, modifyDate;
+	private Date createdAt, updatedAt;
 
 	@EmbeddedId
 	private IamPpsAssociationPK associationPK = new IamPpsAssociationPK();
@@ -176,6 +174,30 @@ public class IamPpsAssociation {
 	}
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	@PreUpdate
+	private void beforeUpdate() {
+		this.updatedAt = new Date();
+	}
+
+	@PrePersist
+	private void beforeCreation() {
+		this.createdAt = new Date();
+		this.updatedAt = new Date();
 	}
 
 	@Override

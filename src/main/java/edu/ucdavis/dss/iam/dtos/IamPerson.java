@@ -2,10 +2,7 @@ package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +21,7 @@ public class IamPerson {
 	private Boolean employeeInd, hsEmployeeInd, facultyInd, studentInd, staffInd, externalInd;
 	private String privacyCode;
 	private Date modifyDate;
+	private Date createdAt, updatedAt;
 	
 	@Id
 	@Column
@@ -225,7 +223,6 @@ public class IamPerson {
 	public Boolean getStaffInd() {
 		return staffInd;
 	}
-	
 	public void setStaffInd(Boolean staffInd) {
 		this.staffInd = staffInd;
 	}
@@ -235,7 +232,6 @@ public class IamPerson {
 	public Boolean getExternalInd() {
 		return externalInd;
 	}
-	
 	public void setExternalInd(Boolean externalInd) {
 		this.externalInd = externalInd;
 	}
@@ -244,11 +240,34 @@ public class IamPerson {
 	public String getPrivacyCode() {
 		return privacyCode;
 	}
-	
 	public void setPrivacyCode(String privacyCode) {
 		this.privacyCode = privacyCode;
 	}
-	
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	@PreUpdate
+	private void beforeUpdate() {
+		this.updatedAt = new Date();
+	}
+
+	@PrePersist
+	private void beforeCreation() {
+		this.createdAt = new Date();
+		this.updatedAt = new Date();
+	}
+
 	@Override
 	public String toString() {
 		return String.format(

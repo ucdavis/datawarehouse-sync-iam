@@ -1,9 +1,7 @@
 package edu.ucdavis.dss.iam.dtos;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table( name = "iam_contactinfo" )
@@ -12,6 +10,7 @@ public class IamContactInfo {
 	private String email, hsEmail, campusEmail;
 	private String addrStreet, addrCity, addrState, addrZip, postalAddress;
 	private String workPhone, workCell, workPager, workFax;
+	private Date createdAt, updatedAt;
 	
 	@Id
 	@Column
@@ -116,5 +115,29 @@ public class IamContactInfo {
 	}
 	public void setWorkFax(String workFax) {
 		this.workFax = workFax;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	@PreUpdate
+	private void beforeUpdate() {
+		this.updatedAt = new Date();
+	}
+
+	@PrePersist
+	private void beforeCreation() {
+		this.createdAt = new Date();
+		this.updatedAt = new Date();
 	}
 }

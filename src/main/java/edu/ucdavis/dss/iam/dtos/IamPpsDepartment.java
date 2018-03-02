@@ -2,10 +2,7 @@ package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,6 +18,7 @@ public class IamPpsDepartment {
 	private Boolean ucdhs;
 	private String bouOrgOId;
 	private Date createDate, modifyDate;
+	private Date createdAt, updatedAt;
 	
 	@Id
 	@Column
@@ -82,7 +80,6 @@ public class IamPpsDepartment {
 	public String getBouOrgOId() {
 		return bouOrgOId;
 	}
-	
 	public void setBouOrgOId(String bouOrgOId) {
 		this.bouOrgOId = bouOrgOId;
 	}
@@ -92,7 +89,6 @@ public class IamPpsDepartment {
 	public Date getCreateDate() {
 		return createDate;
 	}
-	
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
@@ -102,11 +98,34 @@ public class IamPpsDepartment {
 	public Date getModifyDate() {
 		return modifyDate;
 	}
-	
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
 	}
-	
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	@PreUpdate
+	private void beforeUpdate() {
+		this.updatedAt = new Date();
+	}
+
+	@PrePersist
+	private void beforeCreation() {
+		this.createdAt = new Date();
+		this.updatedAt = new Date();
+	}
+
 	@Override
 	public String toString() {
 		return String.format(

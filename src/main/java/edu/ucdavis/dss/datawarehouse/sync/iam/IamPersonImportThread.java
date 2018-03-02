@@ -17,7 +17,7 @@ import edu.ucdavis.dss.elasticsearch.ESClient;
 import edu.ucdavis.dss.iam.client.IamClient;
 
 public class IamPersonImportThread implements Runnable {
-	private List<String> uuids = null;
+	private List<String> iamIds = null;
 	private Logger logger = LoggerFactory.getLogger("IamPersonImportThread");
 	private EntityManagerFactory entityManagerFactory = null;
 	private ESClient client = null;
@@ -25,8 +25,8 @@ public class IamPersonImportThread implements Runnable {
 	private static final int IMPORT_RETRY_COUNT = 5;
 	private static final int IMPORT_RETRY_SLEEP_DURATION = 3000; // milliseconds
 	
-	public IamPersonImportThread(List<String> uuids, EntityManagerFactory entityManagerFactory) {
-		this.uuids = uuids;
+	public IamPersonImportThread(List<String> iamIds, EntityManagerFactory entityManagerFactory) {
+		this.iamIds = iamIds;
 		this.entityManagerFactory = entityManagerFactory;
 	}
 
@@ -40,15 +40,15 @@ public class IamPersonImportThread implements Runnable {
 		
 		client = new edu.ucdavis.dss.elasticsearch.ESClient(SettingsUtils.getElasticSearchHost());
 
-		for(String ucdPersonUUID : uuids) {
+		for(String iamId_s : iamIds) {
 			int retryCount = 0;
 			boolean personImported = false;
 			Exception lastException = null;
 
 			while((retryCount < IMPORT_RETRY_COUNT) && (personImported == false)) {
-				logger.debug("Importing UUID " + ucdPersonUUID + " ...");
+				logger.debug("Importing UUID " + iamId_s + " ...");
 
-				Long iamId = iamClient.getIamIdFromMothraId(ucdPersonUUID);
+				Long iamId = Long.parseLong(iamId_s); // iamClient.getIamIdFromMothraId(ucdPersonUUID);
 
 				List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 				List<IamPerson> people = iamClient.getPersonInfo(iamId);
@@ -120,7 +120,7 @@ public class IamPersonImportThread implements Runnable {
 			}
 
 			if(retryCount == IMPORT_RETRY_COUNT) {
-				logger.error("Skipping ucdPersonUUID: " + ucdPersonUUID + ". Unable to commit transaction.");
+				logger.error("Skipping IAM ID: " + iamId_s + ". Unable to commit transaction.");
 				logger.error("Last exception:");
 				logger.error(ExceptionUtils.stacktraceToString(lastException));
 			}
@@ -128,7 +128,7 @@ public class IamPersonImportThread implements Runnable {
 			count++;
 
 			if (count % 250 == 0) {
-				float progress = (float) count / (float) uuids.size();
+				float progress = (float) count / (float) iamIds.size();
 				long currentTime = new Date().getTime();
 				long timeSoFar = currentTime - additionalStartTime;
 				Date estCompleted = new Date(additionalStartTime + (long) ((float) timeSoFar / progress));

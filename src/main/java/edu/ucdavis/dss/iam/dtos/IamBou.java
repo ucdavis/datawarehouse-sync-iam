@@ -3,10 +3,7 @@ package edu.ucdavis.dss.iam.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -15,6 +12,7 @@ public class IamBou {
 	private String orgOId, deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
 	private Boolean isUCDHS;
 	private Date createDate, modifyDate;
+	private Date createdAt, updatedAt;
 	
 	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -59,4 +57,28 @@ public class IamBou {
 	@JsonProperty("isUCDHS")
 	public Boolean getUCDHS() { return isUCDHS; }
 	public void setUCDHS(Boolean UCDHS) { isUCDHS = UCDHS; }
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	@PreUpdate
+	private void beforeUpdate() {
+		this.updatedAt = new Date();
+	}
+
+	@PrePersist
+	private void beforeCreation() {
+		this.createdAt = new Date();
+		this.updatedAt = new Date();
+	}
 }

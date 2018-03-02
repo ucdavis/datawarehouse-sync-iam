@@ -326,9 +326,9 @@ public class IamClient {
 			return null;
 		}
 
-		if(contactInfos.size() > 1) {
-			logger.warn("IAM returned " + contactInfos.size() + " contactInfos for IAM ID: " + iamId + " (email: " + contactInfos.get(0).getEmail() + ")");
-		}
+//		if(contactInfos.size() > 1) {
+//			logger.warn("IAM returned " + contactInfos.size() + " contactInfos for IAM ID: " + iamId + " (email: " + contactInfos.get(0).getEmail() + ")");
+//		}
 
 		return contactInfos;
 	}
@@ -376,9 +376,9 @@ public class IamClient {
 			return null;
 		}
 
-		if(people.size() > 1) {
-			logger.warn("IAM returned " + people.size() + " 'people' for IAM ID: " + iamId + " (mothra ID: " + people.get(0).getMothraId() + ")");
-		}
+//		if(people.size() > 1) {
+//			logger.warn("IAM returned " + people.size() + " 'people' for IAM ID: " + iamId + " (mothra ID: " + people.get(0).getMothraId() + ")");
+//		}
 
 		return people;
 	}
@@ -426,9 +426,9 @@ public class IamClient {
 			return null;
 		}
 
-		if(prikerbaccts.size() > 1) {
-			logger.warn("IAM returned " + prikerbaccts.size() + " prikerbaccts for IAM ID: " + iamId + " (user ID: " + prikerbaccts.get(0).getUserId() + ")");
-		}
+//		if(prikerbaccts.size() > 1) {
+//			logger.warn("IAM returned " + prikerbaccts.size() + " prikerbaccts for IAM ID: " + iamId + " (user ID: " + prikerbaccts.get(0).getUserId() + ")");
+//		}
 
 		return prikerbaccts;
 	}
@@ -470,6 +470,45 @@ public class IamClient {
 		}
 
 		return bous;
+	}
+
+	public List<IamPersonIdResult> getAllIamIds() {
+		HttpGet request = new HttpGet("/api/iam/people/ids?v=1.0&key=" + apiKey);
+		List<IamPersonIdResult> iamIds = null;
+
+		try {
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
+			request.setConfig(requestConfig);
+
+			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
+
+			HttpEntity entity = response.getEntity();
+
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
+			JsonNode arrNode = rootNode.findPath("results");
+
+			if ((arrNode != null) && !arrNode.isNull()) {
+				iamIds = mapper.readValue(
+						arrNode.toString(),
+						mapper.getTypeFactory().constructCollectionType(
+								List.class, IamPersonIdResult.class));
+			} else {
+				logger.warn("/api/iam/orginfo/pps/divisions response from IAM not understood or was empty/null");
+
+				return null;
+			}
+
+			response.close();
+		} catch (IOException e) {
+			logger.error(ExceptionUtils.stacktraceToString(e));
+			return null;
+		}
+
+		return iamIds;
 	}
 
 	// Credit: http://hc.apache.org/httpcomponents-client-4.5.x/tutorial/html/fundamentals.html#d5e316
