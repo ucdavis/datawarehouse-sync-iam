@@ -20,11 +20,10 @@
 
 	<logger name="com.zaxxer.hikari.HikariDataSource" level="WARN" />
 	<logger name="org.hibernate" level="WARN" />
+	<logger name="org.hibernate.SQL" level="OFF" />
 	<logger name="org.jboss.logging" level="OFF" />
-	<logger name="EntryPoint" level="INFO" />
+	<logger name="EntryPoint" level="WARN" />
 	<logger name="IamLogger" level="INFO" />
-	<logger name="LdapClient" level="INFO" />
-	<logger name="org.springframework.ldap" level="WARN" />
 	<logger name="org.apache.http" level="OFF" />
 	<logger name="com.mysql" level="WARN" />
 	<logger name="IamPersonImportThread" level="WARN" />

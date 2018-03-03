@@ -21,7 +21,7 @@ public class IamPerson {
 	private Boolean employeeInd, hsEmployeeInd, facultyInd, studentInd, staffInd, externalInd;
 	private String privacyCode;
 	private Date modifyDate;
-	private Date createdAt, updatedAt;
+	private Date createdAt, updatedAt, lastSeen;
 	
 	@Id
 	@Column
@@ -257,6 +257,13 @@ public class IamPerson {
 		this.updatedAt = updatedAt;
 	}
 
+	public Date getLastSeen() {
+		return lastSeen;
+	}
+	public void setLastSeen(Date lastSeen) {
+		this.lastSeen = lastSeen;
+	}
+
 	@PreUpdate
 	private void beforeUpdate() {
 		this.updatedAt = new Date();
@@ -264,8 +271,7 @@ public class IamPerson {
 
 	@PrePersist
 	private void beforeCreation() {
-		this.createdAt = new Date();
-		this.updatedAt = new Date();
+		this.createdAt = this.updatedAt = new Date();
 	}
 
 	@Override

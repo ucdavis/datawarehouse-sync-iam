@@ -63,18 +63,19 @@ public class EntryPoint {
 			System.exit(-1);
 		}
 
+		logger.debug("Importing PPS departments ...");
 		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
 			logger.error("Unable to import PPS departments! Will continue ...");
 		}
+
+		logger.debug("Importing BOUs ...");
 		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
 			logger.error("Unable to import BOUs! Will continue ...");
 		}
 
-		logger.info("Fetching IDs from IAM started at " + new Date());
 		List<String> allIamIds = IamIdsImport.importIds();
-		logger.info("Fetching IDs from IAM finished at " + new Date());
 
-		logger.debug("Persisting all people ...");
+		logger.debug("Persisting " + allIamIds.size() + " people ...");
 
 		List<Thread> threads = new ArrayList<Thread>();
 		
@@ -84,6 +85,8 @@ public class EntryPoint {
 			t.setUncaughtExceptionHandler(uncaughtException);
 			threads.add(t);
 		}
+
+		logger.debug("Queued " + threads.size() + " threads of size " + recordsPerThread);
 		
 		/**
 		 * Convert all ucdPersonUUIDs to IAM IDs and fetch associated information

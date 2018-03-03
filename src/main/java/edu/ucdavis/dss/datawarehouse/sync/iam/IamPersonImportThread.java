@@ -22,8 +22,8 @@ public class IamPersonImportThread implements Runnable {
 	private EntityManagerFactory entityManagerFactory = null;
 	private ESClient client = null;
 	private boolean skipElasticUpdate = false;
-	private static final int IMPORT_RETRY_COUNT = 5;
-	private static final int IMPORT_RETRY_SLEEP_DURATION = 3000; // milliseconds
+	private static final int IMPORT_RETRY_COUNT = 10;
+	private static final int IMPORT_RETRY_SLEEP_DURATION = 5000; // milliseconds
 	
 	public IamPersonImportThread(List<String> iamIds, EntityManagerFactory entityManagerFactory) {
 		this.iamIds = iamIds;
@@ -87,6 +87,7 @@ public class IamPersonImportThread implements Runnable {
 
 					if(people != null) {
 						for (IamPerson person : people) {
+							person.setLastSeen(new Date());
 							entityManager.merge(person);
 						}
 					}
