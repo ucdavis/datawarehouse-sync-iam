@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Table( name = "iam_pps_associations" )
 public class IamPpsAssociation {
 	private String deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
+	private String adminDeptCode, adminDeptOfficialName, adminDeptDisplayName, adminDeptAbbrev;
+	private String apptDeptCode, apptDeptOfficialName, apptDeptDisplayName, apptDeptAbbrev;
 	private boolean isUCDHS;
 	private String bouOrgOId;
 	private Date assocStartDate, assocEndDate;
@@ -67,6 +69,38 @@ public class IamPpsAssociation {
 	public void setDeptAbbrev(String deptAbbrev) {
 		this.deptAbbrev = deptAbbrev;
 	}
+
+	@Column
+	public String getAdminDeptCode() { return adminDeptCode; }
+	public void setAdminDeptCode(String adminDeptCode) { this.adminDeptCode = adminDeptCode; }
+
+	@Column
+	public String getAdminDeptOfficialName() { return adminDeptOfficialName; }
+	public void setAdminDeptOfficialName(String adminDeptOfficialName) { this.adminDeptOfficialName = adminDeptOfficialName; }
+
+	@Column
+	public String getAdminDeptDisplayName() { return adminDeptDisplayName; }
+	public void setAdminDeptDisplayName(String adminDeptDisplayName) { this.adminDeptDisplayName = adminDeptDisplayName; }
+
+	@Column
+	public String getAdminDeptAbbrev() { return adminDeptAbbrev; }
+	public void setAdminDeptAbbrev(String adminDeptAbbrev) { this.adminDeptAbbrev = adminDeptAbbrev; }
+
+	@Column
+	public String getApptDeptCode() { return apptDeptCode; }
+	public void setApptDeptCode(String apptDeptCode) { this.apptDeptCode = apptDeptCode; }
+
+	@Column
+	public String getApptDeptOfficialName() { return apptDeptOfficialName; }
+	public void setApptDeptOfficialName(String apptDeptOfficialName) { this.apptDeptOfficialName = apptDeptOfficialName; }
+
+	@Column
+	public String getApptDeptDisplayName() { return apptDeptDisplayName; }
+	public void setApptDeptDisplayName(String apptDeptDisplayName) { this.apptDeptDisplayName = apptDeptDisplayName; }
+
+	@Column
+	public String getApptDeptAbbrev() { return apptDeptAbbrev; }
+	public void setApptDeptAbbrev(String apptDeptAbbrev) { this.apptDeptAbbrev = apptDeptAbbrev; }
 
 	@Column(name="isUCDHS")
 	@JsonProperty("isUCDHS")
