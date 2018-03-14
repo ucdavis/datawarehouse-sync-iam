@@ -48,7 +48,7 @@ public class IamPersonImportThread implements Runnable {
 			while((retryCount < IMPORT_RETRY_COUNT) && (personImported == false)) {
 				logger.debug("Importing UUID " + iamId_s + " ...");
 
-				Long iamId = Long.parseLong(iamId_s); // iamClient.getIamIdFromMothraId(ucdPersonUUID);
+				Long iamId = Long.parseLong(iamId_s);
 
 				List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
 				List<IamPerson> people = iamClient.getPersonInfo(iamId);
@@ -68,20 +68,73 @@ public class IamPersonImportThread implements Runnable {
 					entityManager.getTransaction().begin();
 
 					if(ppsAssociations != null) {
+						List<IamPpsAssociation> existingPpsAssociations = entityManager.createQuery("SELECT pa FROM IamPpsAssociation pa WHERE pa.iamId = :iamId")
+								.setParameter("iamId", iamId).getResultList();
 						for (IamPpsAssociation association : ppsAssociations) {
-							entityManager.merge(association);
+							if(existingPpsAssociations.contains(association) == false) {
+								entityManager.persist(association);
+							} else {
+								existingPpsAssociations.remove(association);
+							}
+						}
+
+						// Remaining existingPpsAssociations should be deleted
+						for (IamPpsAssociation association : existingPpsAssociations) {
+							entityManager.remove(association);
 						}
 					}
 
 					if(sisAssociations != null) {
+						List<IamSisAssociation> existingSisAssociations = entityManager.createQuery("SELECT sa FROM IamSisAssociation sa WHERE sa.iamId = :iamId")
+								.setParameter("iamId", iamId).getResultList();
+
 						for (IamSisAssociation association : sisAssociations) {
-							entityManager.merge(association);
+							if(existingSisAssociations.contains(association) == false) {
+								entityManager.persist(association);
+							} else {
+								existingSisAssociations.remove(association);
+							}
+						}
+
+						// Remaining existingSisAssociations should be deleted
+						for (IamSisAssociation association : existingSisAssociations) {
+							entityManager.remove(association);
 						}
 					}
 
 					if(contactInfos != null) {
+						List<IamContactInfo> existingContactInfos = entityManager.createQuery("SELECT ci FROM IamContactInfo ci WHERE ci.iamId = :iamId")
+								.setParameter("iamId", iamId).getResultList();
+
 						for (IamContactInfo contactInfo : contactInfos) {
-							entityManager.merge(contactInfo);
+							if(existingContactInfos.contains(contactInfo) == false) {
+								entityManager.persist(contactInfo);
+							} else {
+								existingContactInfos.remove(contactInfo);
+							}
+						}
+
+						// Remaining existingContactInfos should be deleted
+						for (IamContactInfo contactInfo : existingContactInfos) {
+							entityManager.remove(contactInfo);
+						}
+					}
+
+					if(prikerbaccts != null) {
+						List<IamPrikerbacct> existingPrikerbaccts = entityManager.createQuery("SELECT pb FROM IamPrikerbacct pb WHERE pb.iamId = :iamId")
+								.setParameter("iamId", iamId).getResultList();
+
+						for (IamPrikerbacct prikerbacct : prikerbaccts) {
+							if(existingPrikerbaccts.contains(prikerbacct) == false) {
+								entityManager.persist(prikerbacct);
+							} else {
+								existingPrikerbaccts.remove(prikerbacct);
+							}
+						}
+
+						// Remaining existingContactInfos should be deleted
+						for (IamPrikerbacct prikerbacct : existingPrikerbaccts) {
+							entityManager.remove(prikerbacct);
 						}
 					}
 
@@ -92,17 +145,15 @@ public class IamPersonImportThread implements Runnable {
 						}
 					}
 
-					if(prikerbaccts != null) {
-						for (IamPrikerbacct prikerbacct : prikerbaccts) {
-							entityManager.merge(prikerbacct);
-						}
-					}
-
 					entityManager.getTransaction().commit();
 					entityManager.close();
 
 					personImported = true;
 				} catch (Exception e) {
+					logger.debug("Received exception persisting IAM ID: " + iamId + ". Retry count " + retryCount);
+					logger.debug("Exception:");
+					logger.debug(ExceptionUtils.stacktraceToString(e));
+
 					lastException = e;
 					entityManager.getTransaction().rollback();
 					if (entityManager.isOpen()) entityManager.close();

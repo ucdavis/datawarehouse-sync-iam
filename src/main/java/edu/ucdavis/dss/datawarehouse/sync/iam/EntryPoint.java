@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import edu.ucdavis.dss.iam.dtos.*;
 import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +18,10 @@ public class EntryPoint {
 	static private Logger logger = LoggerFactory.getLogger("EntryPoint");
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
-	static final int maxThreads = 30;
-	static final int recordsPerThread = 100;
+	static final int maxThreads = 50;
+	static final int recordsPerThread = 125;
+	static final int expireRecordsOlderThanDays = 28;
+	static final long DAY_IN_MS = 86400000;
 
 	// Set up a default uncaught exception handler as Hibernate will not let the process
 	// exit if the main thread dies but Hibernate resources are not cleaned up.
@@ -63,15 +66,15 @@ public class EntryPoint {
 			System.exit(-1);
 		}
 
-		logger.debug("Importing PPS departments ...");
-		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
-			logger.error("Unable to import PPS departments! Will continue ...");
-		}
-
-		logger.debug("Importing BOUs ...");
-		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
-			logger.error("Unable to import BOUs! Will continue ...");
-		}
+//		logger.debug("Importing PPS departments ...");
+//		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
+//			logger.error("Unable to import PPS departments! Will continue ...");
+//		}
+//
+//		logger.debug("Importing BOUs ...");
+//		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
+//			logger.error("Unable to import BOUs! Will continue ...");
+//		}
 
 		List<String> allIamIds = IamIdsImport.importIds();
 
@@ -136,6 +139,56 @@ public class EntryPoint {
 				}
 			}
 		}
+
+		// Remove people (and their associated records) older than 'expireRecordsOlderThanDays' days
+
+		if((entityManager != null) && (entityManager.isOpen())) { entityManager.close(); }
+		entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+
+		Date expiration = new Date(System.currentTimeMillis() - (expireRecordsOlderThanDays * DAY_IN_MS));
+		List<IamPerson> expiredPeople = entityManager.createQuery("SELECT ci FROM IamPerson ci WHERE ci.lastSeen < :expiration")
+				.setParameter("expiration", expiration).getResultList();
+
+		entityManager.getTransaction().commit();
+
+		for(IamPerson person : expiredPeople) {
+			entityManager.getTransaction().begin();
+
+			List<IamPpsAssociation> ppsAssociations = entityManager.createQuery("SELECT pa FROM IamPpsAssociation pa WHERE pa.iamId = :iamId")
+					.setParameter("iamId", person.getIamId()).getResultList();
+
+			for(IamPpsAssociation ppsAssociation : ppsAssociations) {
+				entityManager.remove(ppsAssociation);
+			}
+
+			List<IamSisAssociation> sisAssociations = entityManager.createQuery("SELECT sa FROM IamSisAssociation sa WHERE sa.iamId = :iamId")
+					.setParameter("iamId", person.getIamId()).getResultList();
+
+			for(IamSisAssociation sisAssociation : sisAssociations) {
+				entityManager.remove(sisAssociation);
+			}
+
+			List<IamContactInfo> contactInfos = entityManager.createQuery("SELECT ci FROM IamContactInfo ci WHERE ci.iamId = :iamId")
+					.setParameter("iamId", person.getIamId()).getResultList();
+
+			for(IamContactInfo contactInfo : contactInfos) {
+				entityManager.remove(contactInfo);
+			}
+
+			List<IamPrikerbacct> prikerbaccts = entityManager.createQuery("SELECT pb FROM IamPrikerbacct pb WHERE pb.iamId = :iamId")
+					.setParameter("iamId", person.getIamId()).getResultList();
+
+			for(IamPrikerbacct prikerbacct : prikerbaccts) {
+				entityManager.remove(prikerbacct);
+			}
+
+			entityManager.remove(person);
+
+			entityManager.getTransaction().commit();
+		}
+
+		entityManager.close();
 
 		/**
 		 * Close Hibernate

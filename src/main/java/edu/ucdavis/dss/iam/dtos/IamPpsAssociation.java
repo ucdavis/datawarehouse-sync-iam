@@ -10,37 +10,57 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity
 @Table( name = "iam_pps_associations" )
 public class IamPpsAssociation {
-	private String deptCode, deptOfficialName, deptDisplayName, deptAbbrev;
+	private Long id;
+	private Long iamId;
+	private String assocRank, titleCode, deptCode;
+	private String deptOfficialName, deptDisplayName, deptAbbrev;
 	private String adminDeptCode, adminDeptOfficialName, adminDeptDisplayName, adminDeptAbbrev;
 	private String apptDeptCode, apptDeptOfficialName, apptDeptDisplayName, apptDeptAbbrev;
 	private boolean isUCDHS;
 	private String bouOrgOId;
 	private Date assocStartDate, assocEndDate;
-	private String titleCode, titleOfficialName, titleDisplayName;
+	private String titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
 	private Date createDate, modifyDate;
-	private Date createdAt, updatedAt;
+	private Date createdAt, updatedAt, lastSeen;
 
-	@EmbeddedId
-	private IamPpsAssociationPK associationPK = new IamPpsAssociationPK();
-	
-	public IamPpsAssociationPK getId() {
-		return associationPK;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column
+	public Long getId() {
+		return this.id;
 	}
-	public void setId(IamPpsAssociationPK associationPK) {
-		this.associationPK = associationPK;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
+	@Column
 	public Long getIamId() {
-		return associationPK.getIamId();
+		return this.iamId;
 	}
 	public void setIamId(Long iamId) {
-		this.associationPK.setIamId(iamId);
+		this.iamId = iamId;
+	}
+
+	@Column
+	public String getAssocRank() {
+		return this.assocRank;
+	}
+	public void setAssocRank(String assocRank) {
+		this.assocRank = assocRank;
+	}
+
+	@Column
+	public String getTitleCode() {
+		return this.titleCode;
+	}
+	public void setTitleCode(String titleCode) {
+		this.titleCode = titleCode;
 	}
 
 	@Column
 	public String getDeptCode() {
-		return deptCode;
+		return this.deptCode;
 	}
 	public void setDeptCode(String deptCode) {
 		this.deptCode = deptCode;
@@ -119,13 +139,6 @@ public class IamPpsAssociation {
 		this.bouOrgOId = bouOrgOId;
 	}
 
-	public String getAssocRank() {
-		return associationPK.getAssocRank();
-	}
-	public void setAssocRank(String assocRank) {
-		this.associationPK.setAssocRank(assocRank);
-	}
-
 	@Column
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	public Date getAssocStartDate() {
@@ -142,14 +155,6 @@ public class IamPpsAssociation {
 	}
 	public void setAssocEndDate(Date assocEndDate) {
 		this.assocEndDate = assocEndDate;
-	}
-
-	@Column
-	public String getTitleCode() {
-		return titleCode;
-	}
-	public void setTitleCode(String titleCode) {
-		this.titleCode = titleCode;
 	}
 
 	@Column
@@ -223,6 +228,13 @@ public class IamPpsAssociation {
 		this.updatedAt = updatedAt;
 	}
 
+	public Date getLastSeen() {
+		return lastSeen;
+	}
+	public void setLastSeen(Date lastSeen) {
+		this.lastSeen = lastSeen;
+	}
+
 	@PreUpdate
 	private void beforeUpdate() {
 		this.updatedAt = new Date();
@@ -235,9 +247,59 @@ public class IamPpsAssociation {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		IamPpsAssociation other = (IamPpsAssociation)obj;
+
+		if((assocRank == null) && (other.assocRank != null)) {
+			return false;
+		} else if (assocRank.equals(other.assocRank) == false) {
+			return false;
+		}
+
+		if((iamId == null) && (other.iamId != null)) {
+			return false;
+		} else if ((iamId != null) && iamId.equals(other.iamId) == false) {
+			return false;
+		}
+
+		if((titleCode == null) && (other.titleCode != null)) {
+			return false;
+		} else if ((titleCode != null) && titleCode.equals(other.titleCode) == false) {
+			return false;
+		}
+
+		if((deptCode == null) && (other.deptCode != null)) {
+			return false;
+		} else if ((deptCode != null) && deptCode.equals(other.deptCode) == false) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+
+		result = prime * result + ((assocRank == null) ? 0 : assocRank.hashCode());
+		result = prime * result + ((iamId == null) ? 0 : iamId.hashCode());
+		result = prime * result + ((titleCode == null) ? 0 : titleCode.hashCode());
+		result = prime * result + ((deptCode == null) ? 0 : deptCode.hashCode());
+
+		return result;
+	}
+
+	@Override
 	public String toString() {
 		return String.format(
-				"IamPpsAssociation[PK='%s', deptCode='%s', titleCode='%s']",
-				associationPK, deptCode, titleCode);
+				"IamPpsAssociation[iamId='%s',assocRank='%s',titleCode='%s',deptCode='%s']", iamId, assocRank, titleCode, deptCode);
 	}
 }

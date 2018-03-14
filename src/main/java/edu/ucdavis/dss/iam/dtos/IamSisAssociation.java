@@ -9,56 +9,64 @@ import java.util.Date;
 @Entity
 @Table( name = "iam_sis_associations" )
 public class IamSisAssociation {
-	private String levelCode, levelName, classCode, className, collegeCode, collegeName;
+	private Long id;
+	private Long iamId;
+	private String assocRank, levelCode, classCode, collegeCode, majorCode;
+	private String levelName, className, collegeName;
 	private Date assocStartDate, assocEndDate;
-	private String majorCode, majorName, fepraCode;
+	private String majorName, fepraCode;
 	private Date createDate, modifyDate;
-	private Date createdAt, updatedAt;
+	private Date createdAt, updatedAt, lastSeen;
 
-	@EmbeddedId
-	private IamSisAssociationPK associationPK = new IamSisAssociationPK();
-	
-	public IamSisAssociationPK getId() {
-		return associationPK;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column
+	public Long getId() {
+		return id;
 	}
-	public void setId(IamSisAssociationPK associationPK) {
-		this.associationPK = associationPK;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
+	@Column
 	public Long getIamId() {
-		return associationPK.getIamId();
+		return iamId;
 	}
 	public void setIamId(Long iamId) {
-		this.associationPK.setIamId(iamId);
+		this.iamId = iamId;
 	}
+
+	@Column
+	public String getAssocRank() { return this.assocRank; }
+	public void setAssocRank(String assocRank) { this.assocRank = assocRank; }
 
 	@Column
 	public String getLevelCode() { return levelCode; }
 	public void setLevelCode(String levelCode) { this.levelCode = levelCode; }
 
 	@Column
-	public String getLevelName() { return levelName; }
-	public void setLevelName(String levelName) { this.levelName = levelName; }
-
-	@Column
 	public String getClassCode() { return classCode; }
 	public void setClassCode(String classCode) { this.classCode = classCode; }
-
-	@Column
-	public String getClassName() { return className; }
-	public void setClassName(String className) { this.className = className; }
 
 	@Column
 	public String getCollegeCode() { return collegeCode; }
 	public void setCollegeCode(String collegeCode) { this.collegeCode = collegeCode; }
 
 	@Column
-	public String getCollegeName() { return collegeName; }
-	public void setCollegeName(String collegeName) { this.collegeName = collegeName; }
-
-	@Column
 	public String getMajorCode() { return majorCode; }
 	public void setMajorCode(String majorCode) { this.majorCode = majorCode; }
+
+	@Column
+	public String getLevelName() { return levelName; }
+	public void setLevelName(String levelName) { this.levelName = levelName; }
+
+	@Column
+	public String getClassName() { return className; }
+	public void setClassName(String className) { this.className = className; }
+
+	@Column
+	public String getCollegeName() { return collegeName; }
+	public void setCollegeName(String collegeName) { this.collegeName = collegeName; }
 
 	@Column
 	public String getMajorName() { return majorName; }
@@ -67,13 +75,6 @@ public class IamSisAssociation {
 	@Column
 	public String getFepraCode() { return fepraCode; }
 	public void setFepraCode(String fepraCode) { this.fepraCode = fepraCode; }
-
-	public String getAssocRank() {
-		return associationPK.getAssocRank();
-	}
-	public void setAssocRank(String assocRank) {
-		this.associationPK.setAssocRank(assocRank);
-	}
 
 	@Column
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yy")
@@ -125,9 +126,7 @@ public class IamSisAssociation {
 	}
 
 	@PreUpdate
-	private void beforeUpdate() {
-		this.updatedAt = new Date();
-	}
+	private void beforeUpdate() { this.updatedAt = new Date(); }
 
 	@PrePersist
 	private void beforeCreation() {
@@ -135,10 +134,78 @@ public class IamSisAssociation {
 		this.updatedAt = new Date();
 	}
 
+	public Date getLastSeen() {
+		return lastSeen;
+	}
+	public void setLastSeen(Date lastSeen) {
+		this.lastSeen = lastSeen;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		IamSisAssociation other = (IamSisAssociation)obj;
+
+		if((assocRank == null) && (other.assocRank != null)) {
+			return false;
+		} else if((assocRank != null) && assocRank.equals(other.assocRank) == false) {
+			return false;
+		}
+
+		if((iamId == null) && (other.iamId != null)) {
+			return false;
+		} else if((iamId != null) && iamId.equals(other.iamId) == false) {
+			return false;
+		}
+
+		if((levelCode == null) && (other.levelCode != null)) {
+			return false;
+		} else if((levelCode != null) && levelCode.equals(other.levelCode) == false) {
+			return false;
+		}
+
+		if((classCode == null) && (other.classCode != null)) {
+			return false;
+		} else if((classCode != null) && classCode.equals(other.classCode) == false) {
+			return false;
+		}
+
+		if((collegeCode == null) && (other.collegeCode != null)) {
+			return false;
+		} else if((collegeCode != null) && collegeCode.equals(other.collegeCode) == false) {
+			return false;
+		}
+
+		if((majorCode == null) && (other.majorCode != null)) {
+			return false;
+		} else if((majorCode != null) && majorCode.equals(other.majorCode) == false) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+
+		result = prime * result + ((assocRank == null) ? 0 : assocRank.hashCode());
+		result = prime * result + ((iamId == null) ? 0 : iamId.hashCode());
+
+		return result;
+	}
+
 	@Override
 	public String toString() {
 		return String.format(
-				"IamSisAssociation[PK='%s', majorCode='%s', collegeCode='%s']",
-				associationPK, majorCode, collegeCode);
+				"IamSisAssociation[iamId='%s', majorCode='%s', collegeCode='%s']",
+				iamId, majorCode, collegeCode);
 	}
 }
