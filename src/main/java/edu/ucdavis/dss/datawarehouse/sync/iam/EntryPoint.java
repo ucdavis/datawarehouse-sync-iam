@@ -66,15 +66,15 @@ public class EntryPoint {
 			System.exit(-1);
 		}
 
-//		logger.debug("Importing PPS departments ...");
-//		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
-//			logger.error("Unable to import PPS departments! Will continue ...");
-//		}
-//
-//		logger.debug("Importing BOUs ...");
-//		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
-//			logger.error("Unable to import BOUs! Will continue ...");
-//		}
+		logger.debug("Importing PPS departments ...");
+		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
+			logger.error("Unable to import PPS departments! Will continue ...");
+		}
+
+		logger.debug("Importing BOUs ...");
+		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
+			logger.error("Unable to import BOUs! Will continue ...");
+		}
 
 		List<String> allIamIds = IamIdsImport.importIds();
 
@@ -140,55 +140,61 @@ public class EntryPoint {
 			}
 		}
 
-		// Remove people (and their associated records) older than 'expireRecordsOlderThanDays' days
+		// We ignore this task if the number of people is under 25,000. UCD should have at least 70,000 as of
+		// 3-18-18 and the 25,000 check is to avoid a mistake where the import fails and we start deleting people.
+		if(allIamIds.size() > 25000) {
+			// Remove people (and their associated records) older than 'expireRecordsOlderThanDays' days
 
-		if((entityManager != null) && (entityManager.isOpen())) { entityManager.close(); }
-		entityManager = entityManagerFactory.createEntityManager();
-		entityManager.getTransaction().begin();
-
-		Date expiration = new Date(System.currentTimeMillis() - (expireRecordsOlderThanDays * DAY_IN_MS));
-		List<IamPerson> expiredPeople = entityManager.createQuery("SELECT ci FROM IamPerson ci WHERE ci.lastSeen < :expiration")
-				.setParameter("expiration", expiration).getResultList();
-
-		entityManager.getTransaction().commit();
-
-		for(IamPerson person : expiredPeople) {
+			if ((entityManager != null) && (entityManager.isOpen())) {
+				entityManager.close();
+			}
+			entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			List<IamPpsAssociation> ppsAssociations = entityManager.createQuery("SELECT pa FROM IamPpsAssociation pa WHERE pa.iamId = :iamId")
-					.setParameter("iamId", person.getIamId()).getResultList();
-
-			for(IamPpsAssociation ppsAssociation : ppsAssociations) {
-				entityManager.remove(ppsAssociation);
-			}
-
-			List<IamSisAssociation> sisAssociations = entityManager.createQuery("SELECT sa FROM IamSisAssociation sa WHERE sa.iamId = :iamId")
-					.setParameter("iamId", person.getIamId()).getResultList();
-
-			for(IamSisAssociation sisAssociation : sisAssociations) {
-				entityManager.remove(sisAssociation);
-			}
-
-			List<IamContactInfo> contactInfos = entityManager.createQuery("SELECT ci FROM IamContactInfo ci WHERE ci.iamId = :iamId")
-					.setParameter("iamId", person.getIamId()).getResultList();
-
-			for(IamContactInfo contactInfo : contactInfos) {
-				entityManager.remove(contactInfo);
-			}
-
-			List<IamPrikerbacct> prikerbaccts = entityManager.createQuery("SELECT pb FROM IamPrikerbacct pb WHERE pb.iamId = :iamId")
-					.setParameter("iamId", person.getIamId()).getResultList();
-
-			for(IamPrikerbacct prikerbacct : prikerbaccts) {
-				entityManager.remove(prikerbacct);
-			}
-
-			entityManager.remove(person);
+			Date expiration = new Date(System.currentTimeMillis() - (expireRecordsOlderThanDays * DAY_IN_MS));
+			List<IamPerson> expiredPeople = entityManager.createQuery("SELECT ci FROM IamPerson ci WHERE ci.lastSeen < :expiration")
+					.setParameter("expiration", expiration).getResultList();
 
 			entityManager.getTransaction().commit();
-		}
 
-		entityManager.close();
+			for (IamPerson person : expiredPeople) {
+				entityManager.getTransaction().begin();
+
+				List<IamPpsAssociation> ppsAssociations = entityManager.createQuery("SELECT pa FROM IamPpsAssociation pa WHERE pa.iamId = :iamId")
+						.setParameter("iamId", person.getIamId()).getResultList();
+
+				for (IamPpsAssociation ppsAssociation : ppsAssociations) {
+					entityManager.remove(ppsAssociation);
+				}
+
+				List<IamSisAssociation> sisAssociations = entityManager.createQuery("SELECT sa FROM IamSisAssociation sa WHERE sa.iamId = :iamId")
+						.setParameter("iamId", person.getIamId()).getResultList();
+
+				for (IamSisAssociation sisAssociation : sisAssociations) {
+					entityManager.remove(sisAssociation);
+				}
+
+				List<IamContactInfo> contactInfos = entityManager.createQuery("SELECT ci FROM IamContactInfo ci WHERE ci.iamId = :iamId")
+						.setParameter("iamId", person.getIamId()).getResultList();
+
+				for (IamContactInfo contactInfo : contactInfos) {
+					entityManager.remove(contactInfo);
+				}
+
+				List<IamPrikerbacct> prikerbaccts = entityManager.createQuery("SELECT pb FROM IamPrikerbacct pb WHERE pb.iamId = :iamId")
+						.setParameter("iamId", person.getIamId()).getResultList();
+
+				for (IamPrikerbacct prikerbacct : prikerbaccts) {
+					entityManager.remove(prikerbacct);
+				}
+
+				entityManager.remove(person);
+
+				entityManager.getTransaction().commit();
+			}
+
+			entityManager.close();
+		}
 
 		/**
 		 * Close Hibernate
