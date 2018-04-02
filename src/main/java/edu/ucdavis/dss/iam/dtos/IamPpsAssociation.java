@@ -281,6 +281,18 @@ public class IamPpsAssociation {
 			return false;
 		}
 
+		if((adminDeptCode == null) && (other.adminDeptCode != null)) {
+			return false;
+		} else if ((adminDeptCode != null) && adminDeptCode.equals(other.adminDeptCode) == false) {
+			return false;
+		}
+
+		if((apptDeptCode == null) && (other.apptDeptCode != null)) {
+			return false;
+		} else if ((apptDeptCode != null) && apptDeptCode.equals(other.apptDeptCode) == false) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -293,6 +305,8 @@ public class IamPpsAssociation {
 		result = prime * result + ((iamId == null) ? 0 : iamId.hashCode());
 		result = prime * result + ((titleCode == null) ? 0 : titleCode.hashCode());
 		result = prime * result + ((deptCode == null) ? 0 : deptCode.hashCode());
+		result = prime * result + ((adminDeptCode == null) ? 0 : adminDeptCode.hashCode());
+		result = prime * result + ((apptDeptCode == null) ? 0 : apptDeptCode.hashCode());
 
 		return result;
 	}
