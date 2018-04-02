@@ -293,6 +293,12 @@ public class IamPpsAssociation {
 			return false;
 		}
 
+		if((modifyDate == null) && (other.modifyDate != null)) {
+			return false;
+		} else if ((modifyDate != null) && modifyDate.equals(other.modifyDate) == false) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -307,6 +313,7 @@ public class IamPpsAssociation {
 		result = prime * result + ((deptCode == null) ? 0 : deptCode.hashCode());
 		result = prime * result + ((adminDeptCode == null) ? 0 : adminDeptCode.hashCode());
 		result = prime * result + ((apptDeptCode == null) ? 0 : apptDeptCode.hashCode());
+		result = prime * result + ((modifyDate == null) ? 0 : modifyDate.hashCode());
 
 		return result;
 	}

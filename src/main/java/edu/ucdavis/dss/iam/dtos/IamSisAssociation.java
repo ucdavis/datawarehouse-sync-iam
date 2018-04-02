@@ -188,6 +188,12 @@ public class IamSisAssociation {
 			return false;
 		}
 
+		if((modifyDate == null) && (other.modifyDate != null)) {
+			return false;
+		} else if((modifyDate != null) && modifyDate.equals(other.modifyDate) == false) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -198,6 +204,7 @@ public class IamSisAssociation {
 
 		result = prime * result + ((assocRank == null) ? 0 : assocRank.hashCode());
 		result = prime * result + ((iamId == null) ? 0 : iamId.hashCode());
+		result = prime * result + ((modifyDate == null) ? 0 : modifyDate.hashCode());
 
 		return result;
 	}
