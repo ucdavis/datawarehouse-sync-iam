@@ -1,5 +1,6 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -144,7 +145,6 @@ public class EntryPoint {
 		// 3-18-18 and the 25,000 check is to avoid a mistake where the import fails and we start deleting people.
 		if(allIamIds.size() > 25000) {
 			// Remove people (and their associated records) older than 'expireRecordsOlderThanDays' days
-
 			if ((entityManager != null) && (entityManager.isOpen())) {
 				entityManager.close();
 			}
@@ -152,45 +152,21 @@ public class EntryPoint {
 			entityManager.getTransaction().begin();
 
 			Date expiration = new Date(System.currentTimeMillis() - (expireRecordsOlderThanDays * DAY_IN_MS));
-			List<IamPerson> expiredPeople = entityManager.createQuery("SELECT ci FROM IamPerson ci WHERE ci.lastSeen < :expiration")
+			List<Long> expiredIamIds = entityManager.createQuery("SELECT ci.iamId FROM IamPerson ci WHERE ci.lastSeen < :expiration")
 					.setParameter("expiration", expiration).getResultList();
 
 			entityManager.getTransaction().commit();
 
-			for (IamPerson person : expiredPeople) {
-				entityManager.getTransaction().begin();
+			for (Long iamId : expiredIamIds) {
+				removeAllRecordsForIamId(iamId, entityManager);
+			}
 
-				List<IamPpsAssociation> ppsAssociations = entityManager.createQuery("SELECT pa FROM IamPpsAssociation pa WHERE pa.iamId = :iamId")
-						.setParameter("iamId", person.getIamId()).getResultList();
-
-				for (IamPpsAssociation ppsAssociation : ppsAssociations) {
-					entityManager.remove(ppsAssociation);
-				}
-
-				List<IamSisAssociation> sisAssociations = entityManager.createQuery("SELECT sa FROM IamSisAssociation sa WHERE sa.iamId = :iamId")
-						.setParameter("iamId", person.getIamId()).getResultList();
-
-				for (IamSisAssociation sisAssociation : sisAssociations) {
-					entityManager.remove(sisAssociation);
-				}
-
-				List<IamContactInfo> contactInfos = entityManager.createQuery("SELECT ci FROM IamContactInfo ci WHERE ci.iamId = :iamId")
-						.setParameter("iamId", person.getIamId()).getResultList();
-
-				for (IamContactInfo contactInfo : contactInfos) {
-					entityManager.remove(contactInfo);
-				}
-
-				List<IamPrikerbacct> prikerbaccts = entityManager.createQuery("SELECT pb FROM IamPrikerbacct pb WHERE pb.iamId = :iamId")
-						.setParameter("iamId", person.getIamId()).getResultList();
-
-				for (IamPrikerbacct prikerbacct : prikerbaccts) {
-					entityManager.remove(prikerbacct);
-				}
-
-				entityManager.remove(person);
-
-				entityManager.getTransaction().commit();
+			// Remove older IAM IDs when an individual is found to have a newer one
+			List<String> duplicatedUserIds = entityManager.createNativeQuery("select userId from (SELECT userId, COUNT(*) c FROM iam_prikerbacct GROUP BY userId HAVING c > 1) s").getResultList();
+			for (String userId: duplicatedUserIds) {
+				BigInteger bigIntIamId = (BigInteger)entityManager.createNativeQuery("select iamId FROM iam_prikerbacct WHERE userId=:userId order by iamId ASC LIMIT 1").setParameter("userId", userId).getResultList().get(0);
+				Long iamId = bigIntIamId.longValue();
+				removeAllRecordsForIamId(iamId, entityManager);
 			}
 
 			entityManager.close();
@@ -203,7 +179,48 @@ public class EntryPoint {
 
 		logger.info("Import completed successfully. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
 	}
-	
+
+	private static void removeAllRecordsForIamId(Long iamId, EntityManager entityManager) {
+		entityManager.getTransaction().begin();
+
+		List<IamPpsAssociation> ppsAssociations = entityManager.createQuery("SELECT pa FROM IamPpsAssociation pa WHERE pa.iamId = :iamId")
+				.setParameter("iamId", iamId).getResultList();
+
+		for (IamPpsAssociation ppsAssociation : ppsAssociations) {
+			entityManager.remove(ppsAssociation);
+		}
+
+		List<IamSisAssociation> sisAssociations = entityManager.createQuery("SELECT sa FROM IamSisAssociation sa WHERE sa.iamId = :iamId")
+				.setParameter("iamId", iamId).getResultList();
+
+		for (IamSisAssociation sisAssociation : sisAssociations) {
+			entityManager.remove(sisAssociation);
+		}
+
+		List<IamContactInfo> contactInfos = entityManager.createQuery("SELECT ci FROM IamContactInfo ci WHERE ci.iamId = :iamId")
+				.setParameter("iamId", iamId).getResultList();
+
+		for (IamContactInfo contactInfo : contactInfos) {
+			entityManager.remove(contactInfo);
+		}
+
+		List<IamPrikerbacct> prikerbaccts = entityManager.createQuery("SELECT pb FROM IamPrikerbacct pb WHERE pb.iamId = :iamId")
+				.setParameter("iamId", iamId).getResultList();
+
+		for (IamPrikerbacct prikerbacct : prikerbaccts) {
+			entityManager.remove(prikerbacct);
+		}
+
+		List<IamPerson> people = entityManager.createQuery("SELECT p FROM IamPerson p WHERE p.iamId = :iamId")
+				.setParameter("iamId", iamId).getResultList();
+
+		for (IamPerson person: people) {
+			entityManager.remove(person);
+		}
+
+		entityManager.getTransaction().commit();
+	}
+
 	/**
 	 * Return L lists of equal size composed with the contents of list
 	 * 
