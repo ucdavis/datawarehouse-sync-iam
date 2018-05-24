@@ -53,11 +53,16 @@ public class IamPpsDepartmentsImport {
             return false;
         }
 
-        entityManager.getTransaction().begin();
         for(IamPpsDepartment department : departments) {
-            entityManager.merge( department );
+            try {
+                entityManager.getTransaction().begin();
+                entityManager.merge(department);
+                entityManager.getTransaction().commit();
+            } catch (org.hibernate.exception.ConstraintViolationException e) {
+                logger.error("Exception occurred while saving PPS department: " + department);
+                logger.error(ExceptionUtils.stacktraceToString(e));
+            }
         }
-        entityManager.getTransaction().commit();
 
         entityManager.close();
 
