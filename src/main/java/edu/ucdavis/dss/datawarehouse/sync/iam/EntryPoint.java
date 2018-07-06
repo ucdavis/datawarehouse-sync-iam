@@ -1,10 +1,8 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -82,7 +80,7 @@ public class EntryPoint {
 		logger.debug("Persisting " + allIamIds.size() + " people ...");
 
 		List<Thread> threads = new ArrayList<Thread>();
-		
+
 		List<List<String>> chunkedIamIds = chunkList(allIamIds, recordsPerThread);
 		for(List<String> iamIds : chunkedIamIds) {
 			Thread t = new Thread(new IamPersonImportThread(iamIds, entityManagerFactory));
@@ -91,12 +89,12 @@ public class EntryPoint {
 		}
 
 		logger.debug("Queued " + threads.size() + " threads of size " + recordsPerThread);
-		
+
 		/**
 		 * Convert all ucdPersonUUIDs to IAM IDs and fetch associated information
 		 */
 		int activeThreads = 0;
-		
+
 		// Start as many threads as possible (limited by maxThreads).
 		// If we have too many threads, the while loop below will
 		// start them once other threads finish.
@@ -111,12 +109,12 @@ public class EntryPoint {
 		// loop until all threads have finished.
 		while(threads.size() > 0) {
 			Iterator<Thread> iter = threads.iterator();
-			
+
 			logger.debug("Threads remaining: " + threads.size());
-			
+
 			while(iter.hasNext()) {
 				Thread t = iter.next();
-				
+
 				if(t.isAlive()) {
 					try {
 						t.join(500);
@@ -152,7 +150,7 @@ public class EntryPoint {
 			entityManager.getTransaction().begin();
 
 			Date expiration = new Date(System.currentTimeMillis() - (expireRecordsOlderThanDays * DAY_IN_MS));
-			List<Long> expiredIamIds = entityManager.createQuery("SELECT ci.iamId FROM IamPerson ci WHERE ci.lastSeen < :expiration")
+			List<Long> expiredIamIds = entityManager.createQuery("SELECT ci.iamId FROM IamPerson ci WHERE (ci.lastSeen < :expiration) OR (ci.lastSeen is NULL)")
 					.setParameter("expiration", expiration).getResultList();
 
 			entityManager.getTransaction().commit();
@@ -161,12 +159,40 @@ public class EntryPoint {
 				removeAllRecordsForIamId(iamId, entityManager);
 			}
 
-			// Remove older IAM IDs when an individual is found to have a newer one
+			// Resolve the case where multiple IAM IDs exist for an individual
 			List<String> duplicatedUserIds = entityManager.createNativeQuery("select userId from (SELECT userId, COUNT(*) c FROM iam_prikerbacct GROUP BY userId HAVING c > 1) s").getResultList();
 			for (String userId: duplicatedUserIds) {
-				BigInteger bigIntIamId = (BigInteger)entityManager.createNativeQuery("select iamId FROM iam_prikerbacct WHERE userId=:userId order by iamId ASC LIMIT 1").setParameter("userId", userId).getResultList().get(0);
-				Long iamId = bigIntIamId.longValue();
-				removeAllRecordsForIamId(iamId, entityManager);
+				// A user ID is associated with more than one IAM ID. Pick one.
+
+				// First, if only one IAM ID is active in IAM, choose that one.
+				List<BigInteger> redundantIamIds = (List<BigInteger>)entityManager.createNativeQuery("select iamId FROM iam_prikerbacct WHERE userId=:userId order by iamId ASC").setParameter("userId", userId).getResultList();
+				List<Long> inactiveIamIds = new ArrayList<>();
+				List<Long> activeIamIds = new ArrayList<>();
+
+				for(BigInteger _redundantIamId : redundantIamIds) {
+					String redundantIamId = _redundantIamId.toString();
+
+					if(allIamIds.contains(redundantIamId)) {
+						activeIamIds.add(Long.parseLong(redundantIamId));
+					} else {
+						inactiveIamIds.add(Long.parseLong(redundantIamId));
+					}
+				}
+
+				if(activeIamIds.size() == 1) {
+					// Only one of the multiple IAM IDs are active. Delete the others.
+					inactiveIamIds.forEach(iamId -> removeAllRecordsForIamId(iamId, entityManager));
+				} else {
+					// Multiple IAM IDs are active for the same person. Favor the bigger one (presumed to be newer and correct)
+
+					// Sort IAM IDs so largest (the keeper) is at the end
+					Collections.sort(redundantIamIds);
+
+					// Remove the last IAM ID (the keeper)
+					redundantIamIds.remove(redundantIamIds.size() - 1);
+
+					redundantIamIds.forEach(iamId -> removeAllRecordsForIamId(iamId.longValue(), entityManager));
+				}
 			}
 
 			entityManager.close();
