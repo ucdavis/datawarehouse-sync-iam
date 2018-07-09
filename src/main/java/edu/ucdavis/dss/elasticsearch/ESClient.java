@@ -27,7 +27,8 @@ public class ESClient {
 	public ESClient(String host) {
 		this.host = host;
 	}
-	public HttpResponse putDocument(String index, String type, String id, String document) throws IOException {
+
+	public HttpResponse putDocument(String index, String type, String id, String document) {
 		Request<?> request = new DefaultRequest<Void>(SERVICE_NAME);
 		
 		request.setContent(new ByteArrayInputStream(document.getBytes()));
@@ -44,9 +45,6 @@ public class ESClient {
 		MyHttpResponseHandler<Void> responseHandler = new MyHttpResponseHandler<Void>();
 		MyErrorHandler errorHandler = new MyErrorHandler();
 
-//		System.out.println("document:");
-//		System.out.println(document);
-
 		try {
 			@SuppressWarnings("deprecation")
 			Response<Void> response =
@@ -60,7 +58,38 @@ public class ESClient {
 			return null;
 		}
 	}
-	
+
+	public HttpResponse deleteDocument(String index, String type, String id) {
+		Request<?> request = new DefaultRequest<Void>(SERVICE_NAME);
+
+		// request.setContent(new ByteArrayInputStream(document.getBytes()));
+		request.setEndpoint(URI.create("https://" + this.host + "/" + index + "/" + type + "/" + id));
+		request.setHttpMethod(HttpMethodName.DELETE);
+
+		RequestSigner.performSigningSteps(SERVICE_NAME, REGION, request);
+
+		ExecutionContext context = new ExecutionContext(true);
+
+		ClientConfiguration clientConfiguration = new ClientConfiguration();
+		AmazonHttpClient client = new AmazonHttpClient(clientConfiguration);
+
+		MyHttpResponseHandler<Void> responseHandler = new MyHttpResponseHandler<Void>();
+		MyErrorHandler errorHandler = new MyErrorHandler();
+
+		try {
+			@SuppressWarnings("deprecation")
+			Response<Void> response =
+					client.execute(request, responseHandler, errorHandler, context);
+
+			return response.getHttpResponse();
+		} catch (AmazonServiceException e) {
+			System.out.println("AWS Exception thrown:");
+			System.err.println(e);
+
+			return null;
+		}
+	}
+
 	public HttpResponse search(String index, String type, String q) {
 		Request<?> request = new DefaultRequest<Void>(SERVICE_NAME);
 		

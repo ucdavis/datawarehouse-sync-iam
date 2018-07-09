@@ -236,10 +236,6 @@ public class IamPersonImportThread implements Runnable {
 			logger.error(ExceptionUtils.stacktraceToString(e));
 			skipElasticUpdate = true;
 			return;
-		} catch (IOException e) {
-			logger.error("IOException occurred while updating ElasticSearch:");
-			logger.error(ExceptionUtils.stacktraceToString(e));
-			return;
 		}
 	}
 }

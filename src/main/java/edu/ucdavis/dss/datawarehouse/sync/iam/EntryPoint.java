@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import edu.ucdavis.dss.elasticsearch.ESClient;
 import edu.ucdavis.dss.iam.dtos.*;
 import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ public class EntryPoint {
 	static private Logger logger = LoggerFactory.getLogger("EntryPoint");
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
+	static ESClient esClient = null;
 	static final int maxThreads = 50;
 	static final int recordsPerThread = 125;
 	static final int expireRecordsOlderThanDays = 28;
@@ -143,6 +145,8 @@ public class EntryPoint {
 		// 3-18-18 and the 25,000 check is to avoid a mistake where the import fails and we start deleting people.
 		if(allIamIds.size() > 25000) {
 			// Remove people (and their associated records) older than 'expireRecordsOlderThanDays' days
+			esClient = new edu.ucdavis.dss.elasticsearch.ESClient(SettingsUtils.getElasticSearchHost());
+
 			if ((entityManager != null) && (entityManager.isOpen())) {
 				entityManager.close();
 			}
@@ -156,7 +160,7 @@ public class EntryPoint {
 			entityManager.getTransaction().commit();
 
 			for (Long iamId : expiredIamIds) {
-				removeAllRecordsForIamId(iamId, entityManager);
+				removeAllRecordsForIamId(iamId, entityManager, esClient);
 			}
 
 			// Resolve the case where multiple IAM IDs exist for an individual
@@ -181,7 +185,7 @@ public class EntryPoint {
 
 				if(activeIamIds.size() == 1) {
 					// Only one of the multiple IAM IDs are active. Delete the others.
-					inactiveIamIds.forEach(iamId -> removeAllRecordsForIamId(iamId, entityManager));
+					inactiveIamIds.forEach(iamId -> removeAllRecordsForIamId(iamId, entityManager, esClient));
 				} else {
 					// Multiple IAM IDs are active for the same person. Favor the bigger one (presumed to be newer and correct)
 
@@ -191,7 +195,7 @@ public class EntryPoint {
 					// Remove the last IAM ID (the keeper)
 					redundantIamIds.remove(redundantIamIds.size() - 1);
 
-					redundantIamIds.forEach(iamId -> removeAllRecordsForIamId(iamId.longValue(), entityManager));
+					redundantIamIds.forEach(iamId -> removeAllRecordsForIamId(iamId.longValue(), entityManager, esClient));
 				}
 			}
 
@@ -206,7 +210,7 @@ public class EntryPoint {
 		logger.info("Import completed successfully. Took " + (float)(new Date().getTime() - startTime) / 1000.0 + "s");
 	}
 
-	private static void removeAllRecordsForIamId(Long iamId, EntityManager entityManager) {
+	private static void removeAllRecordsForIamId(Long iamId, EntityManager entityManager, ESClient esClient) {
 		entityManager.getTransaction().begin();
 
 		List<IamPpsAssociation> ppsAssociations = entityManager.createQuery("SELECT pa FROM IamPpsAssociation pa WHERE pa.iamId = :iamId")
@@ -245,6 +249,9 @@ public class EntryPoint {
 		}
 
 		entityManager.getTransaction().commit();
+
+		// Remove the ElasticSearch records for this IAM ID
+		esClient.deleteDocument("dw", "people", iamId.toString());
 	}
 
 	/**
