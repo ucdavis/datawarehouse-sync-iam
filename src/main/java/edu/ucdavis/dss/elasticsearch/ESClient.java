@@ -52,7 +52,7 @@ public class ESClient {
 			
 			return response.getHttpResponse();
 		} catch (AmazonServiceException e) {
-			System.out.println("AWS Exception thrown:");
+			System.out.println("AWS Exception thrown while trying to PUT document in index (" + index + "), type (" + type + "), ID (" + id + "):");
 			System.err.println(e);
 			
 			return null;
@@ -83,7 +83,7 @@ public class ESClient {
 
 			return response.getHttpResponse();
 		} catch (AmazonServiceException e) {
-			System.out.println("AWS Exception thrown:");
+			System.out.println("AWS Exception thrown while trying to DELETE document in index (" + index + "), type (" + type + "), ID (" + id + "):");
 			System.err.println(e);
 
 			return null;
@@ -114,7 +114,7 @@ public class ESClient {
 			
 			return response.getHttpResponse();
 		} catch (AmazonServiceException e) {
-			System.out.println("AWS Exception thrown:");
+			System.out.println("AWS Exception thrown while trying to search in index (" + index + "), type (" + type + "), query (" + q + "):");
 			System.err.println(e);
 			
 			return null;
@@ -124,19 +124,17 @@ public class ESClient {
 	
 	public static class MyHttpResponseHandler<T> implements HttpResponseHandler<AmazonWebServiceResponse<T>> {
 
-		//@Override
 		public AmazonWebServiceResponse<T> handle(
 				com.amazonaws.http.HttpResponse response) throws Exception {
 
-			InputStream responseStream = response.getContent();
-			String responseString = convertStreamToString(responseStream);
+			//InputStream responseStream = response.getContent();
+			//String responseString = convertStreamToString(responseStream);
 			//System.out.println(responseString);
 
 			AmazonWebServiceResponse<T> awsResponse = new AmazonWebServiceResponse<T>();
 			return awsResponse;
 		}
 
-		//@Override
 		public boolean needsConnectionLeftOpen() {
 			return false;
 		}
@@ -144,20 +142,16 @@ public class ESClient {
 
 	public static class MyErrorHandler implements HttpResponseHandler<AmazonServiceException> {
 
-		//@Override
 		public AmazonServiceException handle(
 				com.amazonaws.http.HttpResponse response) throws Exception {
-			System.out.println("In exception handler!");
-
-			AmazonServiceException ase = new AmazonServiceException("Fake service exception.");
+			AmazonServiceException ase = new AmazonServiceException("Elasticsearch");
 			ase.setStatusCode(response.getStatusCode());
 			ase.setErrorCode(response.getStatusText());
-			System.err.println(convertStreamToString(response.getContent()));
+			//System.err.println(convertStreamToString(response.getContent()));
 
 			return ase;
 		}
 
-		//@Override
 		public boolean needsConnectionLeftOpen() {
 			return false;
 		}
