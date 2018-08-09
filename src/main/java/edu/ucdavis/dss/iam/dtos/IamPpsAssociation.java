@@ -17,7 +17,7 @@ public class IamPpsAssociation {
 	private String adminDeptCode, adminDeptOfficialName, adminDeptDisplayName, adminDeptAbbrev;
 	private String apptDeptCode, apptDeptOfficialName, apptDeptDisplayName, apptDeptAbbrev;
 	private boolean isUCDHS;
-	private String bouOrgOId;
+	private String bouOrgOId, adminBouOrgOId, apptBouOrgOId;
 	private Date assocStartDate, assocEndDate;
 	private String titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
@@ -138,6 +138,14 @@ public class IamPpsAssociation {
 	public void setBouOrgOId(String bouOrgOId) {
 		this.bouOrgOId = bouOrgOId;
 	}
+
+	@Column
+	public String getAdminBouOrgOId() { return adminBouOrgOId; }
+	public void setAdminBouOrgOId(String adminBouOrgOId) { this.adminBouOrgOId = adminBouOrgOId; }
+
+	@Column
+	public String getApptBouOrgOId() { return apptBouOrgOId; }
+	public void setApptBouOrgOId(String apptBouOrgOId) { this.apptBouOrgOId = apptBouOrgOId; }
 
 	@Column
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
@@ -296,6 +304,24 @@ public class IamPpsAssociation {
 		if((modifyDate == null) && (other.modifyDate != null)) {
 			return false;
 		} else if ((modifyDate != null) && modifyDate.equals(other.modifyDate) == false) {
+			return false;
+		}
+
+		if((bouOrgOId == null) && (other.bouOrgOId != null)) {
+			return false;
+		} else if ((bouOrgOId != null) && bouOrgOId.equals(other.bouOrgOId) == false) {
+			return false;
+		}
+
+		if((adminBouOrgOId == null) && (other.adminBouOrgOId != null)) {
+			return false;
+		} else if ((adminBouOrgOId != null) && adminBouOrgOId.equals(other.adminBouOrgOId) == false) {
+			return false;
+		}
+
+		if((apptBouOrgOId == null) && (other.apptBouOrgOId != null)) {
+			return false;
+		} else if ((apptBouOrgOId != null) && apptBouOrgOId.equals(other.apptBouOrgOId) == false) {
 			return false;
 		}
 
