@@ -199,13 +199,9 @@ public class IamPersonImportThread implements Runnable {
 		if(skipElasticUpdate) return;
 
 		if(people.size() == 0) return;
-		if(contactInfos.size() == 0) return;
-		if(prikerbaccts.size() == 0) return;
-		
+
 		final IamPerson person = people.get(0);
-		final IamContactInfo contactInfo = contactInfos.get(0);
-		final IamPrikerbacct prikerbacct = prikerbaccts.get(0);
-		
+
 		try {
 			Gson gson = new Gson();
 			ESPersonDTO esPerson = new ESPersonDTO();
@@ -213,8 +209,14 @@ public class IamPersonImportThread implements Runnable {
 			esPerson.setIamId(person.getIamId().toString());
 			esPerson.setDFirstName(person.getdFirstName());
 			esPerson.setDLastName(person.getdLastName());
-			esPerson.setUserId(prikerbacct.getUserId());
-			esPerson.setEmail(contactInfo.getEmail());
+			if(prikerbaccts.size() > 0) {
+				// A person can exist without a prikerbacct
+				esPerson.setUserId(prikerbaccts.get(0).getUserId());
+			}
+			if(contactInfos.size() > 0) {
+				// A person can exist with no contact info
+				esPerson.setEmail(contactInfos.get(0).getEmail());
+			}
 			esPerson.setDMiddleName(person.getdMiddleName());
 			esPerson.setOFirstName(person.getoFirstName());
 			esPerson.setOMiddleName(person.getoMiddleName());
