@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import edu.ucdavis.dss.datawarehouse.sync.StatusLogger;
 import edu.ucdavis.dss.elasticsearch.ESClient;
 import edu.ucdavis.dss.iam.dtos.*;
 import org.hibernate.service.spi.ServiceException;
@@ -66,6 +67,8 @@ public class EntryPoint {
 			logger.error("Unable to create entity manager factory. Is the database running?");
 			System.exit(-1);
 		}
+
+		StatusLogger.markIamLastAttempt(entityManagerFactory);
 
 		logger.debug("Importing PPS departments ...");
 		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
@@ -201,6 +204,9 @@ public class EntryPoint {
 
 			entityManager.close();
 		}
+
+		StatusLogger.markIamLastSuccess(entityManagerFactory);
+		StatusLogger.recordIamDuration(entityManagerFactory, (int)(new Date().getTime() - startTime) / 1000);
 
 		/**
 		 * Close Hibernate

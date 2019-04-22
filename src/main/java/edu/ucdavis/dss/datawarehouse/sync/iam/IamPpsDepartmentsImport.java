@@ -1,5 +1,6 @@
 package edu.ucdavis.dss.datawarehouse.sync.iam;
 
+import edu.ucdavis.dss.datawarehouse.sync.StatusLogger;
 import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamBou;
 import edu.ucdavis.dss.iam.dtos.IamPpsDepartment;
