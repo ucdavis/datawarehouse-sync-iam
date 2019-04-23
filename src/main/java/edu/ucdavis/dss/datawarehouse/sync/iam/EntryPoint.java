@@ -20,8 +20,8 @@ public class EntryPoint {
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
 	static ESClient esClient = null;
-	static final int maxThreads = 50;
-	static final int recordsPerThread = 125;
+	static final int maxThreads = 25;
+	static final int recordsPerThread = 100;
 	static final int expireRecordsOlderThanDays = 28;
 	static final long DAY_IN_MS = 86400000;
 
