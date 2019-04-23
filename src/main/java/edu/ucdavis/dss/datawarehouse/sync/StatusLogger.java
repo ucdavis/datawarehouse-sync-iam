@@ -8,9 +8,11 @@ public class StatusLogger {
     static public void markIamLastAttempt(EntityManagerFactory entityManagerFactory) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        StatusItem statusItem = new StatusItem();
+        StatusItem statusItem = entityManager.find(StatusItem.class, "iam");
+        if(statusItem == null) {
+            statusItem = new StatusItem();
+        }
 
-        statusItem.setUpstreamDb("iam");
         statusItem.setLastAttempt(new Date());
 
         entityManager.getTransaction().begin();
@@ -23,9 +25,11 @@ public class StatusLogger {
     static public void markIamLastSuccess(EntityManagerFactory entityManagerFactory) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        StatusItem statusItem = new StatusItem();
+        StatusItem statusItem = entityManager.find(StatusItem.class, "iam");
+        if(statusItem == null) {
+            statusItem = new StatusItem();
+        }
 
-        statusItem.setUpstreamDb("iam");
         statusItem.setLastSuccess(new Date());
 
         entityManager.getTransaction().begin();
@@ -38,9 +42,11 @@ public class StatusLogger {
     static public void recordIamDuration(EntityManagerFactory entityManagerFactory, Integer duration) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        StatusItem statusItem = new StatusItem();
+        StatusItem statusItem = entityManager.find(StatusItem.class, "iam");
+        if(statusItem == null) {
+            statusItem = new StatusItem();
+        }
 
-        statusItem.setUpstreamDb("iam");
         statusItem.setDuration(duration);
 
         entityManager.getTransaction().begin();
