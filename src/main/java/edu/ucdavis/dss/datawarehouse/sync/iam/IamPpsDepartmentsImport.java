@@ -55,6 +55,8 @@ public class IamPpsDepartmentsImport {
         }
 
         for(IamPpsDepartment department : departments) {
+            if (department.getDeptDisplayName() == null) { continue; }
+
             try {
                 entityManager.getTransaction().begin();
                 entityManager.merge(department);
