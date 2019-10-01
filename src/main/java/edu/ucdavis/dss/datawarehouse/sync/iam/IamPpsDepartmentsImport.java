@@ -146,12 +146,7 @@ public class IamPpsDepartmentsImport {
 
         entityManager.getTransaction().begin();
         for(IamBou bou : bous) {
-            if (bou.getDeptCode().matches("^\\d+$") == false) {
-                logger.error("skipping bou, deptCode is not a number for bou: " + bou.getDeptCode());
-                continue;
-            }
-
-            if (bou.getDeptCode().length() != 6) {
+            if (bou.getDeptCode().length() != 2) {
                 logger.error("skipping bou, deptCode is not 6 digits long for bou: " + bou.getDeptCode());
                 continue;
             }
