@@ -66,7 +66,7 @@ public class IamPpsDepartmentsImport {
                 continue;
             }
             
-            if (department.getDeptCode().matches("^\d+$") == false) {
+            if (department.getDeptCode().matches("^\\d+$") == false) {
                 logger.error("skipping department, deptCode is not a number for department: " + department.toString());
                 continue;
             }
