@@ -54,9 +54,10 @@ public class IamPpsDepartmentsImport {
             logger.error("Unable to fetch departments after " + retryCount + " attempts.");
             return false;
         }
+        logger.error("DEPARTMENTS LOOP START");
 
         for(IamPpsDepartment department : departments) {
-            logger.error("START DEPARTMENT");
+            logger.error("DEPARTMENT START");
             logger.error("To String: " + department.toString());
 
             if (department.getDeptDisplayName() == null) {
@@ -80,8 +81,10 @@ public class IamPpsDepartmentsImport {
                 logger.error(ExceptionUtils.stacktraceToString(e));
             }
 
-            logger.error("END DEPARTMENT");
+            logger.error("DEPARTMENT COMPLETE");
         }
+
+        logger.error("DEPARTMENTS LOOP COMPLETE");
 
         entityManager.close();
 
