@@ -71,6 +71,11 @@ public class IamPpsDepartmentsImport {
                 continue;
             }
 
+            if (department.getDeptCode().length() != 6) {
+                logger.error("skipping department, deptCode is not 6 digits long for department: " + department.toString());
+                continue;
+            }
+            
             //logger.error("OrgOId: " + department.getOrgOId());
             //logger.error("officialName: " + department.getDeptOfficialName());
             //logger.error("deptCode: " + department.getDeptCode());
