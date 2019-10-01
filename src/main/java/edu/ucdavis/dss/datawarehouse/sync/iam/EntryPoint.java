@@ -49,8 +49,8 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean shouldImportBOUs = false;
-		boolean shouldImportPPSDepartments = false;
+		boolean shouldImportBOUs = true;
+		boolean shouldImportPPSDepartments = true;
 
 		logger.info("IAM import started at " + new Date());
 
