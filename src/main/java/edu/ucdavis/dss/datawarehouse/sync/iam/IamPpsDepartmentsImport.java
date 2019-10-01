@@ -27,7 +27,7 @@ public class IamPpsDepartmentsImport {
         /**
          * Extract and load all PPS departments from IAM
          */
-        logger.error("taco");
+
         logger.debug("Persisting all PPS departments ...");
         int retryCount = 0;
         boolean importSuccess = false;
@@ -73,7 +73,7 @@ public class IamPpsDepartmentsImport {
 
             //logger.error("OrgOId: " + department.getOrgOId());
             //logger.error("officialName: " + department.getDeptOfficialName());
-            logger.error("deptCode: " + department.getDeptCode());
+            //logger.error("deptCode: " + department.getDeptCode());
 
             try {
                 //logger.error("SAVE START");
