@@ -146,8 +146,15 @@ public class IamPpsDepartmentsImport {
 
         entityManager.getTransaction().begin();
         for(IamBou bou : bous) {
-            logger.error("attempting merge on bou: " + bou.getDeptCode());
+            if (bou.getDeptCode().matches("^\\d+$") == false) {
+                logger.error("skipping bou, deptCode is not a number for bou: " + bou.getDeptCode());
+                continue;
+            }
 
+            if (bou.getDeptCode().length() != 6) {
+                logger.error("skipping bou, deptCode is not 6 digits long for bou: " + bou.getDeptCode());
+                continue;
+            }
             entityManager.merge( bou );
         }
         entityManager.getTransaction().commit();
