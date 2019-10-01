@@ -147,7 +147,7 @@ public class IamPpsDepartmentsImport {
         entityManager.getTransaction().begin();
         for(IamBou bou : bous) {
             if (bou.getDeptCode().length() != 2) {
-                logger.error("skipping bou, deptCode is not 6 digits long for bou: " + bou.getDeptCode());
+                logger.error("skipping bou, deptCode is not 2 digits long for bou: " + bou.getDeptCode());
                 continue;
             }
             entityManager.merge( bou );
