@@ -69,12 +69,12 @@ public class EntryPoint {
 		}
 
 		StatusLogger.markIamLastAttempt(entityManagerFactory);
-
+		/*
 		logger.error("Importing PPS departments ...");
 		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
 			logger.error("Unable to import PPS departments! Will continue ...");
 		}
-
+		*/
 		logger.error("Importing BOUs ...");
 		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
 			logger.error("Unable to import BOUs! Will continue ...");
