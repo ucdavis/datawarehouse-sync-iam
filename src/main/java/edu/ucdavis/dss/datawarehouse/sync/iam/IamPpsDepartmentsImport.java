@@ -56,22 +56,31 @@ public class IamPpsDepartmentsImport {
         }
 
         for(IamPpsDepartment department : departments) {
-            if (department.getDeptDisplayName() == null) { continue; }
-
-            logger.error("attempting department");
+            logger.error("START DEPARTMENT");
             logger.error("To String: " + department.toString());
+
+            if (department.getDeptDisplayName() == null) {
+                logger.error("-- display name was null");
+                logger.error("END DEPARTMENT");
+                continue;
+            }
+
             logger.error("OrgOId: " + department.getOrgOId());
             logger.error("officialName: " + department.getDeptOfficialName());
             logger.error("deptCode: " + department.getDeptCode());
 
             try {
+                logger.error("SAVE START");
                 entityManager.getTransaction().begin();
                 entityManager.merge(department);
                 entityManager.getTransaction().commit();
+                logger.error("SAVE COMPLETE");
             } catch (javax.persistence.RollbackException e) {
                 logger.error("Exception occurred while saving PPS department: " + department);
                 logger.error(ExceptionUtils.stacktraceToString(e));
             }
+
+            logger.error("END DEPARTMENT");
         }
 
         entityManager.close();
