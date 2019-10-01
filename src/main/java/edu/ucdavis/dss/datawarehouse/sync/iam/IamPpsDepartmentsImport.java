@@ -18,6 +18,7 @@ public class IamPpsDepartmentsImport {
 
     public static boolean importPpsDepartments(EntityManagerFactory entityManagerFactory) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
+        logger.error("IamPpsDepartmentsImport START");
 
         /**
          * Initialize IAM client
@@ -97,6 +98,8 @@ public class IamPpsDepartmentsImport {
         logger.error("DEPARTMENTS LOOP COMPLETE");
 
         entityManager.close();
+
+        logger.error("IamPpsDepartmentsImport COMPLETE");
 
         return true;
     }
