@@ -7,6 +7,8 @@ import edu.ucdavis.dss.iam.dtos.IamPpsDepartment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.List;
