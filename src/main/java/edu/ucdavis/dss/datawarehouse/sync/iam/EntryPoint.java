@@ -49,6 +49,9 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		boolean shouldImportBOUs = false;
+		boolean shouldImportPPSDepartments = false;
+
 		logger.info("IAM import started at " + new Date());
 
 		if(SettingsUtils.initialize() == false) {
@@ -69,20 +72,26 @@ public class EntryPoint {
 		}
 
 		StatusLogger.markIamLastAttempt(entityManagerFactory);
-		/*
-		logger.error("Importing PPS departments ...");
-		if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
-			logger.error("Unable to import PPS departments! Will continue ...");
+		if (shouldImportPPSDepartments) {
+			logger.error("Importing PPS departments ...");
+
+			if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
+				logger.error("Unable to import PPS departments! Will continue ...");
+			}
 		}
-		*/
-		logger.error("Importing BOUs ...");
-		if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
-			logger.error("Unable to import BOUs! Will continue ...");
+
+		if (shouldImportBOUs) {
+			logger.error("Importing BOUs ...");
+
+			if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
+				logger.error("Unable to import BOUs! Will continue ...");
+			}
 		}
 
 		List<String> allIamIds = IamIdsImport.importIds();
 
 		logger.debug("Persisting " + allIamIds.size() + " people ...");
+		logger.error("Persisting " + allIamIds.size() + " people ...");
 
 		List<Thread> threads = new ArrayList<Thread>();
 
