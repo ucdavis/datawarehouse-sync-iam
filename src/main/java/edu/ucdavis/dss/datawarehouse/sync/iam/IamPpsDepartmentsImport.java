@@ -27,6 +27,7 @@ public class IamPpsDepartmentsImport {
         /**
          * Extract and load all PPS departments from IAM
          */
+        logger.error("taco");
         logger.debug("Persisting all PPS departments ...");
         int retryCount = 0;
         boolean importSuccess = false;
@@ -57,11 +58,11 @@ public class IamPpsDepartmentsImport {
         for(IamPpsDepartment department : departments) {
             if (department.getDeptDisplayName() == null) { continue; }
 
-            logger.info("attempting department");
-            logger.info("To String: " + department.toString());
-            logger.info("OrgOId: " + department.getOrgOId());
-            logger.info("officialName: " + department.getDeptOfficialName());
-            logger.info("deptCode: " + department.getDeptCode());
+            logger.error("attempting department");
+            logger.error("To String: " + department.toString());
+            logger.error("OrgOId: " + department.getOrgOId());
+            logger.error("officialName: " + department.getDeptOfficialName());
+            logger.error("deptCode: " + department.getDeptCode());
 
             try {
                 entityManager.getTransaction().begin();
