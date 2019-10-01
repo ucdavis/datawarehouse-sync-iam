@@ -57,31 +57,31 @@ public class IamPpsDepartmentsImport {
         logger.error("DEPARTMENTS LOOP START");
 
         for(IamPpsDepartment department : departments) {
-            logger.error("DEPARTMENT START");
-            logger.error("To String: " + department.toString());
+            //logger.error("DEPARTMENT START");
+            //logger.error("To String: " + department.toString());
 
             if (department.getDeptDisplayName() == null) {
                 logger.error("-- display name was null");
-                logger.error("END DEPARTMENT");
+                //logger.error("END DEPARTMENT");
                 continue;
             }
 
-            logger.error("OrgOId: " + department.getOrgOId());
-            logger.error("officialName: " + department.getDeptOfficialName());
+            //logger.error("OrgOId: " + department.getOrgOId());
+            //logger.error("officialName: " + department.getDeptOfficialName());
             logger.error("deptCode: " + department.getDeptCode());
 
             try {
-                logger.error("SAVE START");
+                //logger.error("SAVE START");
                 entityManager.getTransaction().begin();
                 entityManager.merge(department);
                 entityManager.getTransaction().commit();
-                logger.error("SAVE COMPLETE");
+                //logger.error("SAVE COMPLETE");
             } catch (javax.persistence.RollbackException e) {
                 logger.error("Exception occurred while saving PPS department: " + department);
                 logger.error(ExceptionUtils.stacktraceToString(e));
             }
 
-            logger.error("DEPARTMENT COMPLETE");
+            //logger.error("DEPARTMENT COMPLETE");
         }
 
         logger.error("DEPARTMENTS LOOP COMPLETE");
