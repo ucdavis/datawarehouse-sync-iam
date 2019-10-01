@@ -155,6 +155,7 @@ public class IamPpsDepartmentsImport {
         entityManager.getTransaction().commit();
 
         entityManager.close();
+        logger.error("importBous COMPLETE");
 
         return true;
     }
