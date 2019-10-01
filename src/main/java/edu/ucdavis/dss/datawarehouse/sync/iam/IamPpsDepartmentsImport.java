@@ -57,6 +57,12 @@ public class IamPpsDepartmentsImport {
         for(IamPpsDepartment department : departments) {
             if (department.getDeptDisplayName() == null) { continue; }
 
+            logger.info("attempting department");
+            logger.info("To String: " + department.toString());
+            logger.info("OrgOId: " + department.getOrgOId());
+            logger.info("officialName: " + department.getDeptOfficialName());
+            logger.info("deptCode: " + department.getDeptCode());
+
             try {
                 entityManager.getTransaction().begin();
                 entityManager.merge(department);
