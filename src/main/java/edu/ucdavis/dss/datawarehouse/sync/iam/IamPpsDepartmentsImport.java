@@ -106,6 +106,8 @@ public class IamPpsDepartmentsImport {
 
     public static boolean importBous(EntityManagerFactory entityManagerFactory) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
+        
+        logger.error("importBous START");
 
         /**
          * Initialize IAM client
@@ -144,6 +146,8 @@ public class IamPpsDepartmentsImport {
 
         entityManager.getTransaction().begin();
         for(IamBou bou : bous) {
+            logger.error("attempting merge on bou: " + bou.getDeptCode());
+
             entityManager.merge( bou );
         }
         entityManager.getTransaction().commit();
