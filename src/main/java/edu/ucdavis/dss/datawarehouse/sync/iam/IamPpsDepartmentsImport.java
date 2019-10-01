@@ -61,8 +61,13 @@ public class IamPpsDepartmentsImport {
             //logger.error("To String: " + department.toString());
 
             if (department.getDeptDisplayName() == null) {
-                logger.error("-- display name was null");
+                logger.error("skipping department, displayName was null for department: " + department.toString());
                 //logger.error("END DEPARTMENT");
+                continue;
+            }
+            
+            if (StringUtils.isNumeric(department.getDeptCode()) == false) {
+                logger.error("skipping department, deptCode is not a number for department: " + department.toString());
                 continue;
             }
 
