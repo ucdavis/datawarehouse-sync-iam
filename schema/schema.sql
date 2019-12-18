@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS `iam_pps_associations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `iam_pps_associations` (
-  `deptCode` varchar(6) NOT NULL,
+  `deptCode` varchar(10) NOT NULL,
   `deptOfficialName` varchar(64) NOT NULL,
   `deptDisplayName` varchar(64) NOT NULL,
   `deptAbbrev` varchar(24) NOT NULL,
@@ -27,12 +27,12 @@ CREATE TABLE `iam_pps_associations` (
   `titleOfficialName` varchar(160) NULL,
   `adminBouOrgOId` varchar(32) NULL,
   `adminDeptAbbrev` varchar(24) NOT NULL,
-  `adminDeptCode` varchar(6) NOT NULL,
+  `adminDeptCode` varchar(10) NOT NULL,
   `adminDeptDisplayName` varchar(64) NOT NULL,
   `adminDeptOfficialName` varchar(64) NOT NULL,
   `apptBouOrgOId` varchar(32) NULL,
   `apptDeptAbbrev` varchar(24) NOT NULL,
-  `apptDeptCode` varchar(6) NOT NULL,
+  `apptDeptCode` varchar(10) NOT NULL,
   `apptDeptDisplayName` varchar(64) NOT NULL,
   `apptDeptOfficialName` varchar(64) NOT NULL,
   `createdAt` timestamp NULL,
