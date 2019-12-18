@@ -18,7 +18,6 @@ public class IamPpsDepartmentsImport {
 
     public static boolean importPpsDepartments(EntityManagerFactory entityManagerFactory) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        logger.error("IamPpsDepartmentsImport START");
 
         /**
          * Initialize IAM client
@@ -55,51 +54,21 @@ public class IamPpsDepartmentsImport {
             logger.error("Unable to fetch departments after " + retryCount + " attempts.");
             return false;
         }
-        logger.error("DEPARTMENTS LOOP START");
 
         for(IamPpsDepartment department : departments) {
-            //logger.error("DEPARTMENT START");
-            //logger.error("To String: " + department.toString());
-
-            if (department.getDeptDisplayName() == null) {
-                logger.error("skipping department, displayName was null for department: " + department.toString());
-                //logger.error("END DEPARTMENT");
-                continue;
-            }
-            
-            if (department.getDeptCode().matches("^\\d+$") == false) {
-                logger.error("skipping department, deptCode is not a number for department: " + department.toString());
-                continue;
-            }
-
-            if (department.getDeptCode().length() != 6) {
-                logger.error("skipping department, deptCode is not 6 digits long for department: " + department.toString());
-                continue;
-            }
-            
-            //logger.error("OrgOId: " + department.getOrgOId());
-            //logger.error("officialName: " + department.getDeptOfficialName());
-            //logger.error("deptCode: " + department.getDeptCode());
-
             try {
-                //logger.error("SAVE START");
                 entityManager.getTransaction().begin();
                 entityManager.merge(department);
                 entityManager.getTransaction().commit();
-                //logger.error("SAVE COMPLETE");
             } catch (javax.persistence.RollbackException e) {
                 logger.error("Exception occurred while saving PPS department: " + department);
                 logger.error(ExceptionUtils.stacktraceToString(e));
             }
-
-            //logger.error("DEPARTMENT COMPLETE");
         }
-
-        logger.error("DEPARTMENTS LOOP COMPLETE");
 
         entityManager.close();
 
-        logger.error("IamPpsDepartmentsImport COMPLETE");
+        logger.debug("IamPpsDepartmentsImport COMPLETE");
 
         return true;
     }
@@ -107,7 +76,7 @@ public class IamPpsDepartmentsImport {
     public static boolean importBous(EntityManagerFactory entityManagerFactory) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         
-        logger.error("importBous START");
+        logger.debug("importBous START");
 
         /**
          * Initialize IAM client
@@ -146,16 +115,13 @@ public class IamPpsDepartmentsImport {
 
         entityManager.getTransaction().begin();
         for(IamBou bou : bous) {
-            if (bou.getDeptCode().length() != 2) {
-                logger.error("skipping bou, deptCode is not 2 digits long for bou: " + bou.getDeptCode());
-                continue;
-            }
+            logger.debug(bou.toString());
             entityManager.merge( bou );
         }
         entityManager.getTransaction().commit();
 
         entityManager.close();
-        logger.error("importBous COMPLETE");
+        logger.debug("importBous COMPLETE");
 
         return true;
     }
