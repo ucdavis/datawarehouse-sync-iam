@@ -20,7 +20,7 @@ public class EntryPoint {
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
 	static ESClient esClient = null;
-	static final int maxThreads = 25;
+	static final int maxThreads = 50;
 	static final int recordsPerThread = 100;
 	static final int expireRecordsOlderThanDays = 28;
 	static final long DAY_IN_MS = 86400000;
@@ -73,7 +73,7 @@ public class EntryPoint {
 
 		StatusLogger.markIamLastAttempt(entityManagerFactory);
 		if (shouldImportPPSDepartments) {
-			logger.error("Importing PPS departments ...");
+			logger.debug("Importing PPS departments ...");
 
 			if(IamPpsDepartmentsImport.importPpsDepartments(entityManagerFactory) == false) {
 				logger.error("Unable to import PPS departments! Will continue ...");
@@ -81,7 +81,7 @@ public class EntryPoint {
 		}
 
 		if (shouldImportBOUs) {
-			logger.error("Importing BOUs ...");
+			logger.debug("Importing BOUs ...");
 
 			if(IamPpsDepartmentsImport.importBous(entityManagerFactory) == false) {
 				logger.error("Unable to import BOUs! Will continue ...");
@@ -90,8 +90,7 @@ public class EntryPoint {
 
 		List<String> allIamIds = IamIdsImport.importIds();
 
-		logger.debug("Persisting " + allIamIds.size() + " people ...");
-		logger.error("Persisting " + allIamIds.size() + " people ...");
+		logger.info("Persisting " + allIamIds.size() + " people ...");
 
 		List<Thread> threads = new ArrayList<Thread>();
 
