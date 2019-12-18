@@ -81,4 +81,11 @@ public class IamBou {
 		this.createdAt = new Date();
 		this.updatedAt = new Date();
 	}
+
+	@Override
+	public String toString() {
+		return String.format(
+				"IamBou[orgOId='%s', deptCode='%s', deptOfficialName='%s', deptDisplayName='%s', deptAbbrev='%s']",
+				orgOId, deptCode, deptOfficialName, deptDisplayName, deptAbbrev);
+	}
 }
