@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity
 @Table( name = "iam_people" )
 public class IamPerson {
+	private Long id;
 	private Long iamId;
 	private String mothraId;
 	private String ppsId;
@@ -22,13 +23,21 @@ public class IamPerson {
 	private String privacyCode;
 	private Date modifyDate;
 	private Date createdAt, updatedAt, lastSeen;
-	
+
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	@Column
 	public Long getIamId() {
 		return iamId;
 	}
-	
 	public void setIamId(Long iamId) {
 		this.iamId = iamId;
 	}

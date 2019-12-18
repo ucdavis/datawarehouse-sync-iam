@@ -137,7 +137,8 @@ CREATE TABLE `iam_people` (
   `createdAt` timestamp NULL,
   `updatedAt` timestamp NULL,
   `lastSeen` timestamp NULL,
-  PRIMARY KEY (`iamId`),
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
   -- FULLTEXT KEY `search_key` (`oFirstName`, `oMiddleName`, `oLastName`, `oFullName`, `dFirstName`, `dMiddleName`, `dLastName`, `dFullName`)
   FULLTEXT KEY `search_key` (`oFullName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -213,7 +214,11 @@ CREATE TABLE `iam_bous` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `statuses`
+--
 
+DROP TABLE IF EXISTS `statuses`;
 CREATE TABLE `statuses` (
   `upstream_db` varchar(32) NOT NULL,
   `last_attempt` datetime DEFAULT NULL,
