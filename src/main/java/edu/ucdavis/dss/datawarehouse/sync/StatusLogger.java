@@ -11,6 +11,7 @@ public class StatusLogger {
         StatusItem statusItem = entityManager.find(StatusItem.class, "iam");
         if(statusItem == null) {
             statusItem = new StatusItem();
+            statusItem.setUpstreamDb("iam");
         }
 
         statusItem.setLastAttempt(new Date());
@@ -28,6 +29,7 @@ public class StatusLogger {
         StatusItem statusItem = entityManager.find(StatusItem.class, "iam");
         if(statusItem == null) {
             statusItem = new StatusItem();
+            statusItem.setUpstreamDb("iam");
         }
 
         statusItem.setLastSuccess(new Date());
@@ -45,6 +47,7 @@ public class StatusLogger {
         StatusItem statusItem = entityManager.find(StatusItem.class, "iam");
         if(statusItem == null) {
             statusItem = new StatusItem();
+            statusItem.setUpstreamDb("iam");
         }
 
         statusItem.setDuration(duration);
