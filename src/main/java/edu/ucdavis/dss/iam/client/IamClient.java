@@ -497,7 +497,7 @@ public class IamClient {
 						mapper.getTypeFactory().constructCollectionType(
 								List.class, IamPersonIdResult.class));
 			} else {
-				logger.warn("/api/iam/orginfo/pps/divisions response from IAM not understood or was empty/null");
+				logger.warn("/api/iam/people/ids response from IAM not understood or was empty/null");
 
 				return null;
 			}
