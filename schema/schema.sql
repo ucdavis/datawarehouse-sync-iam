@@ -14,17 +14,30 @@ CREATE TABLE `iam_pps_associations` (
   `bouOrgOId` varchar(32) NOT NULL,
   `assocRank` varchar(1) NOT NULL,
   `assocStartDate` datetime NOT NULL,
-  `assocEndDate` datetime NOT NULL,
+  `assocEndDate` datetime NULL,
   `titleCode` varchar(8) NOT NULL,
   `positionTypeCode` varchar(1) NOT NULL,
   `createDate` datetime NOT NULL,
-  `modifyDate` datetime NOT NULL,
+  `modifyDate` datetime NULL,
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
-  `percentFullTime` varchar(3) NOT NULL,
+  `percentFullTime` varchar(6) NOT NULL,
   `titleDisplayName` varchar(128) NOT NULL,
   `positionType` varchar(32) NOT NULL,
-  `titleOfficialName` varchar(160) NOT NULL,
+  `titleOfficialName` varchar(160) NULL,
+  `adminBouOrgOId` varchar(32) NULL,
+  `adminDeptAbbrev` varchar(24) NOT NULL,
+  `adminDeptCode` varchar(6) NOT NULL,
+  `adminDeptDisplayName` varchar(64) NOT NULL,
+  `adminDeptOfficialName` varchar(64) NOT NULL,
+  `apptBouOrgOId` varchar(32) NULL,
+  `apptDeptAbbrev` varchar(24) NOT NULL,
+  `apptDeptCode` varchar(6) NOT NULL,
+  `apptDeptDisplayName` varchar(64) NOT NULL,
+  `apptDeptOfficialName` varchar(64) NOT NULL,
+  `createdAt` timestamp NULL,
+  `updatedAt` timestamp NULL,
+  `lastSeen` timestamp NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -53,6 +66,9 @@ CREATE TABLE `iam_sis_associations` (
   `fepraCode` varchar(1) NULL,
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NULL,
+  `createdAt` timestamp NULL,
+  `updatedAt` timestamp NULL,
+  `lastSeen` timestamp NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -78,7 +94,11 @@ CREATE TABLE `iam_contactinfo` (
   `addrZip` varchar(10) DEFAULT NULL,
   `postalAddress` varchar(96) DEFAULT NULL,
   `addrStreet` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`iamId`)
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `createdAt` timestamp NULL,
+  `updatedAt` timestamp NULL,
+  `lastSeen` timestamp NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -114,6 +134,9 @@ CREATE TABLE `iam_people` (
   `dFullName` varchar(64) DEFAULT NULL,
   `ppsId` varchar(9) DEFAULT NULL,
   `mothraId` varchar(8) DEFAULT NULL,
+  `createdAt` timestamp NULL,
+  `updatedAt` timestamp NULL,
+  `lastSeen` timestamp NULL,
   PRIMARY KEY (`iamId`),
   -- FULLTEXT KEY `search_key` (`oFirstName`, `oMiddleName`, `oLastName`, `oFullName`, `dFirstName`, `dMiddleName`, `dLastName`, `dFullName`)
   FULLTEXT KEY `search_key` (`oFullName`)
@@ -138,6 +161,8 @@ CREATE TABLE `iam_pps_depts` (
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NOT NULL,
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `createdAt` timestamp NULL,
+  `updatedAt` timestamp NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -157,6 +182,9 @@ CREATE TABLE `iam_prikerbacct` (
   `expireDate` datetime DEFAULT NULL,
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `iamId` bigint(20) NOT NULL,
+  `createdAt` timestamp NULL,
+  `updatedAt` timestamp NULL,
+  `lastSeen` timestamp NULL,
   PRIMARY KEY (`id`),
   KEY `idx_iamid` (`iamId`),
   INDEX `iam_p_iam` (`iamId`)
@@ -179,9 +207,21 @@ CREATE TABLE `iam_bous` (
   `isUCDHS` boolean NOT NULL,
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NULL,
+  `createdAt` timestamp NULL,
+  `updatedAt` timestamp NULL,
   PRIMARY KEY (`orgOId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+CREATE TABLE `statuses` (
+  `upstream_db` varchar(32) NOT NULL,
+  `last_attempt` datetime DEFAULT NULL,
+  `last_success` datetime DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL,
+  PRIMARY KEY (`upstream_db`),
+  UNIQUE KEY `upstream_db_UNIQUE` (`upstream_db`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 
