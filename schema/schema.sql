@@ -8,10 +8,10 @@ DROP TABLE IF EXISTS `iam_pps_associations`;
 CREATE TABLE `iam_pps_associations` (
   `deptCode` varchar(10) NOT NULL,
   `deptOfficialName` varchar(64) NOT NULL,
-  `deptDisplayName` varchar(64) NOT NULL,
+  `deptDisplayName` varchar(64) NULL,
   `deptAbbrev` varchar(24) NOT NULL,
   `isUCDHS` tinyint(1) NOT NULL,
-  `bouOrgOId` varchar(32) NOT NULL,
+  `bouOrgOId` varchar(32) NULL,
   `assocRank` varchar(1) NOT NULL,
   `assocStartDate` datetime NOT NULL,
   `assocEndDate` datetime NULL,
