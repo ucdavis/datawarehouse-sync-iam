@@ -20,7 +20,7 @@ public class EntryPoint {
 	static EntityManagerFactory entityManagerFactory = null;
 	static EntityManager entityManager = null;
 	static ESClient esClient = null;
-	static final int maxThreads = 50;
+	static final int maxThreads = 25;
 	static final int recordsPerThread = 100;
 	static final int expireRecordsOlderThanDays = 28;
 	static final long DAY_IN_MS = 86400000;
@@ -51,6 +51,7 @@ public class EntryPoint {
 	public static void main(String[] args) {
 		boolean shouldImportBOUs = true;
 		boolean shouldImportPPSDepartments = true;
+		boolean shouldImportFromIam = true;
 
 		logger.info("IAM import started at " + new Date());
 
@@ -88,64 +89,67 @@ public class EntryPoint {
 			}
 		}
 
-		List<String> allIamIds = IamIdsImport.importIds();
+		// Pass list through a HashSet to ensure list if unique (as of 12/2019, it contained duplicates)
+		List<String> allIamIds = new ArrayList<String>(new HashSet<String>(IamIdsImport.importIds()));
 
 		logger.info("Persisting " + allIamIds.size() + " people ...");
 
-		List<Thread> threads = new ArrayList<Thread>();
+		if(shouldImportFromIam) {
+			List<Thread> threads = new ArrayList<Thread>();
 
-		List<List<String>> chunkedIamIds = chunkList(allIamIds, recordsPerThread);
-		for(List<String> iamIds : chunkedIamIds) {
-			Thread t = new Thread(new IamPersonImportThread(iamIds, entityManagerFactory));
-			t.setUncaughtExceptionHandler(uncaughtException);
-			threads.add(t);
-		}
-
-		logger.debug("Queued " + threads.size() + " threads of size " + recordsPerThread);
-
-		/**
-		 * Convert all ucdPersonUUIDs to IAM IDs and fetch associated information
-		 */
-		int activeThreads = 0;
-
-		// Start as many threads as possible (limited by maxThreads).
-		// If we have too many threads, the while loop below will
-		// start them once other threads finish.
-		for(Thread t : threads) {
-			if(activeThreads < maxThreads) {
-				t.start();
-				activeThreads++;
+			List<List<String>> chunkedIamIds = chunkList(allIamIds, recordsPerThread);
+			for (List<String> iamIds : chunkedIamIds) {
+				Thread t = new Thread(new IamPersonImportThread(iamIds, entityManagerFactory));
+				t.setUncaughtExceptionHandler(uncaughtException);
+				threads.add(t);
 			}
-		}
 
-		// Ensure all threads get a chance to run and
-		// loop until all threads have finished.
-		while(threads.size() > 0) {
-			Iterator<Thread> iter = threads.iterator();
+			logger.debug("Queued " + threads.size() + " threads of size " + recordsPerThread);
 
-			logger.debug("Threads remaining: " + threads.size());
+			/**
+			 * Convert all ucdPersonUUIDs to IAM IDs and fetch associated information
+			 */
+			int activeThreads = 0;
 
-			while(iter.hasNext()) {
-				Thread t = iter.next();
+			// Start as many threads as possible (limited by maxThreads).
+			// If we have too many threads, the while loop below will
+			// start them once other threads finish.
+			for (Thread t : threads) {
+				if (activeThreads < maxThreads) {
+					t.start();
+					activeThreads++;
+				}
+			}
 
-				if(t.isAlive()) {
-					try {
-						t.join(500);
-					} catch (InterruptedException e) {
-						logger.warn("t.join(); was interrupted:");
-						logger.warn(ExceptionUtils.stacktraceToString(e));
-						e.printStackTrace();
-					}
-				} else {
-					// If thread is terminated, remove it from the list.
-					if(t.getState() == Thread.State.TERMINATED) {
-						activeThreads--;
-						iter.remove();
-					}
-					if(activeThreads < maxThreads) {
-						if(t.getState() == Thread.State.NEW) {
-							t.start();
-							activeThreads++;
+			// Ensure all threads get a chance to run and
+			// loop until all threads have finished.
+			while (threads.size() > 0) {
+				Iterator<Thread> iter = threads.iterator();
+
+				logger.debug("Threads remaining: " + threads.size());
+
+				while (iter.hasNext()) {
+					Thread t = iter.next();
+
+					if (t.isAlive()) {
+						try {
+							t.join(500);
+						} catch (InterruptedException e) {
+							logger.warn("t.join(); was interrupted:");
+							logger.warn(ExceptionUtils.stacktraceToString(e));
+							e.printStackTrace();
+						}
+					} else {
+						// If thread is terminated, remove it from the list.
+						if (t.getState() == Thread.State.TERMINATED) {
+							activeThreads--;
+							iter.remove();
+						}
+						if (activeThreads < maxThreads) {
+							if (t.getState() == Thread.State.NEW) {
+								t.start();
+								activeThreads++;
+							}
 						}
 					}
 				}
