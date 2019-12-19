@@ -21,6 +21,7 @@ public class IamPpsAssociation {
 	private Date assocStartDate, assocEndDate;
 	private String titleOfficialName, titleDisplayName;
 	private String positionTypeCode, positionType, percentFullTime;
+	private String emplClass, emplClassDesc;
 	private Date createDate, modifyDate;
 	private Date createdAt, updatedAt, lastSeen;
 
@@ -206,6 +207,22 @@ public class IamPpsAssociation {
 	}
 
 	@Column
+	public String getEmplClass() {
+		return emplClass;
+	}
+	public void setEmplClass(String emplClass) {
+		this.emplClass = emplClass;
+	}
+
+	@Column
+	public String getEmplClassDesc() {
+		return emplClassDesc;
+	}
+	public void setEmplClassDesc(String emplClassDesc) {
+		this.emplClassDesc = emplClassDesc;
+	}
+
+	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateDate() {
 		return createDate;
@@ -322,6 +339,18 @@ public class IamPpsAssociation {
 		if((apptBouOrgOId == null) && (other.apptBouOrgOId != null)) {
 			return false;
 		} else if ((apptBouOrgOId != null) && apptBouOrgOId.equals(other.apptBouOrgOId) == false) {
+			return false;
+		}
+
+		if((emplClass == null) && (other.emplClass != null)) {
+			return false;
+		} else if ((emplClass != null) && emplClass.equals(other.emplClass) == false) {
+			return false;
+		}
+
+		if((emplClassDesc == null) && (other.emplClassDesc != null)) {
+			return false;
+		} else if ((emplClassDesc != null) && emplClassDesc.equals(other.emplClassDesc) == false) {
 			return false;
 		}
 
