@@ -38,9 +38,9 @@ CREATE TABLE `iam_pps_associations` (
   `createdAt` timestamp NULL,
   `updatedAt` timestamp NULL,
   `lastSeen` timestamp NULL,
-  `emplClass` varchar(2) NOT NULL,
+  `emplClass` varchar(2) NULL,
   -- emplClassDesc longest seen was 29 as of 12/19/19, setting higher for safety
-  `emplClassDesc` varchar(64) NOT NULL,
+  `emplClassDesc` varchar(64) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
