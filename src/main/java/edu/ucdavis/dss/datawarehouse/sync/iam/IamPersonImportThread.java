@@ -51,15 +51,23 @@ public class IamPersonImportThread implements Runnable {
 				Long iamId = Long.parseLong(iamId_s);
 
 				List<IamContactInfo> contactInfos = iamClient.getContactInfo(iamId);
-				List<IamPerson> people = iamClient.getPersonInfo(iamId);
+				List<IamPerson> iamPeople = iamClient.getPersonInfo(iamId);
 				List<IamPrikerbacct> prikerbaccts = iamClient.getPrikerbacct(iamId);
 				List<IamPpsAssociation> ppsAssociations = iamClient.getAllPpsAssociationsForIamId(iamId);
 				List<IamSisAssociation> sisAssociations = iamClient.getAllSisAssociationsForIamId(iamId);
 
-				if ((contactInfos == null) || (people == null) || (prikerbaccts == null) || (ppsAssociations == null)) {
+				if ((contactInfos == null) || (iamPeople == null) || (prikerbaccts == null) || (ppsAssociations == null)) {
 					logger.warn("Unable to fetch from IAM for IAM ID " + iamId);
 					retryCount++;
 					continue;
+				}
+
+				// IAM has returned multiple records for the same IAM ID in the past, i.e. the same person, listed twice
+				// Sanitize the data in this case by only accepting one Person record.
+				if(iamPeople.size() > 1) {
+					IamPerson p = iamPeople.get(0);
+					iamPeople.clear();
+					iamPeople.add(p);
 				}
 
 				EntityManager entityManager = null;
@@ -138,10 +146,27 @@ public class IamPersonImportThread implements Runnable {
 						}
 					}
 
-					if(people != null) {
-						for (IamPerson person : people) {
-							person.setLastSeen(new Date());
-							entityManager.merge(person);
+					if(iamPeople != null) {
+						List<IamPerson> existingPersons = entityManager.createQuery("SELECT p FROM IamPerson p WHERE p.iamId = :iamId")
+								.setParameter("iamId", iamId).getResultList();
+
+						for (IamPerson person : iamPeople) {
+							if (existingPersons.contains(person) == false) {
+								// If we don't have this person record locally, save it
+								person.setLastSeen(new Date());
+								entityManager.persist(person);
+							} else {
+								// If we do have this person record locally, remove from 'existingPersons' to mark that we're done parsing it
+								existingPersons.remove(person);
+							}
+						}
+
+						// Anything remaining in existingPersons neither needs saving, nor is something we already have.
+						// Therefore, it is local data that is no longer needed.
+						// We leave person records for a number of days after they disappear upstream however.
+						// We do not delete them right away. See the cleanup logic at the end of EntryPoint.
+						for (IamPerson person : existingPersons) {
+							entityManager.remove(person);
 						}
 					}
 
@@ -168,7 +193,7 @@ public class IamPersonImportThread implements Runnable {
 					continue;
 				}
 
-				updateElasticSearchDocument(contactInfos, people, prikerbaccts, ppsAssociations, sisAssociations);
+				updateElasticSearchDocument(contactInfos, iamPeople, prikerbaccts, ppsAssociations, sisAssociations);
 			}
 
 			if(retryCount == IMPORT_RETRY_COUNT) {
