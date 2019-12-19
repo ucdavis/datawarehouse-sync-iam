@@ -289,4 +289,54 @@ public class IamPerson {
 				"IamPerson[iamId='%s', ppsId='%s', dFullName='%s', oFullName='%s']",
 				iamId, ppsId, dFullName, oFullName);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		IamPerson other = (IamPerson) obj;
+
+		if((iamId == null) && (other.iamId != null)) {
+			return false;
+		} else if((iamId != null) && iamId.equals(other.iamId) == false) {
+			return false;
+		}
+
+		if((mothraId == null) && (other.mothraId != null)) {
+			return false;
+		} else if((mothraId != null) && mothraId.equals(other.mothraId) == false) {
+			return false;
+		}
+
+		if((ppsId == null) && (other.ppsId != null)) {
+			return false;
+		} else if((ppsId != null) && ppsId.equals(other.ppsId) == false) {
+			return false;
+		}
+
+		if((oFirstName == null) && (other.oFirstName != null)) {
+			return false;
+		} else if((oFirstName != null) && oFirstName.equals(other.oFirstName) == false) {
+			return false;
+		}
+
+		if((oLastName == null) && (other.oLastName != null)) {
+			return false;
+		} else if((oLastName != null) && oLastName.equals(other.oLastName) == false) {
+			return false;
+		}
+
+		if((oFullName == null) && (other.oFullName != null)) {
+			return false;
+		} else if((oFullName != null) && oFullName.equals(other.oFullName) == false) {
+			return false;
+		}
+
+		return true;
+	}
 }
