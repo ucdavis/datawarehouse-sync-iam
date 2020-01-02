@@ -25,6 +25,11 @@ public class EntryPoint {
 	static final int expireRecordsOlderThanDays = 28;
 	static final long DAY_IN_MS = 86400000;
 
+	static boolean shouldImportBOUs = true;
+	static boolean shouldImportPPSDepartments = true;
+	static boolean shouldImportFromIam = true;
+	static boolean skipElasticUpdate = false;
+
 	// Set up a default uncaught exception handler as Hibernate will not let the process
 	// exit if the main thread dies but Hibernate resources are not cleaned up.
 	static Thread.UncaughtExceptionHandler uncaughtException = new Thread.UncaughtExceptionHandler() {
@@ -49,10 +54,6 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		boolean shouldImportBOUs = true;
-		boolean shouldImportPPSDepartments = true;
-		boolean shouldImportFromIam = true;
-
 		logger.info("IAM import started at " + new Date());
 
 		if(SettingsUtils.initialize() == false) {
@@ -268,8 +269,10 @@ public class EntryPoint {
 
 		entityManager.getTransaction().commit();
 
-		// Remove the ElasticSearch records for this IAM ID
-		esClient.deleteDocument("dw", "people", iamId.toString());
+		if(skipElasticUpdate == false) {
+			// Remove the ElasticSearch records for this IAM ID
+			esClient.deleteDocument("dw", "people", iamId.toString());
+		}
 	}
 
 	/**
