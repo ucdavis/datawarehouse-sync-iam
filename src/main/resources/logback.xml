@@ -22,12 +22,12 @@
 	<logger name="org.hibernate" level="ERROR" />
 	<logger name="org.hibernate.SQL" level="OFF" />
 	<logger name="org.jboss.logging" level="OFF" />
-	<logger name="EntryPoint" level="DEBUG" />
+	<logger name="EntryPoint" level="INFO" />
 	<logger name="IamLogger" level="INFO" />
 	<logger name="org.apache.http" level="OFF" />
 	<logger name="com.mysql" level="ERROR" />
-	<logger name="IamPersonImportThread" level="DEBUG" />
-	<logger name="IamPpsDepartmentsImport" level="DEBUG" />
+	<logger name="IamPersonImportThread" level="INFO" />
+	<logger name="IamPpsDepartmentsImport" level="INFO" />
 
 	<root level="ERROR">
 		<appender-ref ref="STDERR" />
