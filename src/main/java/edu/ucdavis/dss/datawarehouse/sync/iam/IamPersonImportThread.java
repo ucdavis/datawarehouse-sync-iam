@@ -232,8 +232,8 @@ public class IamPersonImportThread implements Runnable {
 			ESPersonDTO esPerson = new ESPersonDTO();
 			
 			esPerson.setIamId(person.getIamId().toString());
-			esPerson.setDFirstName(person.getdFirstName());
-			esPerson.setDLastName(person.getdLastName());
+			esPerson.setdFirstName(person.getdFirstName());
+			esPerson.setdLastName(person.getdLastName());
 			if(prikerbaccts.size() > 0) {
 				// A person can exist without a prikerbacct
 				esPerson.setUserId(prikerbaccts.get(0).getUserId());
@@ -242,12 +242,12 @@ public class IamPersonImportThread implements Runnable {
 				// A person can exist with no contact info
 				esPerson.setEmail(contactInfos.get(0).getEmail());
 			}
-			esPerson.setDMiddleName(person.getdMiddleName());
-			esPerson.setOFirstName(person.getoFirstName());
-			esPerson.setOMiddleName(person.getoMiddleName());
-			esPerson.setOLastName(person.getoLastName());
-			esPerson.setDFullName(person.getdFullName());
-			esPerson.setOFullName(person.getoFullName());
+			esPerson.setdMiddleName(person.getdMiddleName());
+			esPerson.setoFirstName(person.getoFirstName());
+			esPerson.setoMiddleName(person.getoMiddleName());
+			esPerson.setoLastName(person.getoLastName());
+			esPerson.setdFullName(person.getdFullName());
+			esPerson.setoFullName(person.getoFullName());
 
 			esPerson.setPeople(people);
 			esPerson.setContactInfos(contactInfos);
