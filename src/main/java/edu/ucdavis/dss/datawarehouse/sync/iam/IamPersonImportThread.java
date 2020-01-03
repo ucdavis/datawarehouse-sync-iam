@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 
 import edu.ucdavis.dss.iam.dtos.*;
 import org.slf4j.Logger;
@@ -180,7 +181,8 @@ public class IamPersonImportThread implements Runnable {
 					logger.debug(ExceptionUtils.stacktraceToString(e));
 
 					lastException = e;
-					entityManager.getTransaction().rollback();
+					EntityTransaction transaction = entityManager.getTransaction();
+					if(transaction != null) { transaction.rollback(); }
 					if (entityManager.isOpen()) entityManager.close();
 					retryCount++;
 
