@@ -159,6 +159,10 @@ public class IamPersonImportThread implements Runnable {
 							} else {
 								// If we do have this person record locally, remove from 'existingPersons' to mark that we're done parsing it
 								existingPersons.remove(person);
+
+								// Update the 'lastSeen' date
+								person.setLastSeen(new Date());
+								entityManager.persist(person);
 							}
 						}
 
