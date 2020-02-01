@@ -152,7 +152,12 @@ public class IamPersonImportThread implements Runnable {
 								.setParameter("iamId", iamId).getResultList();
 
 						for (IamPerson person : iamPeople) {
-							if (existingPersons.contains(person) == false) {
+							IamPerson existing_record = null;
+							int existing_record_array_idx = existingPersons.indexOf(person);
+							if(existing_record_array_idx != -1) {
+								existing_record = existingPersons.get(existing_record_array_idx);
+							}
+							if (existing_record == null) {
 								// If we don't have this person record locally, save it
 								person.setLastSeen(new Date());
 								entityManager.persist(person);
@@ -161,8 +166,10 @@ public class IamPersonImportThread implements Runnable {
 								existingPersons.remove(person);
 
 								// Update the 'lastSeen' date
-								person.setLastSeen(new Date());
-								entityManager.persist(person);
+								// (Operate on existing_record, not person, as we need the database ID to prevent
+								// duplicates.)
+								existing_record.setLastSeen(new Date());
+								entityManager.persist(existing_record);
 							}
 						}
 
