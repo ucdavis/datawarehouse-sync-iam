@@ -337,6 +337,12 @@ public class IamPerson {
 			return false;
 		}
 
+		if((dFullName == null) && (other.dFullName != null)) {
+			return false;
+		} else if((dFullName != null) && dFullName.equals(other.dFullName) == false) {
+			return false;
+		}
+
 		return employeeInd.equals(other.employeeInd) &&
 			hsEmployeeInd.equals(other.hsEmployeeInd) &&
 			facultyInd.equals(other.facultyInd) &&
