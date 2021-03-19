@@ -3,6 +3,7 @@
 .project
 .settings
 .idea
+.env
 
 # Ignore compiled output
 target
