@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -19,33 +20,24 @@ public class SettingsUtils {
 		/**
 		 * Load needed database settings
 		 */
-		String filename = System.getProperty("user.home") + File.separator + ".data-warehouse" + File.separator + "settings.properties";
-		File propsFile = new File(filename);
-
-		InputStream is;
 		try {
-			is = new FileInputStream(propsFile);
+			Map<String, String> env = System.getenv();
 
-			Properties prop = new Properties();
-
-			prop.load(is);
-			is.close();
-
-			iamApiKey = prop.getProperty("IAM_API_KEY");
-			ldapUrl = prop.getProperty("LDAP_URL");
-			ldapBase = prop.getProperty("LDAP_BASE");
-			ldapUser = prop.getProperty("LDAP_USER");
-			ldapPassword = prop.getProperty("LDAP_PASSWORD");
-			elasticSearchHost = prop.getProperty("ELASTICSEARCH_HOST");
+			iamApiKey = env.get("IAM_API_KEY");
+			ldapUrl = env.get("LDAP_URL");
+			ldapBase = env.get("LDAP_BASE");
+			ldapUser = env.get("LDAP_USER");
+			ldapPassword = env.get("LDAP_PASSWORD");
+			elasticSearchHost = env.get("ELASTICSEARCH_HOST");
 			
-			logger.debug("Settings file '" + filename + "' found.");
-
-			return true;
-		} catch (FileNotFoundException e) {
-			logger.warn("Could not find " + filename + ".");
-			return false;
-		} catch (IOException e) {
-			logger.error("An IOException occurred while loading " + filename);
+			if (iamApiKey != null && ldapUrl != null && ldapBase != null && ldapUser != null && ldapPassword != null && elasticSearchHost != null) {
+				return true;
+			} else {
+				System.out.println("Missing an environment variable.");
+				return false;
+			}
+		} catch (SecurityException e) {
+			logger.warn("A SecurityException occured while reading environment.");
 			return false;
 		}
 	}
