@@ -8,7 +8,9 @@ RUN mvn dependency:go-offline
 COPY src/ /build/src/
 RUN mvn package
 
-FROM openjdk:8
+FROM openjdk:8-jdk-alpine
+RUN apk --no-cache add curl
+
 # Had issues with combinded cert bundle
 RUN curl https://s3.amazonaws.com/rds-downloads/rds-ca-2019-root.pem -o rds-ca-2019-root.pem -s
 RUN curl https://s3.amazonaws.com/rds-downloads/rds-ca-2019-us-west-2.pem -o rds-ca-2019-us-west-2.pem -s
