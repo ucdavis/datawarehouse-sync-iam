@@ -3,7 +3,8 @@
 .project
 .settings
 .idea
-.env
+*.env
+!example.env
 
 # Ignore compiled output
 target
