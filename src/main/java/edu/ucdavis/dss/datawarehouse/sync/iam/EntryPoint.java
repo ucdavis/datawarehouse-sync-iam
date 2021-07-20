@@ -2,7 +2,6 @@ package edu.ucdavis.dss.datawarehouse.sync.iam;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -67,7 +66,13 @@ public class EntryPoint {
 		 * Set up Hibernate
 		 */
 		try {
-			entityManagerFactory = Persistence.createEntityManagerFactory( "edu.ucdavis.dss.datawarehouse.sync.iam" );
+			// override persistence.xml at runtime
+			Map<String, Object> configOverrides = new HashMap<String, Object>();
+			configOverrides.put("javax.persistence.jdbc.url", System.getenv("DW_SYNC_IAM_JDBC_URL"));
+			configOverrides.put("javax.persistence.jdbc.user", System.getenv("DW_SYNC_IAM_JDBC_USER"));
+			configOverrides.put("javax.persistence.jdbc.password", System.getenv("DW_SYNC_IAM_JDBC_PASSWORD"));
+
+			entityManagerFactory = Persistence.createEntityManagerFactory("edu.ucdavis.dss.datawarehouse.sync.iam", configOverrides);
 		} catch (ServiceException e) {
 			logger.error("Unable to create entity manager factory. Is the database running?");
 			System.exit(-1);
