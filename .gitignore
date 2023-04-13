@@ -5,6 +5,7 @@
 .idea
 *.env
 !example.env
+.vscode
 
 # Ignore compiled output
 target
