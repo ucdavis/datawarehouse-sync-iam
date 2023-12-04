@@ -376,6 +376,12 @@ public class IamClient {
 			return null;
 		}
 
+		// People with pending work state returns an iamId with empty values in other fields, we'll ignore them
+		if (people.stream().anyMatch(person -> person.getoFirstName() == null && person.getoLastName() == null)) {
+			logger.warn("IAM returned a pending person with IAM ID: " + iamId);
+			people.clear();
+		}
+
 //		if(people.size() > 1) {
 //			logger.warn("IAM returned " + people.size() + " 'people' for IAM ID: " + iamId + " (mothra ID: " + people.get(0).getMothraId() + ")");
 //		}
