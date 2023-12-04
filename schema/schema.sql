@@ -93,7 +93,7 @@ CREATE TABLE `iam_contactinfo` (
   `addrCity` varchar(32) DEFAULT NULL,
   `addrState` varchar(2) DEFAULT NULL,
   `addrZip` varchar(10) DEFAULT NULL,
-  `postalAddress` varchar(96) DEFAULT NULL,
+  `postalAddress` varchar(128) DEFAULT NULL,
   `workPhone` varchar(32) DEFAULT NULL,
   `workCell` varchar(16) DEFAULT NULL,
   `workPager` varchar(16) DEFAULT NULL,
