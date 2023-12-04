@@ -11,11 +11,8 @@ RUN mvn package
 FROM openjdk:8-jdk-alpine
 RUN apk --no-cache add curl
 
-# Had issues with combinded cert bundle
-RUN curl https://s3.amazonaws.com/rds-downloads/rds-ca-2019-root.pem -o rds-ca-2019-root.pem -s
-RUN curl https://s3.amazonaws.com/rds-downloads/rds-ca-2019-us-west-2.pem -o rds-ca-2019-us-west-2.pem -s
-RUN keytool -import -noprompt -trustcacerts -alias aws_rds_ca_2019_root -file rds-ca-2019-root.pem -storepass changeit -keystore "$JAVA_HOME/jre/lib/security/cacerts"
-RUN keytool -import -noprompt -trustcacerts -alias aws_rds_ca_us_west_2 -file rds-ca-2019-us-west-2.pem -storepass changeit -keystore "$JAVA_HOME/jre/lib/security/cacerts"
+RUN curl https://truststore.pki.rds.amazonaws.com/us-west-2/us-west-2-bundle.pem -o us-west-2-bundle.pem -s
+RUN keytool -import -noprompt -trustcacerts -alias aws_us_west_2_bundle -file us-west-2-bundle.pem -storepass changeit -keystore "$JAVA_HOME/jre/lib/security/cacerts"
 
 COPY --from=maven /build/target/datawarehouse-sync-iam-0.2.0-jar-with-dependencies.jar /usr/bin/datawarehouse-sync-iam.jar
 
