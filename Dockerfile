@@ -10,6 +10,8 @@ RUN mvn package
 
 FROM openjdk:8-jdk-alpine
 
+RUN apk --no-cache add openssl
+
 COPY import-rds-certs.sh .
 RUN ./import-rds-certs.sh
 
