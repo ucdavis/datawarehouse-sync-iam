@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline
 COPY src/ /build/src/
 RUN mvn package
 
-FROM openjdk:8-jdk-alpine
+FROM amazoncorretto:8-alpine-jre
 
 RUN apk --no-cache add openssl
 
