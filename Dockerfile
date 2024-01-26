@@ -1,4 +1,4 @@
-FROM maven:3.6-jdk-8-alpine AS maven
+FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /build
 COPY pom.xml .
@@ -8,13 +8,13 @@ RUN mvn dependency:go-offline
 COPY src/ /build/src/
 RUN mvn package
 
-FROM amazoncorretto:8-alpine-jre
+FROM eclipse-temurin:17-jre-alpine
 
 RUN apk --no-cache add openssl
 
 COPY import-rds-certs.sh .
 RUN ./import-rds-certs.sh
 
-COPY --from=maven /build/target/datawarehouse-sync-iam-0.2.0-jar-with-dependencies.jar /usr/bin/datawarehouse-sync-iam.jar
+COPY --from=builder /build/target/datawarehouse-sync-iam-0.2.0-jar-with-dependencies.jar /usr/bin/datawarehouse-sync-iam.jar
 
-CMD java -jar /usr/bin/datawarehouse-sync-iam.jar
+CMD ["java", "-jar", "/usr/bin/datawarehouse-sync-iam.jar"]
