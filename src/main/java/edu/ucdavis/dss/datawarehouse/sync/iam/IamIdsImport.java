@@ -2,6 +2,8 @@ package edu.ucdavis.dss.datawarehouse.sync.iam;
 
 import edu.ucdavis.dss.iam.client.IamClient;
 import edu.ucdavis.dss.iam.dtos.IamPersonIdResult;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,9 @@ import java.util.List;
 public class IamIdsImport {
     static private Logger logger = LoggerFactory.getLogger("IamIdsImport");
 
+    /**
+     * Returns a subset of recently updated IAM Ids on weekdays
+     */
     public static List<String> importIds() {
         /**
          * Initialize IAM client
@@ -22,9 +27,9 @@ public class IamIdsImport {
          */
         logger.debug("Fetching all IAM IDs ...");
 
-        List<IamPersonIdResult> personIdResults = null;
-
-        personIdResults = iamClient.getAllIamIds();
+        List<IamPersonIdResult> personIdResults =
+            LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY ? iamClient.getAllIamIds() :
+                iamClient.getModifiedIamIds();
 
         if(personIdResults == null) {
             logger.error("Unable to fetch IAM IDs.");
