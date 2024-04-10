@@ -276,7 +276,7 @@ public class EntryPoint {
 
 		if(skipElasticUpdate == false) {
 			// Remove the ElasticSearch records for this IAM ID
-			esClient.deleteDocument("dw", "people", iamId.toString());
+			esClient.deleteDocument("dw_people", iamId.toString());
 		}
 	}
 

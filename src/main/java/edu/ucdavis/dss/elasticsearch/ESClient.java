@@ -18,6 +18,8 @@ import com.amazonaws.http.HttpResponse;
 import com.amazonaws.http.HttpResponseHandler;
 
 import edu.ucdavis.dss.aws.RequestSigner;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ESClient {
 	private static final String SERVICE_NAME = "es";
@@ -28,11 +30,14 @@ public class ESClient {
 		this.host = host;
 	}
 
-	public HttpResponse putDocument(String index, String type, String id, String document) {
+	public HttpResponse putDocument(String index, String id, String document) {
 		Request<?> request = new DefaultRequest<Void>(SERVICE_NAME);
-		
+
+		Map<String, String> headers = new HashMap<>();
+		headers.put("Content-Type", "application/json");
+		request.setHeaders(headers);
 		request.setContent(new ByteArrayInputStream(document.getBytes()));
-		request.setEndpoint(URI.create("https://" + this.host + "/" + index + "/" + type + "/" + id));
+		request.setEndpoint(URI.create("https://" + this.host + "/" + index + "/_doc/" + id));
 		request.setHttpMethod(HttpMethodName.PUT);
 		
 		RequestSigner.performSigningSteps(SERVICE_NAME, REGION, request);
@@ -52,18 +57,21 @@ public class ESClient {
 			
 			return response.getHttpResponse();
 		} catch (AmazonServiceException e) {
-			System.out.println("AWS Exception thrown while trying to PUT document in index (" + index + "), type (" + type + "), ID (" + id + "):");
+			System.out.println("AWS Exception thrown while trying to PUT document in index (" + index + "), ID (" + id + "):");
 			System.err.println(e);
 			
 			return null;
 		}
 	}
 
-	public HttpResponse deleteDocument(String index, String type, String id) {
+	public HttpResponse deleteDocument(String index, String id) {
 		Request<?> request = new DefaultRequest<Void>(SERVICE_NAME);
 
 		// request.setContent(new ByteArrayInputStream(document.getBytes()));
-		request.setEndpoint(URI.create("https://" + this.host + "/" + index + "/" + type + "/" + id));
+		Map<String, String> headers = new HashMap<>();
+		headers.put("Content-Type", "application/json");
+		request.setHeaders(headers);
+		request.setEndpoint(URI.create("https://" + this.host + "/" + index + "/" + id));
 		request.setHttpMethod(HttpMethodName.DELETE);
 
 		RequestSigner.performSigningSteps(SERVICE_NAME, REGION, request);
@@ -83,17 +91,17 @@ public class ESClient {
 
 			return response.getHttpResponse();
 		} catch (AmazonServiceException e) {
-			System.out.println("AWS Exception thrown while trying to DELETE document in index (" + index + "), type (" + type + "), ID (" + id + "):");
+			System.out.println("AWS Exception thrown while trying to DELETE document in index (" + index + "), ID (" + id + "):");
 			System.err.println(e);
 
 			return null;
 		}
 	}
 
-	public HttpResponse search(String index, String type, String q) {
+	public HttpResponse search(String index, String q) {
 		Request<?> request = new DefaultRequest<Void>(SERVICE_NAME);
 		
-		request.setEndpoint(URI.create("https://" + this.host + "/" + index + "/" + type + "/_search"));
+		request.setEndpoint(URI.create("https://" + this.host + "/" + index + "/_search"));
 		request.addParameter("q", q);
 		request.setHttpMethod(HttpMethodName.GET);
 		
@@ -114,7 +122,7 @@ public class ESClient {
 			
 			return response.getHttpResponse();
 		} catch (AmazonServiceException e) {
-			System.out.println("AWS Exception thrown while trying to search in index (" + index + "), type (" + type + "), query (" + q + "):");
+			System.out.println("AWS Exception thrown while trying to search in index (" + index + "), query (" + q + "):");
 			System.err.println(e);
 			
 			return null;
