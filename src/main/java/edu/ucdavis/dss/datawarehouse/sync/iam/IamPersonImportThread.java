@@ -271,8 +271,8 @@ public class IamPersonImportThread implements Runnable {
 			esPerson.setLastSeen(new Date());
 			
 			client.putDocument("dw_people", person.getIamId().toString(), gson.toJson(esPerson));
-		} catch (com.amazonaws.SdkClientException e) {
-			logger.error("SdkClientException occurred while updating ElasticSearch:");
+		} catch (IOException e) {
+			logger.error("Exception occurred while updating ElasticSearch:");
 			logger.error(ExceptionUtils.stacktraceToString(e));
 			skipElasticUpdate = true;
 			return;
