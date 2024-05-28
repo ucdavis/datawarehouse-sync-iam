@@ -1,145 +1,70 @@
 package edu.ucdavis.dss.iam.client;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.PrintStream;
-import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.net.ssl.SSLException;
-
-import edu.ucdavis.dss.datawarehouse.sync.iam.ExceptionUtils;
-import edu.ucdavis.dss.iam.dtos.*;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.ucdavis.dss.datawarehouse.sync.iam.ExceptionUtils;
+import edu.ucdavis.dss.iam.dtos.IamBou;
+import edu.ucdavis.dss.iam.dtos.IamContactInfo;
+import edu.ucdavis.dss.iam.dtos.IamPerson;
+import edu.ucdavis.dss.iam.dtos.IamPersonIdResult;
+import edu.ucdavis.dss.iam.dtos.IamPpsAssociation;
+import edu.ucdavis.dss.iam.dtos.IamPpsDepartment;
+import edu.ucdavis.dss.iam.dtos.IamPrikerbacct;
+import edu.ucdavis.dss.iam.dtos.IamSisAssociation;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IamClient {
 	private final Logger logger = LoggerFactory.getLogger("IamLogger");
-	private final int TIMEOUT = 30000; // milliseconds
-	private final int MAX_RETRIES = 3;
-
-	private CloseableHttpClient httpclient;
-	private HttpHost targetHost;
-	private HttpClientContext context;
-	private String apiKey;
+	private final CloseableHttpClient httpClient;
+	private final String BASE_URL = "https://iet-ws.ucdavis.edu/api/iam";
+	private final String apiKey;
 
 	public IamClient(String apiKey) {
-		httpclient = HttpClientBuilder.create().setRetryHandler(retryHandler).build();
+		Timeout TIMEOUT = Timeout.ofSeconds(30);
+		PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+			.setDefaultConnectionConfig(
+				ConnectionConfig.custom().setSocketTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).build()).build();
 
-		targetHost = new HttpHost("iet-ws.ucdavis.edu", 443, "https");
+		int MAX_RETRIES = 3;
+		TimeValue RETRY_INTERVAL = TimeValue.ofSeconds(1);
+		HttpRequestRetryStrategy retryStrategy = new DefaultHttpRequestRetryStrategy(MAX_RETRIES, RETRY_INTERVAL);
 
-		// Add AuthCache to the execution context
-		context = HttpClientContext.create();
-
+		this.httpClient =
+			HttpClients.custom().setConnectionManager(connectionManager).setRetryStrategy(retryStrategy).build();
 		this.apiKey = apiKey;
 	}
 
 	/**
-	 * Returns the IAM ID for the given Mothra ID.
-	 *
-	 * Note: Mothra ID is called UcdPersonUUID in LDAP.
-	 * 
-	 * @param mothraId
-	 * @return
-	 */
-	public Long getIamIdFromMothraId(String mothraId) {
-		HttpGet request = new HttpGet("/api/iam/people/ids/search?mothraId=" + mothraId + "&v=1.0&key=" + apiKey);
-		Long iamId = null;
-
-		try {
-			HashMap<Object, Object> results = null;
-
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results").get(0);
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				results = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructMapType(
-								HashMap.class, Object.class, Object.class));
-
-				iamId = Long.parseLong((String) results.get("iamId"));
-			} else {
-				// Mothra IDs may exist for individuals who are not active and don't show up in IAM.
-				// This is not an error, nor warning.
-				//log.error("getIamIdFromMothraId response from IAM not understood or was empty/null");
-			}
-
-			response.close();
-		} catch (IOException e) {
-			logger.error(ExceptionUtils.stacktraceToString(e));
-		}
-
-		return iamId;
-	}
-
-	/**
 	 * Returns a list of all departments
-	 * 
+	 *
 	 * @return list of departments as IamDepartment DTOs
 	 */
 	public List<IamPpsDepartment> getAllPpsDepartments() {
-		HttpGet request = new HttpGet("/api/iam/orginfo/pps/depts?v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/orginfo/pps/depts?v=1.0&key=" + apiKey);
 		List<IamPpsDepartment> departments = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				departments = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamPpsDepartment.class));
-			} else {
-				logger.error("getAllPpsDepartments response from IAM not understood or was empty/null");
-			}
-
-			response.close();
+			departments = httpClient.execute(request, response -> parseResponse(response, IamPpsDepartment.class));
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
 		}
@@ -149,44 +74,17 @@ public class IamClient {
 
 	/**
 	 * Returns a list of all PPS associations for the given IAM ID
-	 * 
+	 *
 	 * @return list of PPS associations as IamPpsAssociation DTOs
 	 */
 	public List<IamPpsAssociation> getAllPpsAssociationsForIamId(Long iamId) {
-		String url = "/api/iam/associations/pps/" + iamId;
-		HttpGet request = new HttpGet(url + "?v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/associations/pps/" + iamId + "?v=1.0&key=" + apiKey);
 		List<IamPpsAssociation> associations = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				associations = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamPpsAssociation.class));
-			} else {
-				logger.warn("/api/iam/associations/pps/" + iamId + " response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
+			associations = httpClient.execute(request, response -> parseResponse(response, IamPpsAssociation.class));
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
 		}
 
 		return associations;
@@ -198,86 +96,13 @@ public class IamClient {
 	 * @return list of SIS associations as IamSisAssociation DTOs
 	 */
 	public List<IamSisAssociation> getAllSisAssociationsForIamId(Long iamId) {
-		String url = "/api/iam/associations/sis/" + iamId;
-		HttpGet request = new HttpGet(url + "?v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/associations/sis/" + iamId + "?v=1.0&key=" + apiKey);
 		List<IamSisAssociation> associations = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				associations = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamSisAssociation.class));
-			} else {
-				logger.warn("/api/iam/associations/sis/" + iamId + " response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
+			associations = httpClient.execute(request, response -> parseResponse(response, IamSisAssociation.class));
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
-		}
-
-		return associations;
-	}
-
-	/**
-	 * Returns a list of all associations for the department indicated by 'deptCode'
-	 * 
-	 * @return list of associations as IamAssociation DTOs
-	 */
-	public List<IamPpsAssociation> getAllAssociationsForDepartment(String deptCode) {
-		// First, get all people in the department
-		String url = "/api/iam/associations/pps/search?deptCode=" + deptCode;
-		HttpGet request = new HttpGet(url + "&v=1.0&key=" + apiKey);
-		List<IamPpsAssociation> associations = null;
-
-		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				associations = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamPpsAssociation.class));
-			} else {
-				logger.warn("/api/iam/associations/pps/search?deptCode=" + deptCode + " response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
-		} catch (IOException e) {
-			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
 		}
 
 		return associations;
@@ -285,45 +110,18 @@ public class IamClient {
 
 	/**
 	 * Returns the contact info entry for a given IamID
-	 * 
+	 *
 	 * @return List<IamContactInfo> or null
 	 */
 	public List<IamContactInfo> getContactInfo(Long iamId) {
 		// First, get all people in the department
-		String url = "/api/iam/people/contactinfo/" + iamId;
-		HttpGet request = new HttpGet(url + "?v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/people/contactinfo/" + iamId + "?v=1.0&key=" + apiKey);
 		List<IamContactInfo> contactInfos = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				contactInfos = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamContactInfo.class));
-			} else {
-				logger.warn("/api/iam/people/contactinfo/" + iamId + " response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
+			contactInfos = httpClient.execute(request, response -> parseResponse(response, IamContactInfo.class));
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
 		}
 
 //		if(contactInfos.size() > 1) {
@@ -335,45 +133,18 @@ public class IamClient {
 
 	/**
 	 * Returns the person entry(ies) for a given IamID
-	 * 
+	 *
 	 * @return List<IamPerson> or null
 	 */
 	public List<IamPerson> getPersonInfo(Long iamId) {
 		// First, get all people in the department
-		String url = "/api/iam/people/search?iamId=" + iamId;
-		HttpGet request = new HttpGet(url + "&v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/people/search?iamId=" + iamId + "&v=1.0&key=" + apiKey);
 		List<IamPerson> people = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				people = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamPerson.class));
-			} else {
-				logger.warn("/api/iam/people/search?iamId=" + iamId + " response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
+			people = httpClient.execute(request, response -> parseResponse(response, IamPerson.class));
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
 		}
 
 		// People with pending work state returns an iamId with empty values in other fields, we'll ignore them
@@ -391,45 +162,17 @@ public class IamClient {
 
 	/**
 	 * Returns the person entry(ies) for a given IamID
-	 * 
+	 *
 	 * @return List<IamPerson> or null
 	 */
 	public List<IamPrikerbacct> getPrikerbacct(Long iamId) {
-		// First, get all people in the department
-		String url = "/api/iam/people/prikerbacct/" + iamId;
-		HttpGet request = new HttpGet(url + "?v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/people/prikerbacct/" + iamId + "?v=1.0&key=" + apiKey);
 		List<IamPrikerbacct> prikerbaccts = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				prikerbaccts = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamPrikerbacct.class));
-			} else {
-				logger.warn("/api/iam/people/prikerbacct/" + iamId + " response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
+			prikerbaccts = httpClient.execute(request, response -> parseResponse(response, IamPrikerbacct.class));
 		} catch (IOException e) {
-			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
+			logger.warn("/api/iam/people/prikerbacct/" + iamId + " response from IAM not understood or was empty/null");
 		}
 
 //		if(prikerbaccts.size() > 1) {
@@ -440,121 +183,70 @@ public class IamClient {
 	}
 
 	public List<IamBou> getAllBous() {
-		HttpGet request = new HttpGet("/api/iam/orginfo/pps/divisions?v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/orginfo/pps/divisions?v=1.0&key=" + apiKey);
 		List<IamBou> bous = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				bous = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamBou.class));
-			} else {
-				logger.warn("/api/iam/orginfo/pps/divisions response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
+			bous = httpClient.execute(request, response -> parseResponse(response, IamBou.class));
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
 		}
 
 		return bous;
 	}
 
 	public List<IamPersonIdResult> getAllIamIds() {
-		HttpGet request = new HttpGet("/api/iam/people/ids?v=1.0&key=" + apiKey);
+		HttpGet request = new HttpGet(BASE_URL + "/people/ids?v=1.0&key=" + apiKey);
 		List<IamPersonIdResult> iamIds = null;
 
 		try {
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
-			request.setConfig(requestConfig);
-
-			CloseableHttpResponse response = httpclient.execute(targetHost, request, context);
-
-			HttpEntity entity = response.getEntity();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-			JsonNode rootNode = mapper.readValue(EntityUtils.toString(entity), JsonNode.class);
-			JsonNode arrNode = rootNode.findPath("results");
-
-			if ((arrNode != null) && !arrNode.isNull()) {
-				iamIds = mapper.readValue(
-						arrNode.toString(),
-						mapper.getTypeFactory().constructCollectionType(
-								List.class, IamPersonIdResult.class));
-			} else {
-				logger.warn("/api/iam/people/ids response from IAM not understood or was empty/null");
-
-				return null;
-			}
-
-			response.close();
+			iamIds = httpClient.execute(request, response -> parseResponse(response, IamPersonIdResult.class));
 		} catch (IOException e) {
 			logger.error(ExceptionUtils.stacktraceToString(e));
-			return null;
 		}
 
 		return iamIds;
 	}
 
-	// Credit: http://hc.apache.org/httpcomponents-client-4.5.x/tutorial/html/fundamentals.html#d5e316
-	private HttpRequestRetryHandler retryHandler = new HttpRequestRetryHandler() {
-		@Override
-		public boolean retryRequest(
-				IOException exception,
-				int executionCount,
-				HttpContext context) {
+	/**
+	 * Returns iamIds updated in the last X amount of days
+	 *
+	 * @return List<IamPersonIdResult>
+	 */
+	public List<IamPersonIdResult> getModifiedIamIds() {
+		int DAYS_TO_SUBTRACT = 2;
+		String modifyDate =
+			LocalDate.now(ZoneOffset.UTC).minusDays(DAYS_TO_SUBTRACT).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-			if (executionCount >= MAX_RETRIES) {
-				// Do not retry if over max retry count
-				logger.error("A HTTP request exceeded its maximum retries.");
-				return false;
-			}
-			if (exception instanceof InterruptedIOException) {
-				return true;
-			}
-			if (exception instanceof UnknownHostException) {
-				// Unknown host
-				return false;
-			}
-			if (exception instanceof ConnectTimeoutException) {
-				// Connection timed out
-				return true;
-			}
-			if (exception instanceof SSLException) {
-				// SSL handshake exception
-				return false;
-			}
+		HttpGet request =
+			new HttpGet(BASE_URL + "/people/search?modifyDateAfter=" + modifyDate + "&v=1.0&key=" + apiKey);
+		List<IamPersonIdResult> iamIds = null;
 
-			HttpClientContext clientContext = HttpClientContext.adapt(context);
-			HttpRequest request = clientContext.getRequest();
-			boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
-			if (idempotent) {
-				// Retry if the request is considered idempotent
-				return true;
-			}
-
-			return false;
+		try {
+			iamIds = httpClient.execute(request, response -> parseResponse(response, IamPersonIdResult.class));
+		} catch (IOException e) {
+			logger.error(ExceptionUtils.stacktraceToString(e));
 		}
-	};
+
+		return iamIds;
+	}
+
+	private <T> List<T> parseResponse(ClassicHttpResponse response, Class<T> dtoClass) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+		try {
+			JsonNode rootNode = mapper.readValue(EntityUtils.toString(response.getEntity()), JsonNode.class);
+			JsonNode arrNode = rootNode.findPath("results");
+
+			if ((arrNode != null) && !arrNode.isNull()) {
+				return mapper.readValue(arrNode.toString(),
+					mapper.getTypeFactory().constructCollectionType(List.class, dtoClass));
+			}
+		} catch (IOException | ParseException e) {
+			logger.error(ExceptionUtils.stacktraceToString(e));
+		}
+
+		return null;
+	}
 }
