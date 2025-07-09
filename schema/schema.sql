@@ -208,7 +208,7 @@ CREATE TABLE `iam_bous` (
   `deptCode` varchar(6) NOT NULL,
   `deptOfficialName` varchar(64) NOT NULL,
   `deptDisplayName` varchar(32) DEFAULT '',
-  `deptAbbrev` varchar(32) NOT NULL,
+  `deptAbbrev` varchar(32) DEFAULT NULL,
   `isUCDHS` tinyint(1) NOT NULL,
   `createDate` datetime NOT NULL,
   `modifyDate` datetime DEFAULT NULL,
