@@ -17,6 +17,8 @@ public class IamPpsDepartment {
 	private String deptAbbrev;
 	private Boolean ucdhs;
 	private String bouOrgOId;
+	private String subDivisionL4;
+	private String subDivisionL4Name;
 	private Date createDate, modifyDate;
 	private Date createdAt, updatedAt;
 	
@@ -83,7 +85,15 @@ public class IamPpsDepartment {
 	public void setBouOrgOId(String bouOrgOId) {
 		this.bouOrgOId = bouOrgOId;
 	}
-	
+
+	@Column
+	public String getSubDivisionL4() { return subDivisionL4; }
+	public void setSubDivisionL4(String subDivisionL4) { this.subDivisionL4 = subDivisionL4; }
+
+	@Column
+	public String getSubDivisionL4Name() { return subDivisionL4Name; }
+	public void setSubDivisionL4Name(String subDivisionL4Name) { this.subDivisionL4Name = subDivisionL4Name; }
+
 	@Column
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateDate() {

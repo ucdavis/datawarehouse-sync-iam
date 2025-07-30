@@ -164,6 +164,8 @@ CREATE TABLE `iam_pps_depts` (
   `deptAbbrev` varchar(200) NOT NULL DEFAULT '',
   `isUCDHS` tinyint(1) NOT NULL,
   `bouOrgOId` varchar(32) DEFAULT NULL,
+  `subDivisionL4` varchar(10) DEFAULT NULL,
+  `subDivisionL4Name` varchar(64) DEFAULT NULL,
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NOT NULL,
   `UpdatedAt` timestamp NULL DEFAULT NULL,
