@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-17 AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /build
 COPY pom.xml .
@@ -8,9 +8,12 @@ RUN mvn dependency:go-offline
 COPY src/ /build/src/
 RUN mvn package
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre
 
-RUN apk --no-cache add openssl
+RUN apt-get update && \
+    apt-get install -y \
+    openssl && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY import-rds-certs.sh .
 RUN ./import-rds-certs.sh

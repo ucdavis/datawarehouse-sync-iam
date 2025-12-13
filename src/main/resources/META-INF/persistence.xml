@@ -1,7 +1,7 @@
-<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
-	version="2.0">
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
+	version="3.1">
 
 	<persistence-unit name="edu.ucdavis.dss.datawarehouse.sync.iam">
 		<description>
@@ -9,10 +9,10 @@
 		</description>
 
 		<properties>
-			<property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
-			<property name="javax.persistence.jdbc.url" value="${dw_sync_iam_jdbc_url}" />
-			<property name="javax.persistence.jdbc.user" value="${dw_sync_iam_jdbc_user}" />
-			<property name="javax.persistence.jdbc.password" value="${dw_sync_iam_jdbc_password}" />
+			<property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+			<property name="jakarta.persistence.jdbc.url" value="${dw_sync_iam_jdbc_url}" />
+			<property name="jakarta.persistence.jdbc.user" value="${dw_sync_iam_jdbc_user}" />
+			<property name="jakarta.persistence.jdbc.password" value="${dw_sync_iam_jdbc_password}" />
 
 			<property name="hibernate.show_sql" value="false" />
 			<property name="hibernate.hbm2ddl.auto" value="validate" />
@@ -24,7 +24,7 @@
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
 	
 			<!-- Disable the second-level cache -->
-			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.internal.NoCachingRegionFactory" />
+			<property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.internal.NoCachingRegionFactory" />
 		</properties>
 
 	</persistence-unit>

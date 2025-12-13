@@ -1,7 +1,7 @@
 package edu.ucdavis.dss.datawarehouse.sync;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.util.Date;
 
 public class StatusLogger {

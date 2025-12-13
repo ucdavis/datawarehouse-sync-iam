@@ -3,9 +3,9 @@ package edu.ucdavis.dss.datawarehouse.sync.iam;
 import java.math.BigInteger;
 import java.util.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 import edu.ucdavis.dss.datawarehouse.sync.StatusLogger;
 import edu.ucdavis.dss.elasticsearch.ESClient;
@@ -68,9 +68,9 @@ public class EntryPoint {
 		try {
 			// override persistence.xml at runtime
 			Map<String, Object> configOverrides = new HashMap<String, Object>();
-			configOverrides.put("javax.persistence.jdbc.url", System.getenv("DW_SYNC_IAM_JDBC_URL"));
-			configOverrides.put("javax.persistence.jdbc.user", System.getenv("DW_SYNC_IAM_JDBC_USER"));
-			configOverrides.put("javax.persistence.jdbc.password", System.getenv("DW_SYNC_IAM_JDBC_PASSWORD"));
+			configOverrides.put("jakarta.persistence.jdbc.url", System.getenv("DW_SYNC_IAM_JDBC_URL"));
+			configOverrides.put("jakarta.persistence.jdbc.user", System.getenv("DW_SYNC_IAM_JDBC_USER"));
+			configOverrides.put("jakarta.persistence.jdbc.password", System.getenv("DW_SYNC_IAM_JDBC_PASSWORD"));
 
 			entityManagerFactory = Persistence.createEntityManagerFactory("edu.ucdavis.dss.datawarehouse.sync.iam", configOverrides);
 		} catch (ServiceException e) {

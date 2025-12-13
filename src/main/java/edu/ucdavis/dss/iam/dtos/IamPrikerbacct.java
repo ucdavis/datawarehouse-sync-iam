@@ -2,7 +2,7 @@ package edu.ucdavis.dss.iam.dtos;
 
 import java.util.Date;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

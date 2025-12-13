@@ -1,6 +1,6 @@
 package edu.ucdavis.dss.iam.dtos;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
