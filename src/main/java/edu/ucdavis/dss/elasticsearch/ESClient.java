@@ -3,6 +3,7 @@ package edu.ucdavis.dss.elasticsearch;
 import edu.ucdavis.dss.aws.RequestSigner;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import software.amazon.awssdk.http.HttpExecuteRequest;
 import software.amazon.awssdk.http.HttpExecuteResponse;
 import software.amazon.awssdk.http.SdkHttpClient;
@@ -14,9 +15,16 @@ public class ESClient {
 	private static final String SERVICE_NAME = "es";
 	private static final String REGION = "us-west-2";
 	private String host = null;
+	private final SdkHttpClient httpClient;
 
 	public ESClient(String host) {
 		this.host = host;
+
+		this.httpClient = ApacheHttpClient.builder()
+			.socketTimeout(Duration.ofMinutes(5))
+			.connectionTimeout(Duration.ofSeconds(5))
+			.maxConnections(30)
+			.build();
 	}
 
 	public void putDocument(String index, String id, String document) throws IOException {
@@ -27,14 +35,20 @@ public class ESClient {
 
 		SdkHttpFullRequest signedRequest = RequestSigner.sign(SERVICE_NAME, REGION, httpFullRequest);
 
-		SdkHttpClient httpClient = ApacheHttpClient.builder().build();
 		HttpExecuteRequest request = HttpExecuteRequest.builder().request(signedRequest)
 			.contentStreamProvider(signedRequest.contentStreamProvider().orElse(null)).build();
 
-		HttpExecuteResponse response = httpClient.prepareRequest(request).call();
+		HttpExecuteResponse response = this.httpClient.prepareRequest(request).call();
 
-		if (!response.httpResponse().isSuccessful()) {
-			System.out.println(String.format("PUT document %s in index %s was unsuccessful", id, index));
+		try {
+			if (!response.httpResponse().isSuccessful()) {
+				System.out.println(String.format("PUT document %s in index %s was unsuccessful: %s",
+					id, index, response.httpResponse().statusText()));
+			}
+		} finally {
+			if (response.responseBody().isPresent()) {
+				response.responseBody().get().close();
+			}
 		}
 	}
 
