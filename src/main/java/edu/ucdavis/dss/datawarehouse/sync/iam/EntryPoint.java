@@ -190,17 +190,17 @@ public class EntryPoint {
 				// A user ID is associated with more than one IAM ID. Pick one.
 
 				// First, if only one IAM ID is active in IAM, choose that one.
-				List<BigInteger> redundantIamIds = (List<BigInteger>)entityManager.createNativeQuery("select iamId FROM iam_prikerbacct WHERE userId=:userId order by iamId ASC").setParameter("userId", userId).getResultList();
+				List<Long> redundantIamIds = (List<Long>) entityManager.createNativeQuery("select iamId FROM iam_prikerbacct WHERE userId=:userId order by iamId ASC").setParameter("userId", userId).getResultList();
 				List<Long> inactiveIamIds = new ArrayList<>();
 				List<Long> activeIamIds = new ArrayList<>();
 
-				for(BigInteger _redundantIamId : redundantIamIds) {
-					String redundantIamId = _redundantIamId.toString();
+				for(Long redundantIamId : redundantIamIds) {
+					String idAsString = String.valueOf(redundantIamId);
 
-					if(allIamIds.contains(redundantIamId)) {
-						activeIamIds.add(Long.parseLong(redundantIamId));
+					if(allIamIds.contains(idAsString)) {
+						activeIamIds.add(redundantIamId);
 					} else {
-						inactiveIamIds.add(Long.parseLong(redundantIamId));
+						inactiveIamIds.add(redundantIamId);
 					}
 				}
 
