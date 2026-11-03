@@ -4,6 +4,7 @@
 .settings
 .idea
 *.env
+.envrc
 !example.env
 .vscode
 
