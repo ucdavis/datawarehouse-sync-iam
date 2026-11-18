@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM maven:3.9-amazoncorretto-21-al2023 AS builder
 
 WORKDIR /build
 COPY pom.xml .
@@ -8,12 +8,10 @@ RUN mvn dependency:go-offline
 COPY src/ /build/src/
 RUN mvn package
 
-FROM eclipse-temurin:21-jre
+FROM amazoncorretto:21-al2023-headless
 
-RUN apt-get update && \
-    apt-get install -y \
-    openssl && \
-    rm -rf /var/lib/apt/lists/*
+RUN dnf install -y openssl wget && \
+    dnf clean all
 
 COPY import-rds-certs.sh .
 RUN ./import-rds-certs.sh
